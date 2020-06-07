@@ -1,0 +1,129 @@
+.kline-chart {
+  position: relative;
+  height: calc(50vh - 32px - 16px);
+
+  .period-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 16px;
+    padding-top: 6px;
+    padding-bottom: 0;
+    padding-left: 8px;
+    padding-right: 8px;
+    margin-top: 12px;
+
+    .period-icon {
+      color: #999999;
+      font-size: 18px;
+      &-selected {
+        color: #1e88e5 !important;
+      }
+      &:hover {
+        color: #cccccc;
+      }
+    }
+
+    .select-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      position: relative;
+      padding: 0 8px;
+      height: 34px;
+
+      .select-drop-down-container {
+        width: 60px;
+        position: absolute;
+        left: 0;
+        z-index: 20;
+        top: 34px;
+        border-radius: 2px;
+        padding: 2px;
+        transform-origin: top;
+        transform: scaleY(0);
+        transition: all 0.2s;
+
+        .select-drop-down-row {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          padding-left: 6px;
+          height: 28px;
+          line-height: 28px;
+          &:hover {
+            background-color: #25272f;
+          }
+        }
+      }
+    }
+    .select-container:hover {
+      .select {
+        .select-arrow {
+          transform: rotate(180deg);
+        }
+      }
+      .select-drop-down-container {
+        transform: scaleY(1);
+      }
+    }
+  }
+
+  .app-content {
+    display: flex;
+    flex-direction: row;
+    // include the height of period-container
+    height: calc(100% - 16px);
+
+    .k-line-chart-container {
+      position: relative;
+      height: 100%;
+      width: 100%;
+
+      .kline-chart-loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 15;
+        background: rgba(0, 0, 0, 0.2);
+
+        .kline-chart-loading {
+          position: relative;
+          width: 26px;
+          height: 26px;
+          pointer-events: none;
+          animation: kline-chart-loading 1.2s infinite ease-in-out;
+        }
+        @keyframes kline-chart-loading {
+          0% {
+            transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+          }
+          50% {
+            transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+          }
+          100% {
+            transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+          }
+        }
+
+        .kline-chart-loading-text {
+          display: inline-block;
+          margin-top: 6px;
+          font-size: 12px;
+        }
+      }
+
+      #k-line-chart {
+        display: inline-block;
+        width: 100%;
+        height: calc(100% - 40px);
+      }
+    }
+  }
+}
