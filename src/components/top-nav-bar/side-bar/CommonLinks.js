@@ -106,8 +106,8 @@ class CommonLinks extends React.Component {
           key="bug"
           onClick={() => {
             window.open(
-              "https://github.com/Loopring/dex-ux/issues/new",
-              "_blank"
+              'https://github.com/Loopring/dexwebapp/issues/new',
+              '_blank'
             );
           }}
         >
