@@ -133,7 +133,7 @@
     "lint-staged": "^10.0.7",
     "mocha": "^7.0.0",
     "prettier": "^2.0.2",
-    "prettier-eslint": "^10.1.0",
+    "prettier-eslint": "^11.0.0",
     "prettier-eslint-cli": "^5.0.0",
     "react-app-rewired": "^2.1.5",
     "react-dev-utils": "^10.1.0",
