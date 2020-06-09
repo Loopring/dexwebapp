@@ -75,7 +75,7 @@ class TransferModal extends React.Component {
     errorToken: '',
     errorMessage2: '',
     errorAddressMessage: '',
-    memo:""
+    memo: '',
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -111,7 +111,7 @@ class TransferModal extends React.Component {
         errorToken: '',
         errorMessage2: '',
         errorAddressMessage: '',
-        memo:""
+        memo: '',
       });
     }
   }
@@ -245,7 +245,7 @@ class TransferModal extends React.Component {
       loading: true,
     });
 
-    let { amount, amountF, receiver, nonce,memo } = this.state;
+    let { amount, amountF, receiver, nonce, memo } = this.state;
     const { tokens, exchangeId } = this.props.exchange;
     // Transfer
     let symbol = this.props.modalManager.transferToken;
@@ -274,7 +274,7 @@ class TransferModal extends React.Component {
             amountF,
             nonce,
             label: config.getLabel(),
-            memo
+            memo,
           },
           tokens
         );
@@ -470,10 +470,10 @@ class TransferModal extends React.Component {
   };
 
   onMemoChange = (e) => {
-    if(e.target.value.length <= 128){
+    if (e.target.value.length <= 128) {
       this.setState({
-          memo:e.target.value
-      })
+        memo: e.target.value,
+      });
     }
   };
 
@@ -675,7 +675,7 @@ class TransferModal extends React.Component {
                 value={this.state.addressValue}
                 onChange={this.onToAddressChange}
                 loading={this.state.addressLoading}
-                disabled = {this.state.addressLoading}
+                disabled={this.state.addressLoading}
               />
               {this.state.addressValue.toLowerCase().endsWith(".eth") &&
                 !!this.state.toAddress && (
@@ -727,13 +727,13 @@ class TransferModal extends React.Component {
                 errorMessage2={this.state.errorMessage2}
               />
             </Group>
-              <Group label={<I s="Memo" />}>
-                  <SearchStyled
-                      color={theme.textWhite}
-                      value={this.state.memo}
-                      onChange={this.onMemoChange}
-                  />
-              </Group>
+            <Group label={<I s="Memo" />}>
+              <SearchStyled
+                color={theme.textWhite}
+                value={this.state.memo}
+                onChange={this.onMemoChange}
+              />
+            </Group>
           </Section>
 
           <Section

@@ -628,32 +628,35 @@ class EntranceButton extends React.Component {
           break;
         }
         case LOGGED_IN:
-          const lastVIPAccountId = 1403;
-          const iconColor =
-            this.props.dexAccount.account.accountId <= lastVIPAccountId
-              ? this.props.theme.orange
-              : this.props.theme.primary;
-          const icon =
-            this.props.dexAccount.account.accountId <= lastVIPAccountId
-              ? faCrown
-              : faLockOpen;
+          let isVIP = false;
+          if (
+            this.props.dexAccount.account.tags &&
+            this.props.dexAccount.account.tags.includes('super_vip')
+          ) {
+            isVIP = true;
+          }
 
-          const vipBadge =
-            this.props.dexAccount.account.accountId <= lastVIPAccountId ? (
-              <div
-                style={{
-                  color: this.props.theme.orange,
-                  fontSize: "0.75rem",
-                  paddingTop: "4px",
-                  fontWeight: "600",
-                  userSelect: "none",
-                }}
-              >
-                <I s="HonorVip" />
-              </div>
-            ) : (
-              <span />
-            );
+          const iconColor = isVIP
+            ? this.props.theme.orange
+            : this.props.theme.primary;
+
+          const icon = isVIP ? faCrown : faLockOpen;
+
+          const vipBadge = isVIP ? (
+            <div
+              style={{
+                color: this.props.theme.orange,
+                fontSize: '0.75rem',
+                paddingTop: '4px',
+                fontWeight: '600',
+                userSelect: 'none',
+              }}
+            >
+              <I s="HonorVip" />
+            </div>
+          ) : (
+            <span />
+          );
 
           this.scheduleButtonUpdate({
             type: "LOGGED_IN",
