@@ -291,7 +291,7 @@
     "Transfers":"转账记录",
     "Invalid recipient address":"不合法的接收地址",
     "The recipient has't opened an account":"接受者还没有在路印交易所开户",
-    "Recipient Ethereum Address":"接收者以太坊地址",
+    "Recipient Ethereum Address/ENS Name":"接收者以太坊地址/ENS域名",
     "TransferInstruction_Fee_1":"转账费用: ",
     "TransferInstruction_Fee_2":"。 ",
     "TransferInstruction_Fee_3":"路印支付目前完全免费！",
@@ -305,5 +305,6 @@
     "Share on":"分享到",
     "From/To":"发送者/接收者",
     "Sender and receiver are the same":"发送者和接收者一样",
-    "ReferralLinkInstruction":""
+    "ReferralLinkInstruction":"",
+    "Ethereum Address":"以太坊地址"
 }
