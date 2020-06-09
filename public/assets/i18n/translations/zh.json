@@ -306,5 +306,6 @@
     "From/To":"发送者/接收者",
     "Sender and receiver are the same":"发送者和接收者一样",
     "ReferralLinkInstruction":"",
-    "Ethereum Address":"以太坊地址"
+    "Ethereum Address":"以太坊地址",
+    "Memo":"备注"
 }

@@ -90,6 +90,20 @@ class TransferTable extends React.Component {
         dataIndex: "fee",
         width: "12%",
       },
+        {
+            title: (
+                <TextCompactTableHeader
+                    style={{
+                        width: '100%',
+                        textAlign: 'center',
+                    }}
+                >
+                    <I s="Memo" />
+                </TextCompactTableHeader>
+            ),
+            dataIndex: 'memo',
+            width: '14%',
+        },
       {
         title: (
           <TextCompactTableHeader
@@ -108,9 +122,9 @@ class TransferTable extends React.Component {
             </div>
           </TextCompactTableHeader>
         ),
-        dataIndex: "status",
-        width: "14%",
-      },
+        dataIndex: 'status',
+        width: '14%',
+      }
     ];
 
     const data = [];
@@ -236,6 +250,15 @@ class TransferTable extends React.Component {
             {status}
           </div>
         ),
+          memo: (
+              <div
+                  style={{
+                      color: theme.textDim,
+                  }}
+              >
+                  {transaction.memo}
+              </div>
+          ),
       });
     }
 
