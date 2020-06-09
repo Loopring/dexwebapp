@@ -120,7 +120,7 @@
     "TransferInstruction_Fee_3":"Transfers are currently completely free, so go wild!",
     "TransferInstructionNotification":"Your transfer request has been submitted.",
     "TransferInstructionNotificationFailed":"Your transfer request is failed, please try again",
-    "TransferInstruction_1":"Loopring Pay is a layer-2 fast payment service. It allows for secure, scalable payments on Ethereum using our zkRollup. No waiting, no gas fees. You can transfer Ether and supported ERC20 tokens to any Ethereum address that has registered on Loopring.io.",
+    "TransferInstruction_1":"Loopring Pay is a layer-2 fast payment service. It allows for secure, scalable payments on Ethereum using our zkRollup. No waiting, no gas fees. You can transfer Ether and supported ERC20 tokens to any Ethereum address(or ENS name) that has registered on Loopring.io.",
     "TransferInstruction_2":"Because these transfers happen on our zkRollup, that means the recipient must also be on it. If they are not, then you should invite them so they too can benefit from fast, free, and completely non-custodial transfers! Invite them with your referral link",
     "TransferInstruction_2_end":"",
     "ReferralLinkInstruction":"For every new account that registers with your referral code until end of June 15th (EST), you will receive 40 LRC.",

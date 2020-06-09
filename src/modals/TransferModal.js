@@ -20,7 +20,6 @@ import { isValidAddress } from "ethereumjs-util";
 import { lightconeGetAccount } from "lightcone/api/LightconeAPI";
 import { notifyError, notifySuccess } from "redux/actions/Notification";
 import { showTransferModal } from "redux/actions/ModalManager";
-import { withTheme } from "styled-components";
 import { withUserPreferences } from "components/UserPreferenceContext";
 import AppLayout from "AppLayout";
 import AssetDropdown from "modals/components/AssetDropdown";
@@ -34,6 +33,7 @@ import React from "react";
 import WalletConnectIndicator from "modals/components/WalletConnectIndicator";
 import WalletConnectIndicatorPlaceholder from "modals/components/WalletConnectIndicatorPlaceholder";
 import WhyIcon from "components/WhyIcon";
+import styled, { withTheme } from "styled-components";
 
 import config from "lightcone/config";
 
@@ -43,11 +43,28 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import { fetchTransfers } from "redux/actions/MyAccountPage";
 import { submitTransfer } from "lightcone/api/v1/transfer";
 
+const { Search } = Input;
+
+const SearchStyled = styled(Search)`
+  .ant-input-suffix {
+    display: table;
+    height: 100%;
+
+    .ant-input-search-icon {
+      display: ${(props) => (props.loading ? "table-cell" : "none")};
+      vertical-align: middle;
+      color: ${(props) => props.theme.textDim};
+    }
+  }
+`;
+
 class TransferModal extends React.Component {
   state = {
     loading: false,
     amount: null,
     amountF: null,
+    addressValue: "",
+    addressLoading: false,
     toAddress: "",
     receiver: null,
     validateAddress: true,
@@ -83,6 +100,8 @@ class TransferModal extends React.Component {
         amountF: null,
         toAddress: "",
         receiver: null,
+        addressValue: "",
+        addressLoading: false,
         validateAddress: true,
         nonce: -1,
         validateAmount: true,
@@ -378,13 +397,30 @@ class TransferModal extends React.Component {
   };
 
   onToAddressChange = async (e) => {
-    const address = e.target.value;
+    const value = e.target.value;
+    let address = value;
+    if (value.toLowerCase().endsWith(".eth")) {
+      this.setState({
+        addressLoading: true,
+      });
+      try {
+        await window.wallet.web3.eth.ens
+          .getAddress(value)
+          .then(function (addr) {
+            address = addr;
+          });
+      } catch (e) {}
+      this.setState({
+        addressLoading: false,
+      });
+    }
     let validateAddress = !!address && isValidAddress(address);
     if (validateAddress) {
       try {
-        const receiver = (await lightconeGetAccount(e.target.value)).accountId;
+        const receiver = (await lightconeGetAccount(address)).accountId;
         if (receiver !== window.wallet.accountId) {
           this.setState({
+            addressValue: value,
             toAddress: address,
             receiver,
             validateAddress,
@@ -392,6 +428,7 @@ class TransferModal extends React.Component {
           });
         } else {
           this.setState({
+            addressValue: value,
             toAddress: address,
             receiver,
             validateAddress: false,
@@ -400,6 +437,7 @@ class TransferModal extends React.Component {
         }
       } catch (err) {
         this.setState({
+          addressValue: value,
           toAddress: address,
           validateAddress: false,
           errorAddressMessage: "The recipient has't opened an account",
@@ -407,7 +445,8 @@ class TransferModal extends React.Component {
       }
     } else {
       this.setState({
-        toAddress: address,
+        addressValue: value,
+        toAddress: "",
         validateAddress: false,
         errorAddressMessage: "Invalid recipient address",
       });
@@ -616,15 +655,27 @@ class TransferModal extends React.Component {
                 }
               />
             </Group>
-            <Group label={<I s="Recipient Ethereum Address" />}>
-              <Input
+            <Group label={<I s="Recipient Ethereum Address/ENS Name" />}>
+              <SearchStyled
                 suffix={<span />}
                 style={{
                   color: theme.textWhite,
                 }}
-                value={this.state.toAddress}
+                value={this.state.addressValue}
                 onChange={this.onToAddressChange}
+                loading={this.state.addressLoading}
               />
+              {this.state.addressValue.toLowerCase().endsWith(".eth") &&
+                !!this.state.toAddress && (
+                  <div
+                    style={{
+                      paddingTop: "12px",
+                    }}
+                  >
+                    {" "}
+                    <I s="Ethereum Address" />: {this.state.toAddress}
+                  </div>
+                )}
               <ErrorMessage
                 isTransfer={true}
                 selectedToken={selectedToken}
