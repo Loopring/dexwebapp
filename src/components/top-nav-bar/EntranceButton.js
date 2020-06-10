@@ -24,6 +24,7 @@ import {
   showExportAccountModal,
   showLogoutModal,
   showReferralModal,
+  showResetApiKeyModal,
   showSideBar,
   showTransferModal,
   showWithdrawModal,
@@ -168,6 +169,11 @@ class EntranceButton extends React.Component {
 
   pressedResetPasswordButton = () => {
     this.props.resetPasswordModal(true);
+    this.props.showSideBar(false);
+  };
+
+  pressedResetApiKeyButton = () => {
+    this.props.showResetApiKeyModal(true);
     this.props.showSideBar(false);
   };
 
@@ -620,6 +626,14 @@ class EntranceButton extends React.Component {
                     <I s="Reset Account Key" />
                   </SideBarButton>
 
+                  <SideBarButton
+                    key="reset"
+                    onClick={() => this.pressedResetApiKeyButton()}
+                  >
+                    <MenuFontAwesomeIcon icon={faKey} />
+                    <I s="Reset API Key" />
+                  </SideBarButton>
+
                   <CommonLinks />
                 </div>
               );
@@ -719,6 +733,14 @@ class EntranceButton extends React.Component {
                   </SideBarGroupLabel>
 
                   <SideBarButton
+                    key="transfer"
+                    onClick={this.pressedTransferButton}
+                  >
+                    <MenuFontAwesomeIcon icon={faArrowAltCircleUp} />
+                    <I s="Transfer" />
+                  </SideBarButton>
+
+                  <SideBarButton
                     key="deposit"
                     onClick={this.pressedDepositButton}
                   >
@@ -735,18 +757,19 @@ class EntranceButton extends React.Component {
                   </SideBarButton>
 
                   <SideBarButton
-                    key="transfer"
-                    onClick={this.pressedTransferButton}
-                  >
-                    <MenuFontAwesomeIcon icon={faArrowAltCircleUp} />
-                    <I s="Transfer" />
-                  </SideBarButton>
-                  <SideBarButton
                     key="reset"
                     onClick={() => this.pressedResetPasswordButton()}
                   >
                     <MenuFontAwesomeIcon icon={faKey} />
                     <I s="Reset Account Key" />
+                  </SideBarButton>
+
+                  <SideBarButton
+                    key="reset"
+                    onClick={() => this.pressedResetApiKeyButton()}
+                  >
+                    <MenuFontAwesomeIcon icon={faKey} />
+                    <I s="Reset API Key" />
                   </SideBarButton>
 
                   <SideBarButton
@@ -874,6 +897,7 @@ const mapDispatchToProps = (dispatch) => {
     showExportAccountModal: (show) => dispatch(showExportAccountModal(show)),
     showLogoutModal: (show) => dispatch(showLogoutModal(show)),
     resetPasswordModal: (show) => dispatch(resetPasswordModal(show)),
+    showResetApiKeyModal: (show) => dispatch(showResetApiKeyModal(show)),
     showReferralModal: (show) => dispatch(showReferralModal(show)),
     showDepositModal: (show) => dispatch(showDepositModal(show)),
     showTransferModal: (show) => dispatch(showTransferModal(show)),

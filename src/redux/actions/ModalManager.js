@@ -6,8 +6,9 @@ export const SHOW_LOGOUT_MODAL = "SHOW_LOGOUT_MODAL";
 export const SHOW_EXPORT_ACCOUNT = "SHOW_EXPORT_ACCOUNT";
 export const SHOW_ENTER_PASSWORD = "SHOW_ENTER_PASSWORD";
 
-export const SHOW_LOGIN_MODAL = "SHOW_LOGIN_MODAL";
-export const SHOW_RESET_PASSWORD_MODAL = "SHOW_RESET_PASSWORD_MODAL";
+export const SHOW_LOGIN_MODAL = 'SHOW_LOGIN_MODAL';
+export const SHOW_RESET_PASSWORD_MODAL = 'SHOW_RESET_PASSWORD_MODAL';
+export const SHOW_RESET_API_KEY_MODAL = 'SHOW_RESET_API_KEY_MODAL';
 
 export const SHOW_WECHAT_MODAL = "SHOW_WECHAT_MODAL";
 export const SHOW_REFERRAL_MODAL = "SHOW_REFERRAL_MODAL";
@@ -37,6 +38,15 @@ export function loginModal(show) {
 export function resetPasswordModal(show) {
   return {
     type: SHOW_RESET_PASSWORD_MODAL,
+    payload: {
+      show,
+    },
+  };
+}
+
+export function showResetApiKeyModal(show) {
+  return {
+    type: SHOW_RESET_API_KEY_MODAL,
     payload: {
       show,
     },

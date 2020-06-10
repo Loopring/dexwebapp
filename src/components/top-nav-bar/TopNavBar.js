@@ -26,10 +26,11 @@ import MetaMaskService from "components/services/wallet-services/MetaMaskService
 import WalletConnectService from "components/services/wallet-services/WalletConnectService";
 import WalletService from "components/services/wallet-services/WalletService";
 
-import RegisterAccountModal from "modals/RegisterAccountModal";
-import ResetAccountKeyModal from "modals/ResetAccountKeyModal";
-import WebSocketService from "components/services/WebSocketService";
-import WithdrawModal from "modals/WithdrawModal";
+import RegisterAccountModal from 'modals/RegisterAccountModal';
+import ResetAccountKeyModal from 'modals/ResetAccountKeyModal';
+import ResetApiKeyModal from 'modals/ResetApiKeyModal';
+import WebSocketService from 'components/services/WebSocketService';
+import WithdrawModal from 'modals/WithdrawModal';
 
 import { fetchCmcPrice } from "redux/actions/CmcPrice";
 
@@ -161,6 +162,7 @@ class TopNavBar extends React.Component {
             <DepositModal />
             <TransferModal />
             <ResetAccountKeyModal />
+            <ResetApiKeyModal />
             <WithdrawModal />
             <MetaMaskService />
             <WalletConnectService />

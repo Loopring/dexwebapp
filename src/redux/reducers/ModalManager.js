@@ -7,6 +7,7 @@ import {
   SHOW_LOGOUT_MODAL,
   SHOW_REFERRAL_MODAL,
   SHOW_REGISTER_ACCOUNT,
+  SHOW_RESET_API_KEY_MODAL,
   SHOW_RESET_PASSWORD_MODAL,
   SHOW_SIDEBAR,
   SHOW_TRANSFER,
@@ -17,6 +18,7 @@ import {
 const initialState = {
   isRegisterAccountModalVisible: false,
   isResetPasswordModalVisible: false,
+  isResetApiKeyModalVisible: false,
   isWechatModalVisible: false,
   isReferralModalVisible: false,
   isLoginModalVisible: false,
@@ -51,6 +53,11 @@ export const ModalManagerReducer = (state = initialState, action) => {
       return {
         ...state,
         isResetPasswordModalVisible: action.payload.show,
+      };
+    case SHOW_RESET_API_KEY_MODAL:
+      return {
+        ...state,
+        isResetApiKeyModalVisible: action.payload.show,
       };
     case SHOW_WECHAT_MODAL:
       return {
