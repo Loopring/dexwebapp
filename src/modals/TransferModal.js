@@ -6,39 +6,40 @@ import {
   MyModal,
   Section,
   TextPopupTitle,
-} from "modals/styles/Styles";
+} from 'modals/styles/Styles';
 
-import { Col, Input, Row, Spin } from "antd";
-import { connect } from "react-redux";
-import { faClock } from "@fortawesome/free-solid-svg-icons/faClock";
-import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
-import { faTwitter } from "@fortawesome/free-brands-svg-icons/faTwitter";
+import { Col, Input, Row, Spin } from 'antd';
+import { connect } from 'react-redux';
+import { debounce } from 'lodash';
+import { faClock } from '@fortawesome/free-solid-svg-icons/faClock';
+import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
+import { faTwitter } from '@fortawesome/free-brands-svg-icons/faTwitter';
 
-import { formatter } from "lightcone/common";
-import { getWalletType } from "lightcone/api/localStorgeAPI";
-import { isValidAddress } from "ethereumjs-util";
-import { lightconeGetAccount } from "lightcone/api/LightconeAPI";
-import { notifyError, notifySuccess } from "redux/actions/Notification";
-import { showTransferModal } from "redux/actions/ModalManager";
-import { withUserPreferences } from "components/UserPreferenceContext";
-import AppLayout from "AppLayout";
-import AssetDropdown from "modals/components/AssetDropdown";
-import ErrorMessage from "modals/components/ErrorMessage";
-import Group from "modals/components/Group";
-import I from "components/I";
-import LabelValue from "modals/components/LabelValue";
-import ModalIndicator from "modals/components/ModalIndicator";
-import NumericInput from "components/NumericInput";
-import React from "react";
-import WalletConnectIndicator from "modals/components/WalletConnectIndicator";
-import WalletConnectIndicatorPlaceholder from "modals/components/WalletConnectIndicatorPlaceholder";
-import WhyIcon from "components/WhyIcon";
-import styled, { withTheme } from "styled-components";
+import { formatter } from 'lightcone/common';
+import { getWalletType } from 'lightcone/api/localStorgeAPI';
+import { isValidAddress } from 'ethereumjs-util';
+import { lightconeGetAccount } from 'lightcone/api/LightconeAPI';
+import { notifyError, notifySuccess } from 'redux/actions/Notification';
+import { showTransferModal } from 'redux/actions/ModalManager';
+import { withUserPreferences } from 'components/UserPreferenceContext';
+import AppLayout from 'AppLayout';
+import AssetDropdown from 'modals/components/AssetDropdown';
+import ErrorMessage from 'modals/components/ErrorMessage';
+import Group from 'modals/components/Group';
+import I from 'components/I';
+import LabelValue from 'modals/components/LabelValue';
+import ModalIndicator from 'modals/components/ModalIndicator';
+import NumericInput from 'components/NumericInput';
+import React from 'react';
+import WalletConnectIndicator from 'modals/components/WalletConnectIndicator';
+import WalletConnectIndicatorPlaceholder from 'modals/components/WalletConnectIndicatorPlaceholder';
+import WhyIcon from 'components/WhyIcon';
+import styled, { withTheme } from 'styled-components';
 
-import config from "lightcone/config";
+import config from 'lightcone/config';
 
-import "./TransferModal.less";
-import { CopyToClipboard } from "react-copy-to-clipboard";
+import './TransferModal.less';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 // import { Share } from 'react-twitter-widgets';
 import { fetchTransfers } from "redux/actions/MyAccountPage";
 import { submitTransfer } from "lightcone/api/v1/transfer";
@@ -401,60 +402,75 @@ class TransferModal extends React.Component {
 
   onToAddressChange = async (e) => {
     const value = e.target.value;
-    let address = value;
-    if (value.toLowerCase().endsWith(".eth")) {
-      this.setState({
-        addressLoading: true,
-      });
-      try {
-        await window.wallet.web3.eth.ens
-          .getAddress(value)
-          .then(function (addr) {
-            address = addr;
-          });
-      } catch (e) {}
-      this.setState({
-        addressLoading: false,
-      });
-    }
-    let validateAddress = !!address && isValidAddress(address);
-    if (validateAddress) {
-      try {
-        const receiver = (await lightconeGetAccount(address)).accountId;
-        if (receiver !== window.wallet.accountId) {
-          this.setState({
-            addressValue: value,
-            toAddress: address,
-            receiver,
-            validateAddress,
-            errorAddressMessage: "",
-          });
-        } else {
-          this.setState({
-            addressValue: value,
-            toAddress: address,
-            receiver,
-            validateAddress: false,
-            errorAddressMessage: "Sender and receiver are the same",
-          });
-        }
-      } catch (err) {
+    // Update the search UI
+    this.setState({
+      addressValue: value,
+    });
+
+    // Verify the search input value
+    this.onToAddressChangeLoadData(value);
+  };
+
+  onToAddressChangeLoadData = debounce((value) => {
+    (async () => {
+      let address = value;
+      // Check ENS
+      if (value.toLowerCase().endsWith('.eth')) {
         this.setState({
-          addressValue: value,
-          toAddress: address,
-          validateAddress: false,
-          errorAddressMessage: "The recipient has't opened an account",
+          addressLoading: true,
+        });
+        try {
+          await window.wallet.web3.eth.ens
+            .getAddress(value)
+            .then(function (addr) {
+              address = addr;
+            });
+        } catch (e) {}
+        this.setState({
+          addressLoading: false,
         });
       }
-    } else {
-      this.setState({
-        addressValue: value,
-        toAddress: "",
-        validateAddress: false,
-        errorAddressMessage: "Invalid recipient address",
-      });
-    }
-  };
+
+      let validateAddress = !!address && isValidAddress(address);
+      if (validateAddress) {
+        try {
+          const receiver = (await lightconeGetAccount(address)).accountId;
+          if (receiver !== window.wallet.accountId) {
+            this.setState({
+              addressValue: value,
+              toAddress: address,
+              receiver,
+              validateAddress,
+              errorAddressMessage: '',
+            });
+          } else {
+            this.setState({
+              addressValue: value,
+              toAddress: address,
+              receiver,
+              validateAddress: false,
+              errorAddressMessage: 'Sender and receiver are the same',
+            });
+          }
+        } catch (err) {
+          this.setState({
+            addressValue: value,
+            toAddress: address,
+            validateAddress: false,
+            errorAddressMessage:
+              'The recipient doesn’t have a Loopring account',
+          });
+        }
+      } else {
+        this.setState({
+          addressValue: value,
+          toAddress: '',
+          validateAddress: false,
+          errorAddressMessage: 'Invalid recipient address',
+        });
+      }
+    })();
+  }, 500);
 
   transferAll = () => {
     const { availableAmount, amountF } = this.state;
@@ -600,6 +616,7 @@ class TransferModal extends React.Component {
         closeIcon={<FontAwesomeIcon icon={faTimes} />}
         visible={this.props.isVisible}
         onCancel={() => this.onClose()}
+        maxHeight={this.state.loading ? '500px' : 'unset'}
       >
         <Spin spinning={this.state.loading} indicator={indicator}>
           <WalletConnectIndicatorPlaceholder
@@ -668,7 +685,7 @@ class TransferModal extends React.Component {
             </Group>
             <Group label={<I s="Recipient Ethereum Address/ENS Name" />}>
               <SearchStyled
-                suffix={<span />}
+                suffix={<span key="search_suffix" />}
                 style={{
                   color: theme.textWhite,
                 }}

@@ -381,6 +381,7 @@ class WithdrawModal extends React.Component {
         closeIcon={<FontAwesomeIcon icon={faTimes} />}
         visible={this.props.isVisible}
         onCancel={() => this.props.closeModal()}
+        maxHeight={this.state.loading ? '500px' : 'unset'}
       >
         <Spin spinning={this.state.loading} indicator={indicator}>
           <WalletConnectIndicatorPlaceholder

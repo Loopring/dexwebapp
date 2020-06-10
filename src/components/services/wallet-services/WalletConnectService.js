@@ -5,6 +5,11 @@ import I from "components/I";
 import React, { Component } from "react";
 
 import {
+  WALLET_UNCONNECTED,
+  getDataFromLocalStorage,
+  updateAccount,
+} from 'redux/actions/DexAccount';
+import {
   connectToWalletConnect,
   connectToWalletConnectComplete,
 } from "redux/actions/WalletConnect";
@@ -16,11 +21,7 @@ import {
 import {
   emptyMyHistoryOrders,
   emptyMyOpenOrders,
-} from "redux/actions/MyOrders";
-import {
-  getDataFromLocalStorage,
-  updateAccount,
-} from "redux/actions/DexAccount";
+} from 'redux/actions/MyOrders';
 
 import {
   emptyAllHistoryOrders,
@@ -120,6 +121,11 @@ class WalletConnectService extends Component {
         window.web3,
         window.ethereum.accounts[0]
       );
+
+      this.props.updateAccount({
+        ...this.props.dexAccount.account,
+        state: WALLET_UNCONNECTED,
+      });
 
       this.setupSubscribe();
 

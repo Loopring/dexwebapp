@@ -45,6 +45,8 @@ const Section = styled.div`
 const MyModal = styled(Modal)`
   .ant-spin-blur {
     opacity: 0 !important;
+    max-height: ${(props) =>
+      props.maxHeight ? `${props.maxHeight} !important` : `unset`};
   }
 `;
 

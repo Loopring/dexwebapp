@@ -385,6 +385,7 @@ class RegisterAccountModal extends React.Component {
         closeIcon={<FontAwesomeIcon icon={faTimes} />}
         visible={this.props.isVisible}
         onCancel={() => this.onClose()}
+        maxHeight={this.state.loading ? '500px' : 'unset'}
       >
         <Spin indicator={indicator} spinning={this.state.loading}>
           {indicatorPlaceholder}

@@ -290,7 +290,7 @@
     "Transfer":"转账",
     "Transfers":"转账记录",
     "Invalid recipient address":"不合法的接收地址",
-    "The recipient has't opened an account":"接受者还没有在路印交易所开户",
+    "The recipient doesn’t have a Loopring account":"接受者还没有在路印交易所开户",
     "Recipient Ethereum Address/ENS Name":"接收者以太坊地址/ENS域名",
     "TransferInstruction_Fee_1":"转账费用: ",
     "TransferInstruction_Fee_2":"。 ",

@@ -87,21 +87,6 @@ class DexAccountService extends React.Component {
               ) {
                 this.props.showLoginModal(true);
               }
-
-              //  else if (!this.props.exchange.exchangeId) {
-              //   this.loginInterval = setInterval(() => {
-              //     if (this.props.exchange.exchangeId) {
-              //       if (
-              //         this.props.metaMask.isDesiredNetwork &&
-              //         canShowLoginModal()
-              //       ) {
-              //         this.props.showLoginModal(true);
-              //         clearInterval(this.loginInterval);
-              //       }
-              //
-              //     }
-              //   }, 200);
-              // }
             }
           }
         } catch (e) {

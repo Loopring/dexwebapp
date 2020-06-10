@@ -61,7 +61,6 @@ class MetaMaskService extends Component {
 
   createMetaMaskConnection() {
     (async () => {
-      console.log("start createMetaMaskConnection");
       try {
         // Web3 is from MetaMask
         // https://web3js.readthedocs.io/en/v1.2.6/web3.html
@@ -95,10 +94,11 @@ class MetaMaskService extends Component {
 
         this.setupSubscribe();
 
+        saveWalletType('MetaMask');
+
         // Set state
         this.props.getDataFromLocalStorage(accounts[0]);
 
-        saveWalletType("MetaMask");
         this.props.connectToMetaMaskComplete();
 
         // Get related info
