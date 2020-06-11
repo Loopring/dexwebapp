@@ -605,7 +605,7 @@ class TradePanel extends React.Component {
 
         // Timestamp in second
         const validSince = new Date().getTime() / 1000 - 3600;
-        const validUntil = new Date().getTime() / 1000 + 3600 * 24 * 30;
+        const validUntil = new Date().getTime() / 1000 + 3600 * 24 * 10000;
 
         const signedOrder = window.wallet.submitOrder(
           exchange.tokens,
