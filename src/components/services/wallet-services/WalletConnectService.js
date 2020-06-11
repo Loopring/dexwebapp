@@ -75,7 +75,7 @@ class WalletConnectService extends Component {
         "833427e71c094c4fa31d42f93fc87ba3",
         "cb6df97bcec24e7dbd67f384e65cf4db",
       ];
-      const randomIndex = Math.floor(Math.random() * 3);
+      const randomIndex = Math.floor(Math.random() * 7);
       const infuraId = infuraIds[randomIndex];
       const provider = new WalletConnectProvider({
         infuraId, // Required
