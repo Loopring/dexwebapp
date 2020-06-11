@@ -178,6 +178,13 @@ class TransferTable extends React.Component {
         );
       }
 
+      let memo = transaction.memo;
+      if (transaction.memo.toLowerCase() === 'update account reward') {
+        memo = <I s="Update Account Reward" />;
+      } else if (transaction.memo.toLowerCase() === 'reward') {
+        memo = <I s="Reward" />;
+      }
+
       data.push({
         key: i,
         asset: (
@@ -256,7 +263,7 @@ class TransferTable extends React.Component {
               color: theme.textDim,
             }}
           >
-            {transaction.memo}
+            {memo}
           </LargeTableRow>
         ),
       });

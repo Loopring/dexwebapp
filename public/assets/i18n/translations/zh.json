@@ -259,7 +259,7 @@
     "System Status": "系统状态",
     "Trade Competition": "交易大赛",
     "NoChineseDocument": "抱歉，目前我们还没有中文版本的法律文档。",
-    "HonorVip": "路印终生荣誉VIP",
+    "SuperVIP": "路印终生荣誉VIP",
     "Click to copy": "点击拷贝地址到剪切板",
     "BuyPriceHigher": "买单价格大于最新价格的20%。",
     "SellPriceLower": "卖单价格小于最新价格的20%。",
@@ -312,5 +312,7 @@
     "Sender and receiver are the same":"发送者和接收者一样",
     "ReferralLinkInstruction":"",
     "Ethereum Address":"以太坊地址",
-    "Memo":"备注"
+    "Memo":"备注",
+    "Reward":"奖励",
+    "Update Account Reward":"更新账户奖励"
 }

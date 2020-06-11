@@ -642,14 +642,34 @@ class EntranceButton extends React.Component {
           break;
         }
         case LOGGED_IN:
-          let isVIP = false;
-          if (
-            this.props.dexAccount.account.tags &&
-            this.props.dexAccount.account.tags.includes('super_vip')
-          ) {
-            isVIP = true;
+          let vipLevel;
+          if (this.props.dexAccount.account.tags) {
+            if (
+              this.props.dexAccount.account.tags.includes('super_vip') ||
+              this.props.dexAccount.account.tags.includes('vip_4')
+            ) {
+              vipLevel = 'SuperVIP';
+            } else if (this.props.dexAccount.account.tags.includes('vip4')) {
+              vipLevel = 'VIP4';
+            } else if (
+              this.props.dexAccount.account.tags.includes('vip3') ||
+              this.props.dexAccount.account.tags.includes('vip_3')
+            ) {
+              vipLevel = 'VIP3';
+            } else if (
+              this.props.dexAccount.account.tags.includes('vip2') ||
+              this.props.dexAccount.account.tags.includes('vip_2')
+            ) {
+              vipLevel = 'VIP2';
+            } else if (
+              this.props.dexAccount.account.tags.includes('vip1') ||
+              this.props.dexAccount.account.tags.includes('vip_1')
+            ) {
+              vipLevel = 'VIP1';
+            }
           }
 
+          const isVIP = !!vipLevel;
           const iconColor = isVIP
             ? this.props.theme.orange
             : this.props.theme.primary;
@@ -666,7 +686,7 @@ class EntranceButton extends React.Component {
                 userSelect: 'none',
               }}
             >
-              <I s="HonorVip" />
+              <I s={vipLevel} />
             </div>
           ) : (
             <span />

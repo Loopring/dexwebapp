@@ -10,3 +10,23 @@ export async function sendWithdrawTransaction(signedEthereumTx) {
     data,
   });
 }
+
+export async function updateDistributeHash(
+  requestId,
+  hash,
+  publicKeyX,
+  publicKeyY
+) {
+  const data = {
+    requestId,
+    txHash: hash,
+    publicKeyX,
+    publicKeyY,
+  };
+
+  return await request({
+    method: 'POST',
+    url: '/api/v2/updateDistributeHash',
+    data,
+  });
+}

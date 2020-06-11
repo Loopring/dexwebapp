@@ -91,6 +91,24 @@ export function signSetReferrer(request, keyPair) {
   return EdDSA.sign(keyPair.secretKey, hash);
 }
 
+export function signUpdateDistributeHash(request, keyPair) {
+    const method = 'POST';
+    const uri = encodeURIComponent(`${config.getServer()}/api/v2/updateDistributeHash`);
+    const params = encodeURIComponent(
+        JSON.stringify({
+            re: request.requestId,
+            txHash: request.txHash,
+            publicKeyX: keyPair.publicKeyX,
+            publicKeyY: keyPair.publicKeyY,
+        })
+    );
+    const message = `${method}&${uri}&${params}`;
+    const hash = fm.addHexPrefix(sha256(message).toString());
+    // Create signature
+    return EdDSA.sign(keyPair.secretKey, hash);
+}
+
+
 export function createAccountAndDeposit({
   from,
   exchangeAddress,
