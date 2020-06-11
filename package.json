@@ -131,7 +131,7 @@
     "git-revision-webpack-plugin": "^3.0.4",
     "husky": "^4.2.3",
     "lint-staged": "^10.0.7",
-    "mocha": "^7.0.0",
+    "mocha": "^8.0.1",
     "prettier": "^2.0.2",
     "prettier-eslint": "^11.0.0",
     "prettier-eslint-cli": "^5.0.0",
