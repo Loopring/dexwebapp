@@ -415,7 +415,7 @@ class TransferModal extends React.Component {
     (async () => {
       let address = value;
       // Check ENS
-      if (value.toLowerCase().endsWith('.eth')) {
+      if (value.toLowerCase().match(/\.(eth|xyz)$/g)) {
         this.setState({
           addressLoading: true,
         });
@@ -694,7 +694,7 @@ class TransferModal extends React.Component {
                 loading={this.state.addressLoading}
                 disabled={this.state.addressLoading}
               />
-              {this.state.addressValue.toLowerCase().endsWith(".eth") &&
+              {this.state.addressValue.toLowerCase().match(/\.(eth|xyz)$/g) &&
                 !!this.state.toAddress && (
                   <div
                     style={{
