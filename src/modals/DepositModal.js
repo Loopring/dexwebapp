@@ -710,6 +710,9 @@ class DepositModal extends React.Component {
                 errorMessage2={this.state.errorMessage2}
               />
             </Group>
+            {selectedTokenSymbol.toUpperCase() === 'RENBTC' &&
+                <a href='https://bridge.renproject.io/'
+                  target='_blank'>Mint renBTC with BTC</a>}
           </Section>
 
           <Section
