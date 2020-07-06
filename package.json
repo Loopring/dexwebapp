@@ -61,7 +61,6 @@
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.4.1",
     "react-spring": "^8.0.27",
-    "react-twitter-widgets": "^1.9.5",
     "recharts": "^1.6.2",
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",

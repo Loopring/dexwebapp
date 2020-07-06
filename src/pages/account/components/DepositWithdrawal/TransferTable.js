@@ -251,13 +251,13 @@ class TransferTable extends React.Component {
           </div>
         ),
         memo: (
-          <div
+          <LargeTableRow
             style={{
               color: theme.textDim,
             }}
           >
             {transaction.memo}
-          </div>
+          </LargeTableRow>
         ),
       });
     }

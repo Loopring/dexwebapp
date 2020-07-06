@@ -40,9 +40,8 @@ import config from 'lightcone/config';
 
 import './TransferModal.less';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-// import { Share } from 'react-twitter-widgets';
-import { fetchTransfers } from "redux/actions/MyAccountPage";
-import { submitTransfer } from "lightcone/api/v1/transfer";
+import { fetchTransfers } from 'redux/actions/MyAccountPage';
+import { submitTransfer } from 'lightcone/api/v1/transfer';
 
 const { Search } = Input;
 
@@ -251,110 +250,104 @@ class TransferModal extends React.Component {
     // Transfer
     let symbol = this.props.modalManager.transferToken;
 
-    // const referralLink = `loopring.io/invite/${this.props.dexAccount.account.accountId}`;
     // Need to use Share to generate link if there is an update.
-    const twitterLink = `https://twitter.com/intent/tweet?ref_src=twsrc%5Etfw&text=I%20just%20made%20a%20layer-2%20transfer%20on%20Ethereum%20using%20the%20newly%20launched%20Loopring%20Pay.%20It%20was%20instant%2C%20free%2C%20and%20completely%20self-custodial%20thanks%20to%20Loopring%27s%20zkRollup.%20%23EthereumScalesToday%20%23LoopringPay%20Get%20in%20the%20fast%20lane%20at%20loopring.io&tw_p=tweetbutton`;
+    const twitterLink = 'https://twitter.com/intent/tweet?original_referer=http%3A%2F%2Flocalhost%3A3001%2Faccount%2Ftransfers&ref_src=twsrc%5Etfw&text=I%20just%20made%20a%20layer-2%20transfer%20on%20Ethereum%20using%20the%20newly%20launched%20Loopring%20Pay.%20It%20was%20instant%2C%20free%2C%20and%20completely%20self-custodial%20thanks%20to%20Loopring%27s%20zkRollup.%20%23EthereumScalesToday%20%23LoopringPay%20Get%20in%20the%20fast%20lane%20at%20https%3A%2F%2Floopring.io&tw_p=tweetbutton'(
+      async () => {
+        try {
+          if (nonce === -1) {
+            const { accountNonce } = await lightconeGetAccount(
+              window.wallet.address
+            );
 
-    (async () => {
-      try {
-        if (nonce === -1) {
+            nonce = accountNonce;
+          }
+
+          const { transfer, ecdsaSig } = await window.wallet.signTransfer(
+            {
+              exchangeId,
+              receiver: receiver,
+              token: symbol,
+              amount,
+              tokenF: symbol,
+              amountF,
+              nonce,
+              label: config.getLabel(),
+              memo,
+            },
+            tokens
+          );
+
+          await submitTransfer(
+            transfer,
+            ecdsaSig,
+            this.props.dexAccount.account.apiKey
+          );
+
+          let message;
+          if (this.props.userPreferences.language === 'zh') {
+            message = <I s="TransferInstructionNotification" />;
+          } else {
+            message = (
+              <div>
+                <div>
+                  <I s="TransferInstructionNotification" />
+                </div>
+
+                <Row
+                  style={{
+                    marginTop: '3px',
+                  }}
+                  gutter={6}
+                >
+                  <Col>
+                    <I s="Share on" />
+                  </Col>
+                  <Col>
+                    <a
+                      className="btn-twitter"
+                      onClick={() => {
+                        window.open(
+                          twitterLink,
+                          'newwindow',
+                          'width=720,height=480'
+                        );
+                      }}
+                    >
+                      <FontAwesomeIcon
+                        style={{
+                          paddingTop: '1px',
+                        }}
+                        icon={faTwitter}
+                      />{' '}
+                      Twitter
+                    </a>
+                  </Col>
+                </Row>
+              </div>
+            );
+          }
+
+          notifySuccess(message, this.props.theme, 20);
+        } catch (err) {
+          console.error('transfer failed', err);
+          notifyError(
+            <I s="TransferInstructionNotificationFailed" />,
+            this.props.theme
+          );
+        } finally {
+          this.getTransferHistory();
+          this.props.closeModal();
           const { accountNonce } = await lightconeGetAccount(
             window.wallet.address
           );
-
-          nonce = accountNonce;
+          this.setState({
+            loading: false,
+            amount: null,
+            nonce: accountNonce,
+          });
         }
-
-        const { transfer, ecdsaSig } = await window.wallet.signTransfer(
-          {
-            exchangeId,
-            receiver: receiver,
-            token: symbol,
-            amount,
-            tokenF: symbol,
-            amountF,
-            nonce,
-            label: config.getLabel(),
-            memo,
-          },
-          tokens
-        );
-
-        await submitTransfer(
-          transfer,
-          ecdsaSig,
-          this.props.dexAccount.account.apiKey
-        );
-
-        let message;
-        if (this.props.userPreferences.language === "zh") {
-          message = <I s="TransferInstructionNotification" />;
-        } else {
-          message = (
-            <div>
-              <div>
-                <I s="TransferInstructionNotification" />
-              </div>
-
-              <Row
-                style={{
-                  marginTop: "3px",
-                }}
-                gutter={6}
-              >
-                <Col>
-                  <I s="Share on" />
-                </Col>
-                <Col>
-                  <a
-                    className="btn-twitter"
-                    onClick={() => {
-                      window.open(
-                        twitterLink,
-                        "newwindow",
-                        "width=720,height=480"
-                      );
-                    }}
-                  >
-                    <FontAwesomeIcon
-                      style={{
-                        paddingTop: "1px",
-                      }}
-                      icon={faTwitter}
-                    />{" "}
-                    Twitter
-                  </a>
-                  {/* <Share
-                    options={{
-                      text: `I just made a layer-2 transfer on Ethereum using the newly launched Loopring Pay. It was instant, free, and completely self-custodial thanks to Loopring's zkRollup. #EthereumScalesToday #LoopringPay Get in the fast lane at loopring.io`,
-                    }}
-                  /> */}
-                </Col>
-              </Row>
-            </div>
-          );
-        }
-
-        notifySuccess(message, this.props.theme, 20);
-      } catch (err) {
-        console.error("transfer failed", err);
-        notifyError(
-          <I s="TransferInstructionNotificationFailed" />,
-          this.props.theme
-        );
-      } finally {
-        this.getTransferHistory();
-        this.props.closeModal();
-        const { accountNonce } = await lightconeGetAccount(
-          window.wallet.address
-        );
-        this.setState({
-          loading: false,
-          amount: null,
-          nonce: accountNonce,
-        });
       }
-    })();
+    )();
   };
 
   onClose = () => {
