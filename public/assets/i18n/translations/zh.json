@@ -135,6 +135,7 @@
     "WithdrawInstruction_Fee_2":"。",
     "WithdrawInstructionNotification": "您的提现请求已成功提交到以太坊。请注意观察该笔交易的状态，在它没有被确认前，我们不会为您展示该条提现记录。",
     "WithdrawInstructionNotificationFailed": "您的提现请求失败，请重试！",
+    "WithdrawHalNotification": "使用HAL收到钱包中的提款通知（您将在那里重定向以进行激活）",
     "LogoutInstruct_1": "退出登录将会清除您浏览器中的账号秘钥。如果忘记了账号秘钥，您可以通过发起以太坊交易设置一个新的账号秘钥。您在交易所的资产不会因为忘记账号秘钥而丢失。",
     "LogoutInstruct_2": "您确定要退出登录吗？",
     "AccountBeingRegisteredInstruct_1": "我们正在为您注册交易账号。这需要您的交易有至少一个区块链确认。请耐心等待！",

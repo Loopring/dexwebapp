@@ -1,4 +1,5 @@
 import { ActionButton, AssetDropdownMenuItem } from "styles/Styles";
+import { Checkbox } from "antd";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -43,6 +44,7 @@ class WithdrawModal extends React.Component {
     amount: null,
     ethBalance: 0,
     ethEnough: true,
+    notifyEnabled: true,
     balance: 0,
     validateAmount: true,
     availableAmount: 0,
@@ -259,6 +261,10 @@ class WithdrawModal extends React.Component {
           this.props.theme,
           15
         );
+
+        if (this.state.notifyEnabled) {
+          window.open(`https://9000.hal.xyz/recipes/loopring-withdrawal-notification?useraddress=${this.props.dexAccount.account.address}`);
+        }
       } catch (err) {
         notifyError(
           <I s="WithdrawInstructionNotificationFailed" />,
@@ -499,6 +505,15 @@ class WithdrawModal extends React.Component {
             >
               <I s="Withdraw" />
             </ActionButton>
+          </Section>
+          <Section>
+            <Checkbox
+              onChange={(e) => {this.setState({ notifyEnabled: e.target.checked })}}
+
+              checked={this.state.notifyEnabled}
+            >
+              <I s="WithdrawHalNotification" />
+            </Checkbox>
           </Section>
         </Spin>
       </MyModal>
