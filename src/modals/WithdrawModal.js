@@ -261,12 +261,14 @@ class WithdrawModal extends React.Component {
           this.props.theme,
           15
         );
-        window.open(`https://9000.hal.xyz/recipes/loopring-withdrawal-notification?useraddress=${this.props.dexAccount.account.address}`);
       } catch (err) {
         notifyError(
           <I s="WithdrawInstructionNotificationFailed" />,
           this.props.theme
         );
+        if (this.state.notifyEnabled) {
+          window.open(`https://9000.hal.xyz/recipes/loopring-withdrawal-notification?useraddress=${this.props.dexAccount.account.address}`);
+        }
         console.log(err);
       } finally {
         this.props.closeModal();
@@ -506,6 +508,8 @@ class WithdrawModal extends React.Component {
           <Section>
             <Checkbox
               onChange={(e) => {this.setState({ notifyEnabled: e.target.checked })}}
+
+              checked={this.state.notifyEnabled}
             >
               <I s="WithdrawHalNotification" />
             </Checkbox>
