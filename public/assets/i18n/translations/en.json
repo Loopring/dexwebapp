@@ -31,6 +31,7 @@
     "WithdrawInstruction_Fee_2": " for each withdrawal.",
     "WithdrawInstructionNotification": "Your withdrawal request has been submitted to Ethereum. Please monitor your transaction, as you will not see the corresponding withdrawal record on Loopring Exchange before it is confirmed on-chain. Note: after you see your Ethereum transaction confirmed on-chain, it will be perfectly normal that it says 'processing' on the exchange, and that your withdrawal will not immediately be in your wallet: the relayer must prove the batch. Please be patient.",
     "WithdrawInstructionNotificationFailed": "Your withdrawal request failed. Please try again!",
+    "WithdrawHalNotification": "Get notified on withdrawal available in your wallet using HAL (you will be redirect there for activation)",
     "LogoutInstruct_1": "Logging out of the Loopring Exchange will clear your account key from this browser. You can log in again. You can always reset your account key with an Ethereum transaction, which means forgetting your account key will not make you lose any funds on Loopring.",
     "LogoutInstruct_2": "Are you sure you want to log out?",
     "AccountBeingRegisteredInstruct_1": "Your account is being created. We will wait for at least one confirmation for your Ethereum transaction. Please be patient.",
