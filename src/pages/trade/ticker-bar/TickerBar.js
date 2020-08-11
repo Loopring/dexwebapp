@@ -7,6 +7,7 @@ import I from "components/I";
 import MarketSelector from "modals/market-selector/MarketSelector";
 import React from "react";
 import styled, { withTheme } from "styled-components";
+import ReactToolTip from 'react-tooltip';
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -35,6 +36,17 @@ const SelectMarketButton = styled(Button)`
   FontAwesomeIcon {
     font-size: 16px;
   }
+`;
+
+const StyledReactTooltip = styled(ReactToolTip)`
+  padding: 0;
+  padding-left: 6px;
+  padding-right: 6px;
+  height: auto;
+  height: 18px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
 `;
 
 // const BlinkFontAwesomeIcon = styled(FontAwesomeIcon)`
@@ -116,7 +128,8 @@ class TickerBar extends React.Component {
     let price = "-";
     let priceUnit = this.props.cmcPrice.legal;
     let priceLabel = <I s="Last Price" />;
-    let priceLabelValue = `${ticker.close} ${currentMarket.quoteTokenSymbol}`;
+    let priceLabelValue = `${ticker.close} ${currentMarket.quoteTokenSymbol}`; // USDT Price
+    let usdPriceLabelValue = ``; // USD Price
 
     const marketConfig = config.getMarketByPair(
       currentMarket.current,
@@ -135,7 +148,8 @@ class TickerBar extends React.Component {
           marketConfig.precisionForPrice
         );
         if (!isNaN(price)) {
-          priceLabelValue = `${ticker.close} ${currentMarket.quoteTokenSymbol} (${price} ${priceUnit})`;
+          priceLabelValue = `${ticker.close} ${currentMarket.quoteTokenSymbol}`;
+          usdPriceLabelValue = `(${price} ${priceUnit})`;
         }
       }
     } catch (error) {}
@@ -205,6 +219,8 @@ class TickerBar extends React.Component {
           >
             <RegularTextSpan>{priceLabel}</RegularTextSpan>
             <MenuHighlightTextSpan>{priceLabelValue}</MenuHighlightTextSpan>
+            <MenuHighlightTextSpan data-tip="Price Oracle Powered by Band Protocol">{usdPriceLabelValue}</MenuHighlightTextSpan>
+            <StyledReactTooltip backgroundColor="#4a4f59" />
           </MenuItem>
           <MenuItem key="current-market-trade-change" selectable={false}>
             <RegularTextSpan>
