@@ -98,17 +98,9 @@ class MewConnectService extends Component {
       });
 
       //  Enable session (triggers QR Code modal)
-      try {
-        connecting = true;
-        accounts = await provider.enable();
-        connecting = false;
-      } catch (e) {
-        connecting = false;
-        // If user close QA code modal
-        this.props.connectToMewConnectComplete();
-        await provider.close();
-        return;
-      }
+      connecting = true;
+      accounts = await provider.enable();
+      connecting = false;
 
       //  Create Web3
       const web3 = new Web3(provider);
