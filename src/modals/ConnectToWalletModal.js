@@ -158,12 +158,12 @@ class ConnectToWalletModal extends React.Component {
                   }}
                 >
                   <img
-                    src="/assets/images/WalletConnect.svg"
+                    src="/assets/images/mewconnect.svg"
                     alt="MewConnect"
                     draggable="false"
                   />
                   <div>
-                    <HighlightTextSpan>MewConnect</HighlightTextSpan>
+                    <HighlightTextSpan>MEW wallet</HighlightTextSpan>
                   </div>
                 </WalletTypeDiv>
               </Col>
