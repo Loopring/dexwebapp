@@ -61,7 +61,6 @@ class MewConnectService extends Component {
   }
 
   createMewConnect = () => {
-    console.log('hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh'); // todo remove dev item
     (async () => {
       // Create WalletConnect Provider
       const infuraIds = [
