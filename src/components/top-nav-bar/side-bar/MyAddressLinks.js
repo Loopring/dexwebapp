@@ -6,6 +6,7 @@ import I from "components/I";
 import React from "react";
 
 import { connectToWalletConnect } from "redux/actions/WalletConnect";
+import { connectToMewConnect } from "redux/actions/MewConnect";
 import { getEtherscanLink, getWalletType } from "lightcone/api/localStorgeAPI";
 import { showSideBar } from "redux/actions/ModalManager";
 
@@ -26,6 +27,20 @@ class MyAddressLinks extends React.Component {
         console.log(error);
       } finally {
         this.props.connectToWalletConnect(true);
+        this.props.showSideBar(false);
+      }
+    })();
+  };
+
+  pressedReconnectMweConnectButton = () => {
+    (async () => {
+      console.log("pressedReconnectMweConnectButton");
+      try {
+        await window.ethereum.close();
+      } catch (error) {
+        console.log(error);
+      } finally {
+        this.props.connectToMewConnect(true);
         this.props.showSideBar(false);
       }
     })();
@@ -83,6 +98,8 @@ const mapDispatchToProps = (dispatch) => {
     showSideBar: (show) => dispatch(showSideBar(show)),
     connectToWalletConnect: (startConnecting) =>
       dispatch(connectToWalletConnect(startConnecting)),
+    connectToMewConnect: (startConnecting) =>
+      dispatch(connectToMewConnect(startConnecting)),
   };
 };
 
