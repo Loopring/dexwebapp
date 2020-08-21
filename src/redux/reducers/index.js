@@ -17,6 +17,8 @@ import { TabsReducer } from "./Tabs";
 import { TradePanelReducer } from "./TradePanel";
 import { UserPreferenceManagerReducer } from "./UserPreferenceManager";
 import { WalletConnectReducer } from "./WalletConnect";
+import { MewConnectReducer } from "./MewConnect";
+
 
 // markets
 import { CurrentMarketReducer } from "./market/CurrentMarket";
@@ -50,6 +52,7 @@ const rootReducer = (history) =>
     myOrderPage: MyOrderPageReducer,
     metaMask: MetaMaskReducer,
     walletConnect: WalletConnectReducer,
+    mewConnect: MewConnectReducer,
     dexAccount: DexAccountReducer,
     nonce: NonceReducer,
     gasPrice: GasPriceReducer,

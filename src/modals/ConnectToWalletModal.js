@@ -13,6 +13,7 @@ import { HighlightTextSpan } from "styles/Styles";
 import { Section, TextPopupTitle } from "modals/styles/Styles";
 import { connectToMetaMask } from "redux/actions/MetaMask";
 import { connectToWalletConnect } from "redux/actions/WalletConnect";
+import { connectToMewConnect } from "redux/actions/MewConnect";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
@@ -75,6 +76,19 @@ class ConnectToWalletModal extends React.Component {
     })();
   };
 
+  onMewConnectClick = () => {
+    // Before connect, let's disconnect WalletConnect
+    (async () => {
+      try {
+        // await window.ethereum.close();
+      } catch (error) {
+      } finally {
+        this.props.connectToMewConnect(true);
+        this.props.closeModal();
+      }
+    })();
+  };
+
   onClose = () => {
     this.props.closeModal();
   };
@@ -105,7 +119,7 @@ class ConnectToWalletModal extends React.Component {
             }}
           >
             <Row className="row">
-              <Col span={12}>
+              <Col span={8}>
                 <WalletTypeDiv
                   onClick={() => {
                     this.onMetaMaskClick();
@@ -121,7 +135,7 @@ class ConnectToWalletModal extends React.Component {
                   </div>
                 </WalletTypeDiv>
               </Col>
-              <Col span={12}>
+              <Col span={8}>
                 <WalletTypeDiv
                   onClick={() => {
                     this.onWalletConnectClick();
@@ -134,6 +148,22 @@ class ConnectToWalletModal extends React.Component {
                   />
                   <div>
                     <HighlightTextSpan>WalletConnect</HighlightTextSpan>
+                  </div>
+                </WalletTypeDiv>
+              </Col>
+              <Col span={8}>
+                <WalletTypeDiv
+                  onClick={() => {
+                    this.onMewConnectClick();
+                  }}
+                >
+                  <img
+                    src="/assets/images/mewconnect.svg"
+                    alt="MewConnect"
+                    draggable="false"
+                  />
+                  <div>
+                    <HighlightTextSpan><I s="MEW Wallet"/></HighlightTextSpan>
                   </div>
                 </WalletTypeDiv>
               </Col>
@@ -157,6 +187,8 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(connectToMetaMask(startConnecting)),
     connectToWalletConnect: (startConnecting) =>
       dispatch(connectToWalletConnect(startConnecting)),
+    connectToMewConnect: (startConnecting) =>
+      dispatch(connectToMewConnect(startConnecting)),
     closeModal: () => dispatch(showConnectToWalletModal(false)),
   };
 };
