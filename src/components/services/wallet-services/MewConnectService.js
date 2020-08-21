@@ -13,38 +13,17 @@ import {
   connectToMewConnect,
   connectToMewConnectComplete,
 } from "redux/actions/MewConnect";
-import {
-  emptyBalances,
-  emptyDeposits,
-  emptyWithdrawals,
-} from "redux/actions/MyAccountPage";
-import {
-  emptyMyHistoryOrders,
-  emptyMyOpenOrders,
-} from 'redux/actions/MyOrders';
-
-import {
-  emptyAllHistoryOrders,
-  emptyAllOpenOrders,
-  emptyUserTransactions,
-} from "redux/actions/MyOrderPage";
 
 import { fetchGasPrice } from "redux/actions/GasPrice";
 import { fetchNonce } from "redux/actions/Nonce";
 
-import {
-  loginModal,
-  registerAccountModal,
-  showConnectToWalletModal,
-} from "redux/actions/ModalManager";
-import { updateBlockNum } from "redux/actions/NotifyCenter";
+import { showConnectToWalletModal } from "redux/actions/ModalManager";
 
 import { notifyError } from "redux/actions/Notification";
 import Wallet from "lightcone/wallet";
 
 import { saveWalletType } from "lightcone/api/localStorgeAPI";
 import MewConnect from "@myetherwallet/mewconnect-web-client";
-// import WalletConnectQRCodeModal from "@walletconnect/qrcode-modal";
 import Web3 from "web3";
 
 class MewConnectService extends Component {
@@ -184,17 +163,6 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(getDataFromLocalStorage(address)),
     fetchNonce: (address) => dispatch(fetchNonce(address)),
     fetchGasPrice: () => dispatch(fetchGasPrice()),
-    emptyBalances: () => dispatch(emptyBalances()),
-    emptyMyOpenOrders: () => dispatch(emptyMyOpenOrders()),
-    emptyMyHistoryOrders: () => dispatch(emptyMyHistoryOrders()),
-    emptyUserTransactions: () => dispatch(emptyUserTransactions()),
-    registerAccountModal: (show) => dispatch(registerAccountModal(show)),
-    showLoginModal: (show) => dispatch(loginModal(show)),
-    emptyWithdrawals: () => dispatch(emptyWithdrawals()),
-    emptyDeposits: () => dispatch(emptyDeposits()),
-    emptyAllOpenOrders: () => dispatch(emptyAllOpenOrders()),
-    emptyAllHistoryOrders: () => dispatch(emptyAllHistoryOrders()),
-    updateBlockNum: (blockNum) => dispatch(updateBlockNum(blockNum)),
   };
 };
 
