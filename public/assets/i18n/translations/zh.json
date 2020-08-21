@@ -177,7 +177,7 @@
     "Connect Wallet": "连接钱包",
     "Switch Wallet": "切换钱包",
     "Retry WalletConnect": "重连WalletConnect",
-    "MEW Wallet": "NEW钱包",
+    "MEW Wallet": "MEW钱包",
     "ConnectToWeb3Tip": "使用路印交易所需要您首先解锁以太坊钱包",
     "MetaMaskNotDetected": "没有检测到MetaMask。您必须安装MetaMask才能使用路印DEX！",
     "Registering Account...": "正在注册账号...",
