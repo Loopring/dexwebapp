@@ -157,7 +157,7 @@ class MewConnectService extends Component {
 
     // Subscribe to session disconnection/close
     window.ethereum.on("close", (code, reason) => {
-      console.log("WalletConnect", code, reason);
+      console.log("Mew Wallet", code, reason);
     });
   }
 
