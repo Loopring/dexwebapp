@@ -52,7 +52,7 @@ const rootReducer = (history) =>
     myOrderPage: MyOrderPageReducer,
     metaMask: MetaMaskReducer,
     walletConnect: WalletConnectReducer,
-    mewConnect:MewConnectReducer,
+    mewConnect: MewConnectReducer,
     dexAccount: DexAccountReducer,
     nonce: NonceReducer,
     gasPrice: GasPriceReducer,

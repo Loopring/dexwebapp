@@ -119,7 +119,7 @@ class ConnectToWalletModal extends React.Component {
             }}
           >
             <Row className="row">
-              <Col span={12}>
+              <Col span={8}>
                 <WalletTypeDiv
                   onClick={() => {
                     this.onMetaMaskClick();
@@ -135,7 +135,7 @@ class ConnectToWalletModal extends React.Component {
                   </div>
                 </WalletTypeDiv>
               </Col>
-              <Col span={12}>
+              <Col span={8}>
                 <WalletTypeDiv
                   onClick={() => {
                     this.onWalletConnectClick();
@@ -151,7 +151,7 @@ class ConnectToWalletModal extends React.Component {
                   </div>
                 </WalletTypeDiv>
               </Col>
-              <Col span={12}>
+              <Col span={8}>
                 <WalletTypeDiv
                   onClick={() => {
                     this.onMewConnectClick();
@@ -163,7 +163,7 @@ class ConnectToWalletModal extends React.Component {
                     draggable="false"
                   />
                   <div>
-                    <HighlightTextSpan>MEW wallet</HighlightTextSpan>
+                    <HighlightTextSpan><I s="MEW Wallet"/></HighlightTextSpan>
                   </div>
                 </WalletTypeDiv>
               </Col>
