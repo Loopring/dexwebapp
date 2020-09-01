@@ -6,6 +6,7 @@ import React, { Component } from "react";
 import { connectToMetaMask } from "redux/actions/MetaMask";
 import { connectToWalletConnect } from "redux/actions/WalletConnect";
 import { connectToMewConnect } from "redux/actions/MewConnect";
+import { connectToAuthereum } from "redux/actions/Authereum";
 import { getWalletType } from "lightcone/api/localStorgeAPI";
 import { showConnectToWalletModal } from "redux/actions/ModalManager";
 
@@ -18,6 +19,8 @@ class WalletService extends Component {
       this.props.connectToWalletConnect(true);
     } else if (walletConnect === "MewConnect") {
       this.props.connectToMewConnect(true);
+    } else if (walletConnect === "Authereum") {
+      this.props.connectToAuthereum(true);
     } else {
       const href = window.location.href;
       if (
@@ -49,6 +52,8 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(connectToWalletConnect(startConnecting)),
     connectToMewConnect: (startConnecting) =>
       dispatch(connectToMewConnect(startConnecting)),
+    connectToAuthereum: (startConnecting) =>
+      dispatch(connectToAuthereum(startConnecting)),
   };
 };
 

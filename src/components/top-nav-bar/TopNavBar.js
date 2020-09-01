@@ -25,6 +25,7 @@ import WechatModal from "modals/WechatModal";
 import MetaMaskService from "components/services/wallet-services/MetaMaskService";
 import WalletConnectService from "components/services/wallet-services/WalletConnectService";
 import MewConnectService from "components/services/wallet-services/MewConnectService";
+import AuthereumService from "components/services/wallet-services/AuthereumService";
 import WalletService from "components/services/wallet-services/WalletService";
 
 import RegisterAccountModal from 'modals/RegisterAccountModal';
@@ -168,6 +169,7 @@ class TopNavBar extends React.Component {
             <MetaMaskService />
             <WalletConnectService />
             <MewConnectService />
+            <AuthereumService />
             <WalletService />
             <DexAccountBalanceService />
             <DexAccountOrderService />
