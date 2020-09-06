@@ -18,6 +18,7 @@ import { TradePanelReducer } from "./TradePanel";
 import { UserPreferenceManagerReducer } from "./UserPreferenceManager";
 import { WalletConnectReducer } from "./WalletConnect";
 import { MewConnectReducer } from "./MewConnect";
+import { AuthereumReducer } from "./Authereum";
 
 
 // markets
@@ -53,6 +54,7 @@ const rootReducer = (history) =>
     metaMask: MetaMaskReducer,
     walletConnect: WalletConnectReducer,
     mewConnect: MewConnectReducer,
+    authereum: AuthereumReducer,
     dexAccount: DexAccountReducer,
     nonce: NonceReducer,
     gasPrice: GasPriceReducer,

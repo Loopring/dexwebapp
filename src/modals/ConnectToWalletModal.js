@@ -14,6 +14,7 @@ import { Section, TextPopupTitle } from "modals/styles/Styles";
 import { connectToMetaMask } from "redux/actions/MetaMask";
 import { connectToWalletConnect } from "redux/actions/WalletConnect";
 import { connectToMewConnect } from "redux/actions/MewConnect";
+import { connectToAuthereum } from "redux/actions/Authereum";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
@@ -84,6 +85,19 @@ class ConnectToWalletModal extends React.Component {
       } catch (error) {
       } finally {
         this.props.connectToMewConnect(true);
+        this.props.closeModal();
+      }
+    })();
+  };
+
+  onAuthereumClick = () => {
+    // Before connect, let's disconnect Authereum
+    (async () => {
+      try {
+        // await window.ethereum.close();
+      } catch (error) {
+      } finally {
+        this.props.connectToAuthereum(true);
         this.props.closeModal();
       }
     })();
@@ -167,6 +181,22 @@ class ConnectToWalletModal extends React.Component {
                   </div>
                 </WalletTypeDiv>
               </Col>
+              <Col span={8}>
+                <WalletTypeDiv
+                  onClick={() => {
+                    this.onAuthereumClick();
+                  }}
+                >
+                  <img
+                    src="/assets/images/authereum.svg"
+                    alt="Authereum"
+                    draggable="false"
+                  />
+                  <div>
+                    <HighlightTextSpan><I s="Authereum Wallet"/></HighlightTextSpan>
+                  </div>
+                </WalletTypeDiv>
+              </Col>
             </Row>
           </Section>
         </Spin>
@@ -189,6 +219,8 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(connectToWalletConnect(startConnecting)),
     connectToMewConnect: (startConnecting) =>
       dispatch(connectToMewConnect(startConnecting)),
+    connectToAuthereum: (startConnecting) =>
+      dispatch(connectToAuthereum(startConnecting)),
     closeModal: () => dispatch(showConnectToWalletModal(false)),
   };
 };

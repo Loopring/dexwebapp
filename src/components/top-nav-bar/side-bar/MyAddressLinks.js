@@ -7,6 +7,7 @@ import React from "react";
 
 import { connectToWalletConnect } from "redux/actions/WalletConnect";
 import { connectToMewConnect } from "redux/actions/MewConnect";
+import { connectToAuthereum } from "redux/actions/Authereum";
 import { getEtherscanLink, getWalletType } from "lightcone/api/localStorgeAPI";
 import { showSideBar } from "redux/actions/ModalManager";
 
@@ -100,6 +101,8 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(connectToWalletConnect(startConnecting)),
     connectToMewConnect: (startConnecting) =>
       dispatch(connectToMewConnect(startConnecting)),
+    connectToAuthereum: (startConnecting) =>
+      dispatch(connectToAuthereum(startConnecting)),
   };
 };
 
