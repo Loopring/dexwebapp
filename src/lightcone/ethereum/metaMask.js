@@ -65,11 +65,22 @@ export async function personalSign(web3, account, msg) {
               msg,
               result
             );
-            console.log(JSON.stringify(walletValid2));
+            // console.log(JSON.stringify(walletValid2));
             if (walletValid2.result) {
               resolve({ sig: result });
             } else {
-              resolve({ error: "invalid sig" });
+              const walletValid3 = await contractWalletValidate3(
+                web3,
+                account,
+                msg,
+                result
+              );
+              console.log(JSON.stringify(walletValid3));
+              if (walletValid3.result) {
+                resolve({ sig: result });
+              } else {
+                resolve({ error: "invalid sig" });
+              }
             }
           }
         }
@@ -141,6 +152,39 @@ export async function contractWalletValidate2(web3, account, msg, sig) {
         if (!err) {
           const valid = ABI.Contracts.ContractWallet.decodeOutputs(
             "isValidSignature(bytes32,bytes)",
+            result
+          );
+          resolve({
+            result: toHex(toBuffer(valid[0])) === data.slice(0, 10),
+          });
+        } else resolve({ error: err });
+      }
+    );
+  });
+}
+
+// Authereum account contract hashes the data in the validation function,
+// so we must send the data plain text.
+export async function contractWalletValidate3(web3, account, msg, sig) {
+  return new Promise((resolve) => {
+    const hash = toBuffer(msg);
+    const data = ABI.Contracts.ContractWallet.encodeInputs(
+      "isValidSignature(bytes,bytes)",
+      {
+        _data: hash,
+        _signature: toBuffer(sig),
+      }
+    );
+
+    web3.eth.call(
+      {
+        to: account, // contract addr
+        data: data,
+      },
+      function (err, result) {
+        if (!err) {
+          const valid = ABI.Contracts.ContractWallet.decodeOutputs(
+            "isValidSignature(bytes,bytes)",
             result
           );
           resolve({
