@@ -251,8 +251,8 @@ class TransferModal extends React.Component {
     let symbol = this.props.modalManager.transferToken;
 
     // Need to use Share to generate link if there is an update.
-    const twitterLink = 'https://twitter.com/intent/tweet?original_referer=http%3A%2F%2Flocalhost%3A3001%2Faccount%2Ftransfers&ref_src=twsrc%5Etfw&text=I%20just%20made%20a%20layer-2%20transfer%20on%20Ethereum%20using%20the%20newly%20launched%20Loopring%20Pay.%20It%20was%20instant%2C%20free%2C%20and%20completely%20self-custodial%20thanks%20to%20Loopring%27s%20zkRollup.%20%23EthereumScalesToday%20%23LoopringPay%20Get%20in%20the%20fast%20lane%20at%20https%3A%2F%2Floopring.io&tw_p=tweetbutton'(
-      async () => {
+    const twitterLink = 'https://twitter.com/intent/tweet?original_referer=http%3A%2F%2Flocalhost%3A3001%2Faccount%2Ftransfers&ref_src=twsrc%5Etfw&text=I%20just%20made%20a%20layer-2%20transfer%20on%20Ethereum%20using%20the%20newly%20launched%20Loopring%20Pay.%20It%20was%20instant%2C%20free%2C%20and%20completely%20self-custodial%20thanks%20to%20Loopring%27s%20zkRollup.%20%23EthereumScalesToday%20%23LoopringPay%20Get%20in%20the%20fast%20lane%20at%20https%3A%2F%2Floopring.io&tw_p=tweetbutton';
+    (async () => {
         try {
           if (nonce === -1) {
             const { accountNonce } = await lightconeGetAccount(
