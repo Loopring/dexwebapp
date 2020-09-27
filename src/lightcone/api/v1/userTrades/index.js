@@ -1,3 +1,3 @@
-import { getUserTrades } from "./get";
+import { getUserTrades } from './get';
 
 export { getUserTrades };

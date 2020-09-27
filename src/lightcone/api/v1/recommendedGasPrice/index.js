@@ -1,3 +1,3 @@
-import { getRecommendedGasPrice } from "./get";
+import { getRecommendedGasPrice } from './get';
 
 export { getRecommendedGasPrice };

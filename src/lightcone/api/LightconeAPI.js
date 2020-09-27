@@ -1,7 +1,7 @@
-import { dropTrailingZeroes } from "pages/trade/components/defaults/util";
-import { signSetReferrer } from "../sign/exchange";
-import config from "../config";
-import request from "../common/request";
+import { dropTrailingZeroes } from 'pages/trade/components/defaults/util';
+import { signSetReferrer } from '../sign/exchange';
+import config from '../config';
+import request from '../common/request';
 
 export function getRefreshDurationInMillionSeconds() {
   return 30 * 1000;
@@ -12,50 +12,50 @@ export function getApiDocsURL() {
 }
 
 export async function getApiKey(data, signed) {
-  const signature = signed.Rx + "," + signed.Ry + "," + signed.s;
+  const signature = signed.Rx + ',' + signed.Ry + ',' + signed.s;
   const headers = {
-    "X-API-SIG": signature,
+    'X-API-SIG': signature,
   };
 
   const response = await request({
-    method: "GET",
-    url: "/api/v2/apiKey",
+    method: 'GET',
+    url: '/api/v2/apiKey',
     headers: headers,
     params: data,
   });
-  return response["data"];
+  return response['data'];
 }
 
 export async function applyApiKey(data, signed) {
-  const signature = signed.Rx + "," + signed.Ry + "," + signed.s;
+  const signature = signed.Rx + ',' + signed.Ry + ',' + signed.s;
   const headers = {
-    "X-API-SIG": signature,
+    'X-API-SIG': signature,
   };
   const response = await request({
-    method: "POST",
-    url: "/api/v2/apiKey",
+    method: 'POST',
+    url: '/api/v2/apiKey',
     headers: headers,
     data,
   });
 
-  return response["data"];
+  return response['data'];
 }
 
 export async function getDexNonce(data) {
   return await request({
-    method: "GET",
-    url: "/api/v2/dexNonce",
+    method: 'GET',
+    url: '/api/v2/dexNonce',
     param: data,
   });
 }
 
 export async function submitOrderToLightcone(data, apiKey) {
   const headers = {
-    "X-API-KEY": apiKey,
+    'X-API-KEY': apiKey,
   };
   return await request({
-    method: "POST",
-    url: "/api/v2/order",
+    method: 'POST',
+    url: '/api/v2/order',
     headers: headers,
     data,
   });
@@ -68,16 +68,16 @@ export async function getOrderId(accountId, tokenSId, apiKey) {
     tokenSId: tokenSId,
   };
   const headers = {
-    "X-API-KEY": apiKey,
+    'X-API-KEY': apiKey,
   };
   const response = await request({
-    method: "GET",
-    url: "/api/v2/orderId",
+    method: 'GET',
+    url: '/api/v2/orderId',
     headers: headers,
     params,
   });
 
-  return response["data"];
+  return response['data'];
 }
 
 export async function lightconeGetAccount(owner) {
@@ -86,18 +86,18 @@ export async function lightconeGetAccount(owner) {
   };
 
   const response = await request({
-    method: "GET",
-    url: "/api/v2/account",
+    method: 'GET',
+    url: '/api/v2/account',
     params,
   });
 
-  return response["data"];
+  return response['data'];
 }
 
 export async function getTimestamp() {
   return await request({
-    method: "POST",
-    url: "/api/v2/timestamp",
+    method: 'POST',
+    url: '/api/v2/timestamp',
   });
 }
 
@@ -107,12 +107,12 @@ export async function getTrade(market, limit) {
     limit,
   };
   const response = await request({
-    method: "GET",
-    url: "/api/v2/trade",
+    method: 'GET',
+    url: '/api/v2/trade',
     params,
   });
 
-  return response["data"]["trades"];
+  return response['data']['trades'];
 }
 
 export function arrToTrade(arr) {
@@ -141,27 +141,27 @@ export async function getDepositHistory(
     offset,
     allType: true,
     start: 0,
-    end: Date.now() * 1000,
+    end: Date.now(),
   };
 
-  if (typeof tokenSymbol !== "undefined") {
+  if (typeof tokenSymbol !== 'undefined') {
     params.tokenSymbol = tokenSymbol;
   }
 
   const headers = {
-    "X-API-KEY": apiKey,
+    'X-API-KEY': apiKey,
   };
 
   const response = await request({
-    method: "GET",
-    url: "/api/v2/user/deposits",
+    method: 'GET',
+    url: '/api/v2/user/deposits',
     headers: headers,
     params,
   });
 
-  const data = response["data"];
-  const totalNum = data["totalNum"];
-  const transactions = data["transactions"];
+  const data = response['data'];
+  const totalNum = data['totalNum'];
+  const transactions = data['transactions'];
   const updatedTransactions = mapTransactions(transactions, tokens);
   return {
     totalNum,
@@ -195,18 +195,18 @@ function mapTransactions(transactions, tokens) {
     let amountInUI = mapAmountInUI(baseToken, transaction.amount, tokens);
     let realAmountInUI = transaction.realAmount
       ? mapAmountInUI(baseToken, transaction.realAmount, tokens)
-      : "";
+      : '';
     // Why this is feeAmount?
-    const feeInUI = config.fromWEI("ETH", transaction.feeAmount, tokens);
+    const feeInUI = config.fromWEI('ETH', transaction.feeAmount, tokens);
 
     const txHashInUI =
-      transaction.txHash.substring(0, 7) + "..." + transaction.txHash.slice(-7);
+      transaction.txHash.substring(0, 7) + '...' + transaction.txHash.slice(-7);
 
     const distributeHashInUI = transaction.distributeHash
       ? transaction.distributeHash.substring(0, 7) +
-        "..." +
+        '...' +
         transaction.distributeHash.slice(-7)
-      : "";
+      : '';
 
     const updatedTransaction = {
       ...transaction,
@@ -235,27 +235,27 @@ export async function getWithdrawalHistory(
     limit,
     offset,
     start: 0,
-    end: Date.now() * 1000,
+    end: Date.now(),
   };
 
-  if (typeof tokenSymbol !== "undefined") {
+  if (typeof tokenSymbol !== 'undefined') {
     params.tokenSymbol = tokenSymbol;
   }
 
   const headers = {
-    "X-API-KEY": apiKey,
+    'X-API-KEY': apiKey,
   };
 
   const response = await request({
-    method: "GET",
-    url: "/api/v2/user/withdrawals",
+    method: 'GET',
+    url: '/api/v2/user/withdrawals',
     headers: headers,
     params,
   });
 
-  const data = response["data"];
-  const totalNum = data["totalNum"];
-  const transactions = data["transactions"];
+  const data = response['data'];
+  const totalNum = data['totalNum'];
+  const transactions = data['transactions'];
   const updatedTransactions = mapTransactions(transactions, tokens);
   return {
     totalNum,
@@ -267,16 +267,16 @@ export async function getWithdrawalHistory(
 
 export async function getTicker(markets, tokens) {
   const params = {
-    market: markets.reduce((acc, cur) => acc + "," + cur),
+    market: markets.reduce((acc, cur) => acc + ',' + cur),
   };
 
   const response = await request({
-    method: "GET",
-    url: "/api/v2/ticker",
+    method: 'GET',
+    url: '/api/v2/ticker',
     params,
   });
   return mapTicker(
-    response["data"].map((arr) => arrToTicker(arr)),
+    response['data'].map((arr) => arrToTicker(arr)),
     tokens
   );
 }
@@ -286,15 +286,15 @@ function mapTicker(tickers, configTokens) {
   for (let i = 0; i < tickers.length; i = i + 1) {
     const ticker = tickers[i];
 
-    const tokens = ticker.market.split("-");
+    const tokens = ticker.market.split('-');
     const baseToken = tokens[0];
     const quoteToken = tokens[1];
-    const open = parseFloat(ticker["open"]);
-    const close = parseFloat(ticker["close"]);
+    const open = parseFloat(ticker['open']);
+    const close = parseFloat(ticker['close']);
     let percentChange24h = (((close - open) / open) * 100).toFixed(2);
-    percentChange24h = percentChange24h !== "NaN" ? percentChange24h : "0.00";
+    percentChange24h = percentChange24h !== 'NaN' ? percentChange24h : '0.00';
     if (close - open > 0) {
-      percentChange24h = `+ ${percentChange24h}`;
+      percentChange24h = `+${percentChange24h}`;
     }
 
     const updatedTicker = {
@@ -330,17 +330,17 @@ export async function getExchangeInfo() {
   const data = {};
 
   const response = await request({
-    method: "GET",
-    url: "/api/v2/exchange/info",
+    method: 'GET',
+    url: '/api/v2/exchange/info',
     data,
   });
 
-  return response["data"];
+  return response['data'];
 }
 
 export async function setRefer(info, keyPair) {
   const signed = signSetReferrer(info, keyPair);
-  const signature = signed.Rx + "," + signed.Ry + "," + signed.s;
+  const signature = signed.Rx + ',' + signed.Ry + ',' + signed.s;
   let data;
   if (info.referrer) {
     data = {
@@ -359,15 +359,15 @@ export async function setRefer(info, keyPair) {
   }
 
   const headers = {
-    "X-API-SIG": signature,
+    'X-API-SIG': signature,
   };
 
   const response = await request({
-    method: "POST",
-    url: "/api/v2/refer",
+    method: 'POST',
+    url: '/api/v2/refer',
     headers: headers,
     data,
   });
 
-  return response["data"];
+  return response['data'];
 }

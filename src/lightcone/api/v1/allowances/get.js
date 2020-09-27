@@ -1,5 +1,5 @@
-import { request } from "../../../common";
-import config from "../../../config";
+import { request } from '../../../common';
+import config from '../../../config';
 
 export async function getAllowance(owner, symbol, tokens) {
   let token = config.getTokenBySymbol(symbol, tokens);
@@ -10,10 +10,10 @@ export async function getAllowance(owner, symbol, tokens) {
   };
 
   const response = await request({
-    method: "GET",
-    url: "/api/v2/allowances",
+    method: 'GET',
+    url: '/api/v2/allowances',
     params,
   });
 
-  return response["data"];
+  return response['data'];
 }

@@ -1,6 +1,6 @@
-import { request } from "../../../common";
-import BigNumber from "bignumber.js";
-import config from "../../../config";
+import { request } from '../../../common';
+import BigNumber from 'bignumber.js';
+import config from '../../../config';
 
 export async function getDepth(market, level, limit, configTokens) {
   const params = {
@@ -9,16 +9,16 @@ export async function getDepth(market, level, limit, configTokens) {
     limit,
   };
   const response = await request({
-    method: "GET",
-    url: "/api/v2/depth",
+    method: 'GET',
+    url: '/api/v2/depth',
     params,
   });
 
-  const tokens = market.split("-");
+  const tokens = market.split('-');
   const baseToken = tokens[0];
 
-  const depth = response["data"];
-  const bids = depth["bids"].map((arr) => arrToDepth(arr));
+  const depth = response['data'];
+  const bids = depth['bids'].map((arr) => arrToDepth(arr));
   let updatedBids = [];
   let aggregatedBidSize = BigNumber(0);
   for (let i = 0; i < bids.length; i = i + 1) {
@@ -39,7 +39,7 @@ export async function getDepth(market, level, limit, configTokens) {
     updatedBids.push(updatedBid);
   }
 
-  const asks = depth["asks"].map((arr) => arrToDepth(arr));
+  const asks = depth['asks'].map((arr) => arrToDepth(arr));
   let updatedAsks = [];
   let aggregateAskSize = BigNumber(0);
   for (let i = 0; i < asks.length; i = i + 1) {
@@ -59,7 +59,7 @@ export async function getDepth(market, level, limit, configTokens) {
   return {
     bids: updatedBids,
     asks: updatedAsks,
-    version: depth["version"],
+    version: depth['version'],
   };
 }
 

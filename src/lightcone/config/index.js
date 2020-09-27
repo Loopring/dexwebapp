@@ -1,16 +1,29 @@
-import { toBig, toFixed } from "../common/formatter";
-const config = require("./config.json");
+import { toBig, toFixed } from '../common/formatter';
+const config = require('./config.json');
+
+function getMaintenanceMode() {
+  return config.maintenanceMode;
+}
 
 function getRelayerHost(restUrl = true) {
-  return restUrl ? config.prodServerUrl : config.prodWsUrl;
+  if (
+    window.location.hostname === 'beta-loopring-io.herokuapp.com' ||
+    window.location.hostname === 'beta.loopring.io' ||
+    window.location.hostname === 'loopring.io' ||
+    window.location.hostname === 'www.loopring.io'
+  ) {
+    return restUrl ? config.prodServerUrl : config.prodWsUrl;
+  } else {
+    return restUrl ? config.uatServerUrl : config.uatWsUrl;
+  }
 }
 
 function getServer() {
-  return "https://" + getRelayerHost();
+  return 'https://' + getRelayerHost();
 }
 
 function getWsServer() {
-  return "wss://" + getRelayerHost(false) + "/v2/ws";
+  return 'wss://' + getRelayerHost(false) + '/v2/ws';
 }
 
 function getChannelId() {
@@ -26,7 +39,7 @@ function getMaxFeeBips() {
 }
 
 function getTokenBySymbol(symbol, tokens) {
-  if (typeof symbol === "undefined") {
+  if (typeof symbol === 'undefined') {
     return {};
   }
   return (
@@ -37,7 +50,7 @@ function getTokenBySymbol(symbol, tokens) {
 }
 
 function getTokenByAddress(address, tokens) {
-  if (typeof address === "undefined") {
+  if (typeof address === 'undefined') {
     return {};
   }
   return tokens.find(
@@ -46,7 +59,7 @@ function getTokenByAddress(address, tokens) {
 }
 
 function getTokenByTokenId(tokenId, tokens) {
-  if (typeof tokenId === "undefined") {
+  if (typeof tokenId === 'undefined') {
     return {};
   }
   return tokens.find((token) => token.tokenId === tokenId);
@@ -55,18 +68,18 @@ function getTokenByTokenId(tokenId, tokens) {
 function fromWEI(symbol, valueInWEI, tokens, { precision, ceil } = {}) {
   const token = getTokenBySymbol(symbol, tokens);
   const precisionToFixed = precision ? precision : token.precision;
-  const value = toBig(valueInWEI).div("1e" + token.decimals);
+  const value = toBig(valueInWEI).div('1e' + token.decimals);
   return toFixed(value, precisionToFixed, ceil);
 }
 
-function toWEI(symbol, value, tokens) {
+function toWEI(symbol, value, tokens, rm = 3) {
   const token = getTokenBySymbol(symbol, tokens);
-  if (typeof token === "undefined") {
+  if (typeof token === 'undefined') {
     return 0;
   }
   return toBig(value)
-    .times("1e" + token.decimals)
-    .toFixed(0);
+    .times('1e' + token.decimals)
+    .toFixed(0, rm);
 }
 
 function getMarketByPair(pair, markets) {
@@ -80,17 +93,29 @@ function isSupportedMarket(market, markets) {
 }
 
 function getMarketsByTokenR(token, markets) {
-  return markets.filter((item) => item.split("-")[1] === token);
+  return markets.filter((item) => item.split('-')[1] === token);
 }
 
 function getMarketsByTokenL(token, markets) {
-  return markets.filter((item) => item.split("-")[0] === token);
+  return markets.filter((item) => item.split('-')[0] === token);
 }
 
 function getTokenSupportedMarkets(token) {
   const leftMarket = getMarketsByTokenL(token);
   const rightMarket = getMarketsByTokenR(token);
   return [...leftMarket, ...rightMarket];
+}
+
+function getDepositGas(token) {
+  if (token) {
+    const data = config.deposits.find(
+      (d) => d.token.toUpperCase() === token.toUpperCase()
+    );
+    if (data) {
+      return data;
+    }
+  }
+  return getGasLimitByType('depositTo');
 }
 
 function getGasLimitByType(type) {
@@ -110,6 +135,7 @@ function getMaxAmountInWEI() {
 }
 
 export default {
+  getMaintenanceMode,
   getRelayerHost,
   getServer,
   getWsServer,
@@ -128,4 +154,5 @@ export default {
   getMaxAmountInWEI,
   fromWEI,
   toWEI,
+  getDepositGas,
 };

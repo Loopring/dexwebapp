@@ -1,4 +1,5 @@
 {
+  "maintenanceMode": false,
   "defaultGasPrice": 21,
   "defaultGasLimit": "0x7a120",
   "label": 211,
@@ -6,6 +7,8 @@
   "feeToken": "ETH",
   "maxFeeBips": 50,
   "maxAmount": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+  "uatServerUrl": "uat.loopring.io",
+  "uatWsUrl":"ws.uat.loopring.io",
   "prodServerUrl": "api.loopring.io",
   "prodWsUrl":"ws.loopring.io",
   "defaultChannelId":"hebao::subchannel::0001",
@@ -20,15 +23,55 @@
     },
     {
       "type": "deposit",
-      "gas": 500000
+      "gas": 350000
     },
     {
       "type": "create",
-      "gas": 500000
+      "gas": 305000
     },
     {
       "type": "depositTo",
-      "gas": 500000
+      "gas": 350000
+    },
+    {
+      "type": "claim",
+      "gas": 250000
+    }
+  ],
+  "deposits":[
+    {
+      "token":"NEST",
+      "gas":350000
+    },
+    {
+      "token":"PNK",
+      "gas":350000
+    },
+    {
+      "token":"BZRX",
+      "gas":350000
+    },
+    {
+      "token":"VBZRX",
+      "gas":350000
+    },
+    {
+      "token":"LEND",
+      "gas":350000
+    },
+    {
+      "token":"GRID",
+      "gas":350000
+    },
+    {
+      "token":"ONG",
+      "gas":350000
+    },{
+      "token":"GRG",
+      "gas":350000
+    },{
+      "token":"ANT",
+      "gas":350000
     }
   ]
 }

@@ -1,11 +1,11 @@
 // Taken and modified from
 // https://github.com/iden3/circomlib
 
-import { bigInt } from "snarkjs";
-import { createHash } from "./poseidon";
+import { bigInt } from 'snarkjs';
+import { createHash } from './poseidon';
 
-import babyJub from "./babyjub";
-import createBlakeHash from "blake-hash";
+import babyJub from './babyjub';
+import createBlakeHash from 'blake-hash';
 
 function generateKeyPair(seed) {
   const secretKey = bigInt.leBuff2int(seed).mod(babyJub.subOrder);
@@ -29,9 +29,9 @@ function sign(strKey, msg) {
   const key = bigInt(strKey);
   const prv = bigInt.leInt2Buff(key, 32);
 
-  const h1 = createBlakeHash("blake512").update(prv).digest();
+  const h1 = createBlakeHash('blake512').update(prv).digest();
   const msgBuff = bigInt.leInt2Buff(bigInt(msg), 32);
-  const rBuff = createBlakeHash("blake512")
+  const rBuff = createBlakeHash('blake512')
     .update(Buffer.concat([h1.slice(32, 64), msgBuff]))
     .digest();
   let r = bigInt.leBuff2int(rBuff);

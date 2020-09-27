@@ -1,3 +1,3 @@
-import { getAllowance } from "./get";
+import { getAllowance } from './get';
 
 export { getAllowance };

@@ -1,3 +1,3 @@
-import { getMarketInfo } from "./get";
+import { getMarketInfo } from './get';
 
 export { getMarketInfo };

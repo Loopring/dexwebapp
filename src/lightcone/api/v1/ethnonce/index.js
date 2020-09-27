@@ -1,3 +1,3 @@
-import { getEthNonce } from "./get";
+import { getEthNonce } from './get';
 
 export { getEthNonce };

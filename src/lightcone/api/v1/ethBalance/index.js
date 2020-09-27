@@ -1,3 +1,3 @@
-import { getEthBalance } from "./get";
+import { getEthBalance } from './get';
 
 export { getEthBalance };

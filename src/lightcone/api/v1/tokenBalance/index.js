@@ -1,3 +1,3 @@
-import { getTokenBalance } from "./get";
+import { getTokenBalance } from './get';
 
 export { getTokenBalance };

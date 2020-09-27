@@ -184,5 +184,26 @@
   "payable": true,
   "stateMutability": "payable",
   "type": "function"
+}, {
+  "constant": false,
+  "inputs": [
+    {
+      "internalType": "uint256",
+      "name": "blockIdx",
+      "type": "uint256"
+    },
+    {
+      "internalType": "uint256",
+      "name": "slotIdx",
+      "type": "uint256"
+    }
+  ],
+  "name": "withdrawFromApprovedWithdrawal",
+  "outputs": [
+
+  ],
+  "payable": false,
+  "stateMutability": "nonpayable",
+  "type": "function"
 }
 ]

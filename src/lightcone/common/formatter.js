@@ -1,6 +1,6 @@
-import * as ethUtil from "ethereumjs-util";
-import BN from "bn.js";
-import BigNumber from "bignumber.js";
+import * as ethUtil from 'ethereumjs-util';
+import BN from 'bn.js';
+import BigNumber from 'bignumber.js';
 
 BigNumber.config({
   EXPONENTIAL_AT: 20,
@@ -28,7 +28,7 @@ export function toBuffer(mixed) {
  * @returns {Buffer}
  */
 export function zeroPad(num, places) {
-  return toBuffer(String(num).padStart(places, "0"));
+  return toBuffer(String(num).padStart(places, '0'));
 }
 
 /**
@@ -38,7 +38,7 @@ export function zeroPad(num, places) {
  */
 export function toHex(mixed) {
   if (
-    typeof mixed === "number" ||
+    typeof mixed === 'number' ||
     mixed instanceof BigNumber ||
     mixed instanceof BN
   ) {
@@ -46,16 +46,16 @@ export function toHex(mixed) {
   }
 
   if (mixed instanceof Buffer) {
-    return addHexPrefix(mixed.toString("hex"));
+    return addHexPrefix(mixed.toString('hex'));
   }
 
-  if (typeof mixed === "string") {
+  if (typeof mixed === 'string') {
     const regex = new RegExp(/^0x[0-9a-fA-F]*$/);
     return regex.test(mixed)
       ? mixed
-      : addHexPrefix(toBuffer(mixed).toString("hex"));
+      : addHexPrefix(toBuffer(mixed).toString('hex'));
   }
-  throw new Error("Unsupported type");
+  throw new Error('Unsupported type');
 }
 
 /**
@@ -64,7 +64,7 @@ export function toHex(mixed) {
  * @returns {number}
  */
 export function toNumber(mixed) {
-  if (typeof mixed === "number") {
+  if (typeof mixed === 'number') {
     return mixed;
   }
 
@@ -72,11 +72,11 @@ export function toNumber(mixed) {
     return mixed.toNumber();
   }
 
-  if (typeof mixed === "string") {
+  if (typeof mixed === 'string') {
     return Number(mixed);
   }
 
-  throw new Error("Unsupported type");
+  throw new Error('Unsupported type');
 }
 
 /**
@@ -89,15 +89,15 @@ export function toBig(mixed) {
     return mixed;
   }
 
-  if (typeof mixed === "number") {
+  if (typeof mixed === 'number') {
     return new BigNumber(mixed.toString());
   }
 
-  if (typeof mixed === "string") {
+  if (typeof mixed === 'string') {
     return new BigNumber(mixed);
   }
 
-  throw new Error("Unsupported type");
+  throw new Error('Unsupported type');
 }
 
 /**
@@ -134,13 +134,13 @@ export function toGWEI(value) {
  */
 export function formatKey(mixed) {
   if (mixed instanceof Buffer) {
-    return mixed.toString("hex");
+    return mixed.toString('hex');
   }
 
-  if (typeof mixed === "string") {
-    return mixed.startsWith("0x") ? mixed.slice(2) : mixed;
+  if (typeof mixed === 'string') {
+    return mixed.startsWith('0x') ? mixed.slice(2) : mixed;
   }
-  throw new Error("Unsupported type");
+  throw new Error('Unsupported type');
 }
 
 /**
@@ -150,15 +150,15 @@ export function formatKey(mixed) {
  */
 export function formatAddress(mixed) {
   if (mixed instanceof Buffer) {
-    return ethUtil.toChecksumAddress("0x" + mixed.toString("hex"));
+    return ethUtil.toChecksumAddress('0x' + mixed.toString('hex'));
   }
 
-  if (typeof mixed === "string") {
+  if (typeof mixed === 'string') {
     return ethUtil.toChecksumAddress(
-      mixed.startsWith("0x") ? mixed : "0x" + mixed
+      mixed.startsWith('0x') ? mixed : '0x' + mixed
     );
   }
-  throw new Error("Unsupported type");
+  throw new Error('Unsupported type');
 }
 
 /**
@@ -167,10 +167,10 @@ export function formatAddress(mixed) {
  * @returns {string}
  */
 export function addHexPrefix(input) {
-  if (typeof input === "string") {
-    return input.startsWith("0x") ? input : "0x" + input;
+  if (typeof input === 'string') {
+    return input.startsWith('0x') ? input : '0x' + input;
   }
-  throw new Error("Unsupported type");
+  throw new Error('Unsupported type');
 }
 
 /**
@@ -179,10 +179,10 @@ export function addHexPrefix(input) {
  * @returns {string}
  */
 export function clearHexPrefix(input) {
-  if (typeof input === "string") {
-    return input.startsWith("0x") ? input.slice(2) : input;
+  if (typeof input === 'string') {
+    return input.startsWith('0x') ? input.slice(2) : input;
   }
-  throw new Error("Unsupported type");
+  throw new Error('Unsupported type');
 }
 
 /**
@@ -201,12 +201,12 @@ export function padLeftEven(hex) {
  */
 export function getDisplaySymbol(settingsCurrency) {
   switch (settingsCurrency) {
-    case "CNY":
-      return "￥";
-    case "USD":
-      return "$";
+    case 'CNY':
+      return '￥';
+    case 'USD':
+      return '$';
     default:
-      return "";
+      return '';
   }
 }
 
@@ -224,17 +224,17 @@ export function toFixed(number, precision, ceil) {
     return number.toFixed(precision, rm);
   }
 
-  if (typeof number === "number") {
+  if (typeof number === 'number') {
     return ceil
       ? (
-          Math.ceil(number * Number("1e" + precision)) /
-          Number("1e" + precision)
+          Math.ceil(number * Number('1e' + precision)) /
+          Number('1e' + precision)
         ).toFixed(precision)
       : (
-          Math.floor(number * Number("1e" + precision)) /
-          Number("1e" + precision)
+          Math.floor(number * Number('1e' + precision)) /
+          Number('1e' + precision)
         ).toFixed(precision);
   }
 
-  throw new Error("Unsupported type");
+  throw new Error('Unsupported type');
 }

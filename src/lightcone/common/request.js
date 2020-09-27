@@ -1,5 +1,5 @@
-import axios from "axios";
-import config from "../config";
+import axios from 'axios';
+import config from '../config';
 
 export const SERVER_URL = config.getServer();
 
@@ -23,22 +23,22 @@ export default function request(options, parse) {
 }
 
 function parseResponse(response) {
-  const data = response["data"];
-  const resultInfo = data["resultInfo"];
-  const errorData = data["error"];
+  const data = response['data'];
+  const resultInfo = data['resultInfo'];
+  const errorData = data['error'];
 
   // Some API endpoints in the old versions don't have resultInfo.
   if (resultInfo) {
-    const code = resultInfo["code"];
+    const code = resultInfo['code'];
     if (code !== 0) {
-      const errorMessage = resultInfo["message"];
+      const errorMessage = resultInfo['message'];
       throw Error(errorMessage);
     }
     return data;
   } else if (errorData) {
-    const code = errorData["code"];
+    const code = errorData['code'];
     if (code !== 0) {
-      const errorMessage = `${errorData["code"]} ${errorData["message"]}`;
+      const errorMessage = `${errorData['code']} ${errorData['message']}`;
       throw Error(errorMessage);
     }
     return data;

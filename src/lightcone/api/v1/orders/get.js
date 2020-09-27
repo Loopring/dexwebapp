@@ -1,5 +1,5 @@
-import { request } from "../../../common";
-import config from "../../../config";
+import { request } from '../../../common';
+import config from '../../../config';
 
 export async function getOrders({
   accountId,
@@ -11,33 +11,33 @@ export async function getOrders({
   tokens,
 }) {
   const headers = {
-    "X-API-KEY": apiKey,
+    'X-API-KEY': apiKey,
   };
   const params = {
     accountId,
     limit,
     offset,
     start: 0,
-    end: Date.now() * 1000,
+    end: Date.now(),
   };
-  if (typeof market !== "undefined") {
+  if (typeof market !== 'undefined') {
     params.market = market;
   }
 
-  if (typeof statuses !== "undefined") {
-    params.status = statuses.reduce((a, c) => a + "," + c);
+  if (typeof statuses !== 'undefined') {
+    params.status = statuses.reduce((a, c) => a + ',' + c);
   }
 
   const response = await request({
-    method: "GET",
-    url: "/api/v2/orders",
+    method: 'GET',
+    url: '/api/v2/orders',
     headers: headers,
     params,
   });
 
-  const data = response["data"];
-  const totalNum = data["totalNum"];
-  const orders = data["orders"];
+  const data = response['data'];
+  const totalNum = data['totalNum'];
+  const orders = data['orders'];
   const updatedOrders = map(orders, tokens);
   return {
     accountId,
@@ -56,45 +56,45 @@ export function map(orders, configTokens) {
     const order = orders[i];
     let updatedOrder = { ...order };
     const market = updatedOrder.market;
-    const tokens = market.split("-");
+    const tokens = market.split('-');
     const baseToken = tokens[0];
     const quoteToken = tokens[1];
-    let sizeInBigNumber = "0";
-    let filledInBigNumber = "0";
+    let sizeInBigNumber = '0';
+    let filledInBigNumber = '0';
 
-    updatedOrder["baseToken"] = baseToken;
-    updatedOrder["quoteToken"] = quoteToken;
+    updatedOrder['baseToken'] = baseToken;
+    updatedOrder['quoteToken'] = quoteToken;
 
     // Used in table directly
-    updatedOrder["sizeInString"] = config.fromWEI(
+    updatedOrder['sizeInString'] = config.fromWEI(
       baseToken,
       order.size,
       configTokens
     );
 
-    updatedOrder["filledSizeInString"] = config.fromWEI(
+    updatedOrder['filledSizeInString'] = config.fromWEI(
       baseToken,
       order.filledSize,
       configTokens
     );
 
-    let feeInString = "";
+    let feeInString = '';
     if (Number(order.filledSize) === 0) {
-      feeInString = "-";
+      feeInString = '-';
     } else {
       const feeToken =
-        order.side.toLowerCase() === "buy" ? baseToken : quoteToken;
+        order.side.toLowerCase() === 'buy' ? baseToken : quoteToken;
       feeInString = config.fromWEI(feeToken, order.filledFee, configTokens, {
         precision: 8,
       });
     }
-    updatedOrder["feeInString"] = feeInString;
+    updatedOrder['feeInString'] = feeInString;
 
     //因为前端side == sell, buy = false; side = buy, buy = true，因此都按照size计算。
-    sizeInBigNumber = order["size"];
-    filledInBigNumber = order["filledSize"];
-    if (order.status === "processed") {
-      updatedOrder["filled"] = `100%`;
+    sizeInBigNumber = order['size'];
+    filledInBigNumber = order['filledSize'];
+    if (order.status === 'processed') {
+      updatedOrder['filled'] = `100%`;
     } else {
       const sizeFromWei = config.fromWEI(
         baseToken,
@@ -107,7 +107,7 @@ export function map(orders, configTokens) {
         configTokens
       );
       const filledInNumber = Math.floor((filledSize / sizeFromWei) * 100);
-      updatedOrder["filled"] = `${filledInNumber}%`;
+      updatedOrder['filled'] = `${filledInNumber}%`;
     }
 
     const token = config.getTokenBySymbol(quoteToken, configTokens);
@@ -115,7 +115,7 @@ export function map(orders, configTokens) {
       parseFloat(updatedOrder.sizeInString) * parseFloat(order.price)
     );
     const totalInString = total.toFixed(token.precision);
-    updatedOrder["totalInString"] = totalInString;
+    updatedOrder['totalInString'] = totalInString;
 
     updatedOrders.push(updatedOrder);
   }

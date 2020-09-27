@@ -1,19 +1,19 @@
-import * as exchange from "../sign/exchange";
-import * as fm from "../common/formatter";
+import * as exchange from '../sign/exchange';
+import * as fm from '../common/formatter';
 import {
   personalSign,
   sendTransaction,
   signEthereumTx,
-} from "../ethereum/metaMask";
-import { sha256 } from "ethereumjs-util";
-import Contracts from "../ethereum/contracts/Contracts";
-import config from "../config";
+} from '../ethereum/metaMask';
+import { sha256 } from 'ethereumjs-util';
+import Contracts from '../ethereum/contracts/Contracts';
+import config from '../config';
 
-const assert = require("assert");
+const assert = require('assert');
 
 export default class Wallet {
-  keyMessage = "Sign this message to access Loopring Exchange: ";
-  transferMessage = "Sign this message to authorize Loopring Pay: ";
+  keyMessage = 'Sign this message to access Loopring Exchange: ';
+  transferMessage = 'Sign this message to authorize Loopring Pay: ';
 
   constructor(walletType, web3, address, accountId = -1, keyPair = null) {
     this.walletType = walletType;
@@ -41,21 +41,21 @@ export default class Wallet {
     const rawTx = {
       from: this.address,
       to: tokenAddress,
-      value: "0",
-      data: Contracts.ERC20Token.encodeInputs("approve", {
+      value: '0',
+      data: Contracts.ERC20Token.encodeInputs('approve', {
         _spender: exchangeAddress,
-        _value: "0x0",
+        _value: '0x0',
       }),
       chainId: chainId,
       nonce: nonce.toString(),
       gasPrice: fm.fromGWEI(gasPrice).toString(),
-      gas: config.getGasLimitByType("approve").gas.toString(),
+      gas: config.getGasLimitByType('approve').gas.toString(),
     };
 
     const response = sendByMetaMask
       ? await sendTransaction(this.web3, rawTx)
       : await signEthereumTx(this.web3, this.address, rawTx);
-    return response["result"];
+    return response['result'];
   }
 
   /**
@@ -76,21 +76,21 @@ export default class Wallet {
     const rawTx = {
       from: this.address,
       to: tokenAddress,
-      value: "0",
-      data: Contracts.ERC20Token.encodeInputs("approve", {
+      value: '0',
+      data: Contracts.ERC20Token.encodeInputs('approve', {
         _spender: exchangeAddress,
         _value: config.getMaxAmountInWEI(),
       }),
       chainId: chainId,
       nonce: nonce.toString(),
       gasPrice: fm.fromGWEI(gasPrice).toString(),
-      gas: config.getGasLimitByType("approve").gas.toString(),
+      gas: config.getGasLimitByType('approve').gas.toString(),
     };
     const response = sendByMetaMask
       ? await sendTransaction(this.web3, rawTx)
       : await signEthereumTx(this.web3, this.address, rawTx);
 
-    return response["result"];
+    return response['result'];
   }
 
   /**
@@ -102,7 +102,8 @@ export default class Wallet {
     const result = await personalSign(
       this.web3,
       this.address,
-      this.keyMessage + exchangeAddress + " with key nonce: " + keyNonce
+      this.keyMessage + exchangeAddress + ' with key nonce: ' + keyNonce,
+      this.walletType
     );
 
     if (!result.error) {
@@ -121,7 +122,8 @@ export default class Wallet {
     const result = await personalSign(
       this.web3,
       this.address,
-      this.keyMessage + exchangeAddress + " with key nonce: " + keyNonce
+      this.keyMessage + exchangeAddress + ' with key nonce: ' + keyNonce,
+      this.walletType
     );
 
     if (result.error) {
@@ -158,7 +160,7 @@ export default class Wallet {
    *
    * */
   async createOrUpdateAccount(keyPair, payload, sendByMetaMask = false) {
-    payload["from"] = this.address;
+    payload['from'] = this.address;
 
     const tx = exchange.createAccountAndDeposit({
       ...payload,
@@ -170,7 +172,7 @@ export default class Wallet {
       ? await sendTransaction(this.web3, tx)
       : await signEthereumTx(this.web3, this.address, tx);
 
-    return response["result"];
+    return response['result'];
   }
 
   /**
@@ -179,12 +181,12 @@ export default class Wallet {
    * @param sendByMetaMask
    */
   async depositTo(payload, sendByMetaMask = false) {
-    payload["from"] = this.address;
+    payload['from'] = this.address;
     const tx = exchange.deposit(payload);
     const response = sendByMetaMask
       ? await sendTransaction(this.web3, tx)
       : await signEthereumTx(this.web3, this.address, tx);
-    return response["result"];
+    return response['result'];
   }
 
   /**
@@ -193,12 +195,12 @@ export default class Wallet {
    * @param sendByMetaMask
    */
   async onchainWithdrawal(payload, sendByMetaMask) {
-    payload["from"] = this.address;
+    payload['from'] = this.address;
     const tx = exchange.onChainWithdraw(payload);
     const response = sendByMetaMask
       ? await sendTransaction(this.web3, tx)
       : await signEthereumTx(this.web3, this.address, tx);
-    return response["result"];
+    return response['result'];
   }
 
   /**
@@ -293,6 +295,22 @@ export default class Wallet {
     return exchange.signCancel(cancel, this.keyPair);
   }
 
+  batchCancelOrdersByHash(orderHashes) {
+    return exchange.batchCancelOrdersByHash(
+      this.accountId,
+      orderHashes,
+      this.keyPair
+    );
+  }
+
+  batchCancelOrdersByClientOrderId(clientOrderIds) {
+    return exchange.batchCancelOrdersByClientOrderIds(
+      this.accountId,
+      clientOrderIds,
+      this.keyPair
+    );
+  }
+
   /**
    * Get Api Key signature
    */
@@ -315,7 +333,7 @@ export default class Wallet {
    * @param orderHash: [OPTIONAL] specified order hash to cancel
    * @param clientOrderId: [OPTIONAL] specified client order ID to cancel
    */
-  submitFlexCancel(orderHash = "", clientOrderId = "") {
+  submitFlexCancel(orderHash = '', clientOrderId = '') {
     const request = {
       accountId: this.accountId,
       orderHash: orderHash,
@@ -330,7 +348,12 @@ export default class Wallet {
   async generateHebaoGuadianMessage(type, message) {
     assert(this.address !== null);
 
-    const result = await personalSign(this.web3, this.address, message);
+    const result = await personalSign(
+      this.web3,
+      this.address,
+      message,
+      this.walletType
+    );
 
     if (result.error) {
       throw new Error(result.error.message);
@@ -338,7 +361,7 @@ export default class Wallet {
 
     return {
       address: this.address,
-      sig: result["sig"],
+      sig: result['sig'],
       type,
     };
   }
@@ -355,7 +378,8 @@ export default class Wallet {
     const result = await personalSign(
       this.web3,
       this.address,
-      `${this.transferMessage}${encodeTransfer}`
+      `${this.transferMessage}${encodeTransfer}`,
+      this.walletType
     );
 
     if (!result.error) {
@@ -364,5 +388,41 @@ export default class Wallet {
         transfer: signedTransfer,
       };
     } else return result;
+  }
+
+  signUpdateDistributeHash(request) {
+    return exchange.signUpdateDistributeHash(request, this.keyPair);
+  }
+
+  async claimWithdrawal(
+    exchangeAddress,
+    chainId,
+    nonce,
+    gasPrice,
+    blockIndex,
+    slotIndex,
+    sendByMetaMask = false
+  ) {
+    const rawTx = {
+      from: this.address,
+      to: exchangeAddress,
+      value: '0',
+      data: Contracts.ExchangeContract.encodeInputs(
+        'withdrawFromApprovedWithdrawal',
+        {
+          blockIdx: blockIndex,
+          slotIdx: slotIndex,
+        }
+      ),
+      chainId: chainId,
+      nonce: nonce.toString(),
+      gasPrice: fm.fromGWEI(gasPrice).toString(),
+      gas: config.getGasLimitByType('claim').gas.toString(),
+    };
+    const response = sendByMetaMask
+      ? await sendTransaction(this.web3, rawTx)
+      : await signEthereumTx(this.web3, this.address, rawTx);
+
+    return response['result'];
   }
 }

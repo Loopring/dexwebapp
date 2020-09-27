@@ -1,11 +1,11 @@
-import * as Poseidon from "./poseidon";
-import * as fm from "../common/formatter";
-import ABI from "../ethereum/contracts";
-import EdDSA from "./eddsa";
-import config from "../config";
-import sha256 from "crypto-js/sha256";
+import * as Poseidon from './poseidon';
+import * as fm from '../common/formatter';
+import ABI from '../ethereum/contracts';
+import EdDSA from './eddsa';
+import config from '../config';
+import sha256 from 'crypto-js/sha256';
 
-const assert = require("assert");
+const assert = require('assert');
 
 export function generateKeyPair(seed) {
   return EdDSA.generateKeyPair(seed);
@@ -21,7 +21,7 @@ export function signGetApiKey(request, keyPair) {
     return;
   }
 
-  const method = "GET";
+  const method = 'GET';
   const uri = encodeURIComponent(`${config.getServer()}/api/v2/apiKey`);
   const params = encodeURIComponent(
     `accountId=${request.accountId}&publicKeyX=${keyPair.publicKeyX}&publicKeyY=${keyPair.publicKeyY}`
@@ -39,7 +39,7 @@ export function signApplyApiKey(request, keyPair) {
     return;
   }
 
-  const method = "POST";
+  const method = 'POST';
   const uri = encodeURIComponent(`${config.getServer()}/api/v2/apiKey`);
   const params = encodeURIComponent(
     JSON.stringify({
@@ -60,7 +60,7 @@ export function signSetReferrer(request, keyPair) {
     return;
   }
 
-  const method = "POST";
+  const method = 'POST';
   const uri = encodeURIComponent(`${config.getServer()}/api/v2/refer`);
 
   let params;
@@ -92,22 +92,23 @@ export function signSetReferrer(request, keyPair) {
 }
 
 export function signUpdateDistributeHash(request, keyPair) {
-    const method = 'POST';
-    const uri = encodeURIComponent(`${config.getServer()}/api/v2/updateDistributeHash`);
-    const params = encodeURIComponent(
-        JSON.stringify({
-            re: request.requestId,
-            txHash: request.txHash,
-            publicKeyX: keyPair.publicKeyX,
-            publicKeyY: keyPair.publicKeyY,
-        })
-    );
-    const message = `${method}&${uri}&${params}`;
-    const hash = fm.addHexPrefix(sha256(message).toString());
-    // Create signature
-    return EdDSA.sign(keyPair.secretKey, hash);
+  const method = 'POST';
+  const uri = encodeURIComponent(
+    `${config.getServer()}/api/v2/updateDistributeHash`
+  );
+  const params = encodeURIComponent(
+    JSON.stringify({
+      requestId: request.requestId,
+      txHash: request.txHash,
+      publicKeyX: keyPair.publicKeyX,
+      publicKeyY: keyPair.publicKeyY,
+    })
+  );
+  const message = `${method}&${uri}&${params}`;
+  const hash = fm.addHexPrefix(sha256(message).toString());
+  // Create signature
+  return EdDSA.sign(keyPair.secretKey, hash);
 }
-
 
 export function createAccountAndDeposit({
   from,
@@ -124,16 +125,16 @@ export function createAccountAndDeposit({
 }) {
   try {
     let address, value;
-    if (token.symbol.toUpperCase() === "ETH") {
-      address = "0x0";
-      value = "0";
+    if (token.symbol.toUpperCase() === 'ETH') {
+      address = '0x0';
+      value = '0';
     } else {
       address = token.address;
-      value = fm.toHex(fm.toBig(amount).times("1e" + token.decimals));
+      value = fm.toHex(fm.toBig(amount).times('1e' + token.decimals));
     }
 
     const data = ABI.Contracts.ExchangeContract.encodeInputs(
-      "updateAccountAndDeposit",
+      'updateAccountAndDeposit',
       {
         pubKeyX: fm.toHex(fm.toBN(publicX)),
         pubKeyY: fm.toHex(fm.toBN(publicY)),
@@ -151,10 +152,10 @@ export function createAccountAndDeposit({
       chainId: chainId,
       nonce: nonce.toString(),
       gasPrice: fm.fromGWEI(gasPrice).toFixed(),
-      gas: config.getGasLimitByType("create").gas.toString(),
+      gas: config.getGasLimitByType('create').gas.toString(),
     };
   } catch (err) {
-    console.error("Failed in method createOrUpdateAccount. Error: ", err);
+    console.error('Failed in method createOrUpdateAccount. Error: ', err);
     throw err;
   }
 }
@@ -171,20 +172,22 @@ export function deposit({
 }) {
   let value, data;
   try {
-    value = fm.toBig(amount).times("1e" + token.decimals);
-    if (token.symbol.toUpperCase() === "ETH") {
-      data = ABI.Contracts.ExchangeContract.encodeInputs("deposit", {
-        tokenAddress: "0x0",
+    value = fm.toBig(amount).times('1e' + token.decimals);
+    if (token.symbol.toUpperCase() === 'ETH') {
+      data = ABI.Contracts.ExchangeContract.encodeInputs('deposit', {
+        tokenAddress: '0x0',
         amount: fm.toHex(value),
       });
       value = value.plus(fee);
     } else {
-      data = ABI.Contracts.ExchangeContract.encodeInputs("deposit", {
+      data = ABI.Contracts.ExchangeContract.encodeInputs('deposit', {
         tokenAddress: token.address,
         amount: fm.toHex(value),
       });
       value = fm.toBig(fee);
     }
+
+    const gas = config.getDepositGas(token.symbol).gas.toString();
 
     return {
       from: from,
@@ -194,10 +197,10 @@ export function deposit({
       chainId: chainId,
       nonce: nonce.toString(),
       gasPrice: fm.fromGWEI(gasPrice).toFixed(),
-      gas: config.getGasLimitByType("depositTo").gas.toString(),
+      gas: gas,
     };
   } catch (err) {
-    console.error("Failed in method deposit. Error: ", err);
+    console.error('Failed in method deposit. Error: ', err);
     throw err;
   }
 }
@@ -214,9 +217,9 @@ export function onChainWithdraw({
 }) {
   let to, value, data;
   try {
-    value = fm.toBig(amount).times("1e" + token.decimals);
-    to = token.symbol.toUpperCase() === "ETH" ? "0x0" : token.address;
-    data = ABI.Contracts.ExchangeContract.encodeInputs("withdraw", {
+    value = fm.toBig(amount).times('1e' + token.decimals);
+    to = token.symbol.toUpperCase() === 'ETH' ? '0x0' : token.address;
+    data = ABI.Contracts.ExchangeContract.encodeInputs('withdraw', {
       tokenAddress: to,
       amount: fm.toHex(value),
     });
@@ -230,22 +233,22 @@ export function onChainWithdraw({
       chainId: chainId,
       nonce: nonce.toString(),
       gasPrice: fm.fromGWEI(gasPrice).toFixed(),
-      gas: config.getGasLimitByType("withdraw").gas.toString(),
+      gas: config.getGasLimitByType('withdraw').gas.toString(),
     };
   } catch (err) {
-    console.error("Failed in method withdraw. Error: ", err);
+    console.error('Failed in method withdraw. Error: ', err);
     throw err;
   }
 }
 
 function setupOffChainWithdrawal(withdrawal, tokens) {
   let token, feeToken;
-  if (!withdrawal.token.startsWith("0x")) {
+  if (!withdrawal.token.startsWith('0x')) {
     token = config.getTokenBySymbol(withdrawal.token, tokens);
   } else {
     token = config.getTokenByAddress(withdrawal.token, tokens);
   }
-  if (!withdrawal.tokenF.startsWith("0x")) {
+  if (!withdrawal.tokenF.startsWith('0x')) {
     feeToken = config.getTokenBySymbol(withdrawal.tokenF, tokens);
   } else {
     feeToken = config.getTokenByAddress(withdrawal.tokenF, tokens);
@@ -352,12 +355,12 @@ export function signOrder(_order, keyPair, tokens) {
 
 function setupOrder(order, tokens) {
   let tokenBuy, tokenSell;
-  if (!order.tokenS.startsWith("0x")) {
+  if (!order.tokenS.startsWith('0x')) {
     tokenSell = config.getTokenBySymbol(order.tokenS, tokens);
   } else {
     tokenSell = config.getTokenByAddress(order.tokenS, tokens);
   }
-  if (!order.tokenB.startsWith("0x")) {
+  if (!order.tokenB.startsWith('0x')) {
     tokenBuy = config.getTokenBySymbol(order.tokenB, tokens);
   } else {
     tokenBuy = config.getTokenByAddress(order.tokenB, tokens);
@@ -367,10 +370,20 @@ function setupOrder(order, tokens) {
   order.tokenSId = tokenSell.tokenId;
   order.tokenBId = tokenBuy.tokenId;
 
-  order.amountSInBN = config.toWEI(tokenSell.symbol, order.amountS, tokens);
+  order.amountSInBN = config.toWEI(
+    tokenSell.symbol,
+    order.amountS,
+    tokens,
+    order.buy ? 2 : 3
+  );
   order.amountS = order.amountSInBN;
 
-  order.amountBInBN = config.toWEI(tokenBuy.symbol, order.amountB, tokens);
+  order.amountBInBN = config.toWEI(
+    tokenBuy.symbol,
+    order.amountB,
+    tokens,
+    order.buy ? 2 : 3
+  );
   order.amountB = order.amountBInBN;
 
   order.buy = order.buy !== undefined ? !!order.buy : false;
@@ -384,10 +397,10 @@ function setupOrder(order, tokens) {
   order.rebateBips = order.rebateBips !== undefined ? order.rebateBips : 0;
   order.label = order.label !== undefined ? order.label : config.getLabel();
 
-  assert(order.maxFeeBips < 64, "maxFeeBips >= 64");
-  assert(order.feeBips < 64, "feeBips >= 64");
-  assert(order.rebateBips < 64, "rebateBips >= 64");
-  assert(order.label < 2 ** 16, "order.label >= 2**16");
+  assert(order.maxFeeBips < 64, 'maxFeeBips >= 64');
+  assert(order.feeBips < 64, 'feeBips >= 64');
+  assert(order.rebateBips < 64, 'rebateBips >= 64');
+  assert(order.label < 2 ** 16, 'order.label >= 2**16');
 
   // Sign the order
   return order;
@@ -435,12 +448,12 @@ export function signCancel(_cancel, keyPair) {
 
 function setupCancel(cancel, tokens) {
   let orderToken, feeToken;
-  if (!cancel.orderToken.startsWith("0x")) {
+  if (!cancel.orderToken.startsWith('0x')) {
     orderToken = config.getTokenBySymbol(cancel.orderToken, tokens);
   } else {
     orderToken = config.getTokenByAddress(cancel.orderToken, tokens);
   }
-  if (!cancel.tokenF.startsWith("0x")) {
+  if (!cancel.tokenF.startsWith('0x')) {
     feeToken = config.getTokenBySymbol(cancel.tokenF, tokens);
   } else {
     feeToken = config.getTokenByAddress(cancel.tokenF, tokens);
@@ -458,20 +471,16 @@ function setupCancel(cancel, tokens) {
 }
 
 export function signFlexCancel(request, keyPair) {
-  if (request.signature !== undefined) {
-    return;
-  }
-
-  const method = "DELETE";
+  const method = 'DELETE';
   const uri = encodeURIComponent(`${config.getServer()}/api/v2/orders`);
   let params = `accountId=${request.accountId}`;
 
   if (request.clientOrderId) {
-    params = params + `&clientOrderId=${request.clientOrderId}`;
+    params = params + `&clientOrderId=${encodeURIComponent(request.clientOrderId)}`;
   }
 
   if (request.orderHash) {
-    params = params + `&orderHash=${request.orderHash}`;
+    params = params + `&orderHash=${encodeURIComponent(request.orderHash)}`;
   }
 
   const encodedParams = encodeURIComponent(params);
@@ -492,6 +501,54 @@ export function signFlexCancel(request, keyPair) {
      */
 
   return request;
+}
+
+export function batchCancelOrdersByHash(accountId, orderHashes, keyPair) {
+  const method = 'DELETE';
+  const uri = encodeURIComponent(`${config.getServer()}/api/v2/orders/byHash`);
+  const coma = encodeURIComponent(',');
+  const params = `accountId=${accountId}&orderHash=${orderHashes.join(coma)}`;
+  const encodedParams = encodeURIComponent(params);
+  const message = `${method}&${uri}&${encodedParams}`;
+
+  const hash = fm.addHexPrefix(sha256(message).toString());
+  // Create signature
+  const signature = EdDSA.sign(keyPair.secretKey, hash);
+
+  return {
+    accountId,
+    orderHashes,
+    signature,
+  };
+}
+
+export function batchCancelOrdersByClientOrderIds(
+  accountId,
+  clientOrderIds,
+  keyPair
+) {
+  const method = 'DELETE';
+  const uri = encodeURIComponent(
+    `${config.getServer()}/api/v2/orders/byClientOrderId`
+  );
+
+  const coma = encodeURIComponent(',');
+  const params = `accountId=${accountId}&clientOrderId=${clientOrderIds.join(
+    coma
+  )}`;
+
+  const encodedParams = encodeURIComponent(params);
+  const message = `${method}&${uri}&${encodedParams}`;
+
+  const hash = fm.addHexPrefix(sha256(message).toString());
+  // Create signature
+  const signature = EdDSA.sign(keyPair.secretKey, hash);
+
+  return {
+    accountId,
+    clientOrderIds,
+    signature,
+  };
 }
 
 export function signTransfer(transfer, keyPair, tokens) {
@@ -537,6 +594,7 @@ export function encodeTransfer({
   amountF,
   label,
   nonce,
+  memo
 }) {
   const inputs = {
     exchangeId: exchangeId,
@@ -548,6 +606,7 @@ export function encodeTransfer({
     amountF: amountF,
     label: label,
     nonce: nonce,
+    memo:  memo || ""
   };
 
   return fm.addHexPrefix(sha256(JSON.stringify(inputs)).toString());

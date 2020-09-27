@@ -1,23 +1,23 @@
-import { bigInt, bn128 } from "snarkjs";
+import { bigInt, bn128 } from 'snarkjs';
 
 const Base8 = [
   bigInt(
-    "16540640123574156134436876038791482806971768689494387082833631921987005038935"
+    '16540640123574156134436876038791482806971768689494387082833631921987005038935'
   ),
   bigInt(
-    "20819045374670962167435360035096875258406992893633759881276124905556507972311"
+    '20819045374670962167435360035096875258406992893633759881276124905556507972311'
   ),
 ];
 const order = bigInt(
-  "21888242871839275222246405745257275088614511777268538073601725287587578984328"
+  '21888242871839275222246405745257275088614511777268538073601725287587578984328'
 );
 const subOrder = order.shr(3);
 const p = bn128.r;
 
 function addPoint(a, b) {
   const q = bn128.r;
-  const cta = bigInt("168700");
-  const d = bigInt("168696");
+  const cta = bigInt('168700');
+  const d = bigInt('168696');
   const res = [];
 
   res[0] = bigInt(
@@ -26,7 +26,7 @@ function addPoint(a, b) {
       .add(bigInt(b[0]).mul(a[1]))
       .mul(
         bigInt(
-          bigInt("1").add(d.mul(a[0]).mul(b[0]).mul(a[1]).mul(b[1]))
+          bigInt('1').add(d.mul(a[0]).mul(b[0]).mul(a[1]).mul(b[1]))
         ).inverse(q)
       )
   ).affine(q);
@@ -36,7 +36,7 @@ function addPoint(a, b) {
       .sub(cta.mul(a[0]).mul(b[0]))
       .mul(
         bigInt(
-          bigInt("1").sub(d.mul(a[0]).mul(b[0]).mul(a[1]).mul(b[1]))
+          bigInt('1').sub(d.mul(a[0]).mul(b[0]).mul(a[1]).mul(b[1]))
         ).inverse(q)
       )
   ).affine(q);
@@ -45,7 +45,7 @@ function addPoint(a, b) {
 }
 
 function mulPointEscalar(base, e) {
-  let res = [bigInt("0"), bigInt("1")];
+  let res = [bigInt('0'), bigInt('1')];
   let rem = bigInt(e);
   let exp = base;
 
@@ -69,8 +69,8 @@ function inSubgroup(P) {
 function inCurve(P) {
   const F = bn128.Fr;
 
-  const a = bigInt("168700");
-  const d = bigInt("168696");
+  const a = bigInt('168700');
+  const d = bigInt('168696');
 
   const x2 = F.square(P[0]);
   const y2 = F.square(P[1]);
@@ -102,8 +102,8 @@ function unpackPoint(_buff) {
   P[1] = bigInt.leBuff2int(buff);
   if (P[1].greaterOrEquals(exports.p)) return null;
 
-  const a = bigInt("168700");
-  const d = bigInt("168696");
+  const a = bigInt('168700');
+  const d = bigInt('168696');
 
   const y2 = F.square(P[1]);
 

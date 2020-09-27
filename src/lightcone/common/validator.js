@@ -1,5 +1,5 @@
-import Schema from "async-validator";
-import schemas from "./schemas";
+import Schema from 'async-validator';
+import schemas from './schemas';
 
 let handleErrors = (errors) => {
   let msgs = errors.map((err) => err.message).join();
@@ -11,7 +11,7 @@ export default async function validate(payload) {
   let source = {};
   let schema = {};
 
-  if (typeof value === "undefined") {
+  if (typeof value === 'undefined') {
     throw new Error(`data type invalid: ${type} should not be undefined`);
   }
   if (value === null) {

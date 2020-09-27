@@ -1,12 +1,12 @@
-import { request } from "../../../common";
+import { request } from '../../../common';
 
 export async function sendWithdrawTransaction(signedEthereumTx) {
   const data = {
     data: signedEthereumTx,
   };
   return await request({
-    method: "POST",
-    url: "/api/v2/sendEthTx",
+    method: 'POST',
+    url: '/api/v2/sendEthTx',
     data,
   });
 }
@@ -15,8 +15,13 @@ export async function updateDistributeHash(
   requestId,
   hash,
   publicKeyX,
-  publicKeyY
+  publicKeyY,
+  signed
 ) {
+  const signature = signed.Rx + ',' + signed.Ry + ',' + signed.s;
+  const headers = {
+    'X-API-SIG': signature,
+  };
   const data = {
     requestId,
     txHash: hash,
@@ -27,6 +32,7 @@ export async function updateDistributeHash(
   return await request({
     method: 'POST',
     url: '/api/v2/updateDistributeHash',
+    headers,
     data,
   });
 }

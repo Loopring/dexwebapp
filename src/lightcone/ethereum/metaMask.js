@@ -1,8 +1,14 @@
-import { addHexPrefix, toBuffer, toHex, toNumber } from "../common/formatter";
-import { hashPersonalMessage, keccak256 } from "ethereumjs-util";
-import { validate } from "../common";
-import ABI from "../ethereum/contracts";
-import Transaction from "ethereumjs-tx";
+import { addHexPrefix, toBuffer, toHex, toNumber } from '../common/formatter';
+import {
+  ecrecover,
+  fromRpcSig,
+  hashPersonalMessage,
+  keccak256,
+  pubToAddress,
+} from 'ethereumjs-util';
+import { validate } from '../common';
+import ABI from '../ethereum/contracts';
+import Transaction from 'ethereumjs-tx';
 
 /**
  * @description sign hash
@@ -12,7 +18,7 @@ import Transaction from "ethereumjs-tx";
  * @returns {Promise.<*>}
  */
 export async function sign(web3, account, hash) {
-  await validate({ value: account, type: "ETH_ADDRESS" });
+  await validate({ value: account, type: 'ETH_ADDRESS' });
 
   return new Promise((resolve) => {
     web3.eth.sign(hash, account, function (err, result) {
@@ -22,7 +28,7 @@ export async function sign(web3, account, hash) {
         const v = toNumber(addHexPrefix(result.slice(130, 132)));
         resolve({ result: { r, s, v } });
       } else {
-        const errorMsg = err.message.substring(0, err.message.indexOf(" at "));
+        const errorMsg = err.message.substring(0, err.message.indexOf(' at '));
         resolve({ error: { message: errorMsg } });
       }
     });
@@ -41,10 +47,31 @@ export async function signMessage(web3, account, message) {
   return await sign(web3, account, hash);
 }
 
-export async function personalSign(web3, account, msg) {
+export async function personalSign(web3, account, msg, walletType) {
   return new Promise((resolve) => {
-    web3.eth.personal.sign(msg, account, "", async function (err, result) {
+    web3.eth.personal.sign(msg, account, '', async function (err, result) {
       if (!err) {
+        // ecRecover not implemented in WalletLink
+        if (walletType === 'WalletLink') {
+          const valid = await walletLinkValid(web3, account, msg, result);
+          if (valid.result) {
+            resolve({ sig: result });
+          } else {
+            resolve({ error: 'Failed to valid using WalletLink' });
+          }
+          return;
+        }
+
+        if (walletType === 'Authereum') {
+          const valid = await authereumValid(web3, account, msg, result);
+          if (valid.result) {
+            resolve({ sig: result });
+          } else {
+            resolve({ error: 'invalid sig using Authereum' });
+          }
+          return;
+        }
+
         const valid = await ecRecover(web3, account, msg, result);
         if (valid.result) {
           resolve({ sig: result });
@@ -55,7 +82,7 @@ export async function personalSign(web3, account, msg) {
             msg,
             result
           );
-          // console.log(JSON.stringify(walletValid));
+          console.log(JSON.stringify(walletValid));
           if (walletValid.result) {
             resolve({ sig: result });
           } else {
@@ -65,21 +92,22 @@ export async function personalSign(web3, account, msg) {
               msg,
               result
             );
-            // console.log(JSON.stringify(walletValid2));
+            console.log(JSON.stringify(walletValid2));
             if (walletValid2.result) {
               resolve({ sig: result });
             } else {
-              const walletValid3 = await contractWalletValidate3(
+              const myKeyValid = await mykeyWalletValid(
                 web3,
                 account,
                 msg,
                 result
               );
-              console.log(JSON.stringify(walletValid3));
-              if (walletValid3.result) {
+              // console.log(JSON.stringify(myKeyValid));
+
+              if (myKeyValid.result) {
                 resolve({ sig: result });
               } else {
-                resolve({ error: "invalid sig" });
+                resolve({ error: 'invalid sig' });
               }
             }
           }
@@ -105,7 +133,7 @@ export async function contractWalletValidate(web3, account, msg, sig) {
   return new Promise((resolve) => {
     const hash = hashPersonalMessage(toBuffer(msg));
     const data = ABI.Contracts.ContractWallet.encodeInputs(
-      "isValidSignature(bytes,bytes)",
+      'isValidSignature(bytes,bytes)',
       {
         _data: hash,
         _signature: toBuffer(sig),
@@ -120,7 +148,7 @@ export async function contractWalletValidate(web3, account, msg, sig) {
       function (err, result) {
         if (!err) {
           const valid = ABI.Contracts.ContractWallet.decodeOutputs(
-            "isValidSignature(bytes,bytes)",
+            'isValidSignature(bytes,bytes)',
             result
           );
           resolve({
@@ -136,7 +164,7 @@ export async function contractWalletValidate2(web3, account, msg, sig) {
   return new Promise((resolve) => {
     const hash = hashPersonalMessage(toBuffer(msg));
     const data = ABI.Contracts.ContractWallet.encodeInputs(
-      "isValidSignature(bytes32,bytes)",
+      'isValidSignature(bytes32,bytes)',
       {
         _data: hash,
         _signature: toBuffer(sig),
@@ -149,9 +177,10 @@ export async function contractWalletValidate2(web3, account, msg, sig) {
         data: data,
       },
       function (err, result) {
+        console.log(result);
         if (!err) {
           const valid = ABI.Contracts.ContractWallet.decodeOutputs(
-            "isValidSignature(bytes32,bytes)",
+            'isValidSignature(bytes32,bytes)',
             result
           );
           resolve({
@@ -163,13 +192,45 @@ export async function contractWalletValidate2(web3, account, msg, sig) {
   });
 }
 
+export async function mykeyWalletValid(web3, account, msg, sig) {
+  const myKeyContract = '0xADc92d1fD878580579716d944eF3460E241604b7';
+  return new Promise((resolve) => {
+    web3.eth.call(
+      {
+        to: myKeyContract,
+        data: ABI.Contracts.ContractWallet.encodeInputs('getKeyData', {
+          _account: account,
+          _index: 3,
+        }),
+      },
+      function (err, res) {
+        if (!err) {
+          const signature = fromRpcSig(sig);
+          const hash = hashPersonalMessage(keccak256(toBuffer(msg)));
+          const address = addHexPrefix(
+            ABI.Contracts.ContractWallet.decodeOutputs('getKeyData', res)[0]
+          );
+          const recAddress = toHex(
+            pubToAddress(ecrecover(hash, signature.v, signature.r, signature.s))
+          );
+          resolve({
+            result: recAddress.toLowerCase() === address.toLowerCase(),
+          });
+        } else {
+          resolve({ error: err });
+        }
+      }
+    );
+  });
+}
+
 // Authereum account contract hashes the data in the validation function,
 // so we must send the data plain text.
-export async function contractWalletValidate3(web3, account, msg, sig) {
+export async function authereumValid(web3, account, msg, sig) {
   return new Promise((resolve) => {
     const hash = toBuffer(msg);
     const data = ABI.Contracts.ContractWallet.encodeInputs(
-      "isValidSignature(bytes,bytes)",
+      'isValidSignature(bytes,bytes)',
       {
         _data: hash,
         _signature: toBuffer(sig),
@@ -184,7 +245,7 @@ export async function contractWalletValidate3(web3, account, msg, sig) {
       function (err, result) {
         if (!err) {
           const valid = ABI.Contracts.ContractWallet.decodeOutputs(
-            "isValidSignature(bytes,bytes)",
+            'isValidSignature(bytes,bytes)',
             result
           );
           resolve({
@@ -193,6 +254,19 @@ export async function contractWalletValidate3(web3, account, msg, sig) {
         } else resolve({ error: err });
       }
     );
+  });
+}
+
+export async function walletLinkValid(web3, account, msg, sig) {
+  return new Promise((resolve) => {
+    const signature = fromRpcSig(sig);
+    const hash = hashPersonalMessage(toBuffer(msg));
+    const recAddress = toHex(
+      pubToAddress(ecrecover(hash, signature.v, signature.r, signature.s))
+    );
+    resolve({
+      result: recAddress.toLowerCase() === account.toLowerCase(),
+    });
   });
 }
 
@@ -204,17 +278,17 @@ export async function contractWalletValidate3(web3, account, msg, sig) {
  * @returns {Promise.<*>}
  */
 export async function signEthereumTx(web3, account, rawTx) {
-  await validate({ value: rawTx, type: "TX" });
+  await validate({ value: rawTx, type: 'TX' });
   const ethTx = new Transaction(rawTx);
   const hash = toHex(ethTx.hash(false));
   const response = await sign(web3, account, hash);
-  if (!response["error"]) {
-    const signature = response["result"];
+  if (!response['error']) {
+    const signature = response['result'];
     signature.v += ethTx.getChainId() * 2 + 8;
     Object.assign(ethTx, signature);
     return { result: toHex(ethTx.serialize()) };
   } else {
-    throw new Error(response["error"]["message"]);
+    throw new Error(response['error']['message']);
   }
 }
 
@@ -225,8 +299,9 @@ export async function signEthereumTx(web3, account, rawTx) {
  * @returns {*}
  */
 export async function sendTransaction(web3, tx) {
-  await validate({ type: "TX", value: tx });
+  await validate({ type: 'TX', value: tx });
   delete tx.gasPrice;
+  // delete tx.gas;
   const response = await new Promise((resolve) => {
     web3.eth.sendTransaction(tx, function (err, transactionHash) {
       if (!err) {
@@ -237,9 +312,9 @@ export async function sendTransaction(web3, tx) {
     });
   });
 
-  if (response["result"]) {
+  if (response['result']) {
     return response;
   } else {
-    throw new Error(response["error"]["message"]);
+    throw new Error(response['error']['message']);
   }
 }

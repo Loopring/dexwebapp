@@ -1,3 +1,3 @@
-import { getTokenInfo } from "./get";
+import { getTokenInfo } from './get';
 
 export { getTokenInfo };
