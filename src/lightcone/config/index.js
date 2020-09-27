@@ -6,16 +6,7 @@ function getMaintenanceMode() {
 }
 
 function getRelayerHost(restUrl = true) {
-  if (
-    window.location.hostname === 'beta-loopring-io.herokuapp.com' ||
-    window.location.hostname === 'beta.loopring.io' ||
-    window.location.hostname === 'loopring.io' ||
-    window.location.hostname === 'www.loopring.io'
-  ) {
-    return restUrl ? config.prodServerUrl : config.prodWsUrl;
-  } else {
-    return restUrl ? config.uatServerUrl : config.uatWsUrl;
-  }
+  return restUrl ? config.prodServerUrl : config.prodWsUrl;
 }
 
 function getServer() {
