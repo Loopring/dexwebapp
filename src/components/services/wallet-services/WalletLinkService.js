@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { withTheme } from 'styled-components';
-import I from 'components/I';
+import { withUserPreferences } from 'components/UserPreferenceContext';
 
 import React, { Component } from 'react';
 
@@ -10,34 +10,34 @@ import {
   updateAccount,
 } from 'redux/actions/DexAccount';
 import {
-  connectToMewConnect,
-  connectToMewConnectComplete,
-} from 'redux/actions/MewConnect';
+  connectToWalletLink,
+  connectToWalletLinkComplete,
+} from 'redux/actions/WalletLink';
 
 import { fetchGasPrice } from 'redux/actions/GasPrice';
 import { fetchNonce } from 'redux/actions/Nonce';
 
 import { showConnectToWalletModal } from 'redux/actions/ModalManager';
 
-import { notifyError } from 'redux/actions/Notification';
 import Wallet from 'lightcone/wallet';
 
 import { saveWalletType } from 'lightcone/api/localStorgeAPI';
-import MewConnect from '@myetherwallet/mewconnect-web-client';
+
+import WalletLink from 'walletlink';
 import Web3 from 'web3';
 
-class MewConnectService extends Component {
+class WalletLinkService extends Component {
   componentDidUpdate(prevProps, prevState) {
     // Only use referenceCount
     if (
-      prevProps.mewConnect.referenceCount !==
-      this.props.mewConnect.referenceCount
+      prevProps.walletLink.referenceCount !==
+      this.props.walletLink.referenceCount
     ) {
-      this.createMewConnect();
+      this.createConnect();
     }
   }
 
-  createMewConnect = () => {
+  createConnect = () => {
     (async () => {
       // Create WalletConnect Provider
       const infuraIds = [
@@ -54,28 +54,39 @@ class MewConnectService extends Component {
       ];
       const randomIndex = Math.floor(Math.random() * 7);
       const infuraId = infuraIds[randomIndex];
-      const mewConnect = new MewConnect.Provider({
-        infuraId, // Required
+
+      const language = this.props.userPreferences.language;
+
+      const walletLink = new WalletLink({
+        appName:
+          language === 'en' ? 'Loopring Exchange (DEX)' : '路印去中心化交易所',
+        appLogoUrl: 'https://www.loopring.io/favicon.png',
+        darkMode: false,
       });
-      const provider = mewConnect.makeWeb3Provider();
+
+      // TODO: WalletLink doesn't support golier testnet
+      const ETH_JSONRPC_URL = `https://mainnet.infura.io/v3/${infuraId}`;
+      const CHAIN_ID = 1;
+
+      const provider = walletLink.makeWeb3Provider(ETH_JSONRPC_URL, CHAIN_ID);
+
       let accounts;
       let connecting = false;
+      /*
       provider.on('disconnected', (error, payload) => {
         // disconnect can be also triggered from other places.
         if (connecting) {
           console.log('disconnect', error, payload);
-          this.props.connectToMewConnectComplete();
+          this.props.connectToWalletLinkComplete();
           notifyError(
-            <I s="Failed to connect to MEWconnect!" />,
+            <I s="Failed to connect to Coinbase Wallet!" />,
             this.props.theme
           );
           this.props.showConnectToWalletModal(true);
         }
       });
+      */
 
-      // Enable session (triggers QR Code modal)
-      // TODO: MEW connect doesn't throw errors.
-      // https://github.com/MyEtherWallet/MEWconnect-web-client/issues/19
       try {
         connecting = true;
         accounts = await provider.enable();
@@ -83,7 +94,7 @@ class MewConnectService extends Component {
       } catch (e) {
         connecting = false;
         // If user close QR code modal
-        this.props.connectToMewConnectComplete();
+        this.props.connectToWalletLinkComplete();
         await provider.close();
         return;
       }
@@ -95,7 +106,7 @@ class MewConnectService extends Component {
       // Assign use window.ethereum
       window.ethereum = provider;
 
-      window.wallet = new Wallet('MewConnect', window.web3, accounts[0]);
+      window.wallet = new Wallet('WalletLink', window.web3, accounts[0]);
 
       this.props.updateAccount({
         ...this.props.dexAccount.account,
@@ -104,12 +115,12 @@ class MewConnectService extends Component {
 
       this.setupSubscribe();
 
-      saveWalletType('MewConnect');
+      saveWalletType('WalletLink');
 
       // Set state
       this.props.getDataFromLocalStorage(window.wallet.address);
 
-      this.props.connectToMewConnectComplete();
+      this.props.connectToWalletLinkComplete();
 
       // Get related info
       this.props.fetchNonce(window.wallet.address);
@@ -118,19 +129,20 @@ class MewConnectService extends Component {
   };
 
   setupSubscribe() {
+    /*
     // Subscribe to accounts change
     window.ethereum.on('accountsChanged', (accounts) => {
-      this.props.connectToMewConnect(true);
+      this.props.connectToWalletLink(true);
     });
 
     // Subscribe to chainId change
     window.ethereum.on('chainChanged', (chainId) => {
-      this.props.connectToMewConnect(true);
+      this.props.connectToWalletLink(true);
     });
 
     // Subscribe to networkId change
     window.ethereum.on('networkChanged', (networkId) => {
-      this.props.connectToMewConnect(true);
+      this.props.connectToWalletLink(true);
     });
 
     // Subscribe to session connection/open
@@ -140,8 +152,9 @@ class MewConnectService extends Component {
 
     // Subscribe to session disconnection/close
     window.ethereum.on('close', (code, reason) => {
-      console.log('Mew Wallet', code, reason);
+      console.log('WalletLink', code, reason);
     });
+    */
   }
 
   render() {
@@ -150,15 +163,15 @@ class MewConnectService extends Component {
 }
 
 const mapStateToProps = (state) => {
-  const { dexAccount, mewConnect } = state;
-  return { dexAccount, mewConnect };
+  const { dexAccount, walletLink } = state;
+  return { dexAccount, walletLink };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    connectToMewConnect: (startConnecting) =>
-      dispatch(connectToMewConnect(startConnecting)),
-    connectToMewConnectComplete: () => dispatch(connectToMewConnectComplete()),
+    connectToWalletLink: (startConnecting) =>
+      dispatch(connectToWalletLink(startConnecting)),
+    connectToWalletLinkComplete: () => dispatch(connectToWalletLinkComplete()),
     showConnectToWalletModal: (show) =>
       dispatch(showConnectToWalletModal(show)),
     updateAccount: (account) => dispatch(updateAccount(account)),
@@ -169,6 +182,6 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export default withTheme(
-  connect(mapStateToProps, mapDispatchToProps)(MewConnectService)
+export default withUserPreferences(
+  withTheme(connect(mapStateToProps, mapDispatchToProps)(WalletLinkService))
 );

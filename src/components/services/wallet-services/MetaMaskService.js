@@ -1,44 +1,44 @@
-import { connect } from "react-redux";
-import { withTheme } from "styled-components";
-import I from "components/I";
-import React, { Component } from "react";
+import { connect } from 'react-redux';
+import { withTheme } from 'styled-components';
+import I from 'components/I';
+import React, { Component } from 'react';
 
 import {
   WALLET_UNCONNECTED,
   getDataFromLocalStorage,
   updateAccount,
-} from "redux/actions/DexAccount";
+} from 'redux/actions/DexAccount';
 import {
   connectToMetaMask,
   connectToMetaMaskComplete,
   detectIfMetaMaskInstalled,
-} from "redux/actions/MetaMask";
+} from 'redux/actions/MetaMask';
 import {
   emptyBalances,
   emptyDeposits,
   emptyWithdrawals,
-} from "redux/actions/MyAccountPage";
+} from 'redux/actions/MyAccountPage';
 import {
   emptyMyHistoryOrders,
   emptyMyOpenOrders,
-} from "redux/actions/MyOrders";
+} from 'redux/actions/MyOrders';
 
 import {
   emptyAllHistoryOrders,
   emptyAllOpenOrders,
   emptyUserTransactions,
-} from "redux/actions/MyOrderPage";
+} from 'redux/actions/MyOrderPage';
 
-import { fetchGasPrice } from "redux/actions/GasPrice";
-import { fetchNonce } from "redux/actions/Nonce";
+import { fetchGasPrice } from 'redux/actions/GasPrice';
+import { fetchNonce } from 'redux/actions/Nonce';
 
-import { notifyError } from "redux/actions/Notification";
-import Wallet from "lightcone/wallet";
-import Web3 from "web3";
+import { notifyError } from 'redux/actions/Notification';
+import Wallet from 'lightcone/wallet';
+import Web3 from 'web3';
 
-import { loginModal, registerAccountModal } from "redux/actions/ModalManager";
-import { saveWalletType } from "lightcone/api/localStorgeAPI";
-import { updateBlockNum } from "redux/actions/NotifyCenter";
+import { loginModal, registerAccountModal } from 'redux/actions/ModalManager';
+import { saveWalletType } from 'lightcone/api/localStorgeAPI';
+import { updateBlockNum } from 'redux/actions/NotifyCenter';
 
 class MetaMaskService extends Component {
   componentDidUpdate(prevProps, prevState) {
@@ -85,7 +85,7 @@ class MetaMaskService extends Component {
         const accounts = await web3.eth.getAccounts();
         window.ethereum.accounts = accounts;
 
-        window.wallet = new Wallet("MetaMask", window.web3, accounts[0]);
+        window.wallet = new Wallet('MetaMask', window.web3, accounts[0]);
 
         this.props.updateAccount({
           ...this.props.dexAccount.account,
@@ -119,9 +119,9 @@ class MetaMaskService extends Component {
 
   setupSubscribe() {
     this.subscription = new Web3(window.ethereum).eth
-      .subscribe("newBlockHeaders", function (error, result) {})
+      .subscribe('newBlockHeaders', function (error, result) {})
       .on(
-        "data",
+        'data',
         function (blockHeader) {
           if (this.props.metaMask.isDesiredNetwork) {
             this.props.updateBlockNum(blockHeader.number);
@@ -129,7 +129,7 @@ class MetaMaskService extends Component {
         }.bind(this)
       );
 
-    window.ethereum.on("accountsChanged", (accounts) => {
+    window.ethereum.on('accountsChanged', (accounts) => {
       if (
         !!window.wallet &&
         window.wallet.address &&
@@ -150,14 +150,14 @@ class MetaMaskService extends Component {
       }
     });
 
-    window.ethereum.on("networkChanged", (networkVersion) => {
+    window.ethereum.on('networkChanged', (networkVersion) => {
       this.props.connectToMetaMask(true);
     });
   }
 
   accountChange(address) {
     try {
-      window.wallet = new Wallet("MetaMask", window.web3, address);
+      window.wallet = new Wallet('MetaMask', window.web3, address);
       this.props.getDataFromLocalStorage(address);
 
       // Need to re-connect to MetaMask

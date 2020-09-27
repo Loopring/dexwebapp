@@ -1,8 +1,8 @@
-import { connect } from "react-redux";
-import { withTheme } from "styled-components";
-import I from "components/I";
+import { connect } from 'react-redux';
+import { withTheme } from 'styled-components';
+import I from 'components/I';
 
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
 import {
   WALLET_UNCONNECTED,
@@ -12,19 +12,19 @@ import {
 import {
   connectToAuthereum,
   connectToAuthereumComplete,
-} from "redux/actions/Authereum";
+} from 'redux/actions/Authereum';
 
-import { fetchGasPrice } from "redux/actions/GasPrice";
-import { fetchNonce } from "redux/actions/Nonce";
+import { fetchGasPrice } from 'redux/actions/GasPrice';
+import { fetchNonce } from 'redux/actions/Nonce';
 
-import { showConnectToWalletModal } from "redux/actions/ModalManager";
+import { showConnectToWalletModal } from 'redux/actions/ModalManager';
 
-import { notifyError } from "redux/actions/Notification";
-import Wallet from "lightcone/wallet";
+import { notifyError } from 'redux/actions/Notification';
+import Wallet from 'lightcone/wallet';
 
-import { saveWalletType } from "lightcone/api/localStorgeAPI";
-import Authereum from "authereum";
-import Web3 from "web3";
+import { saveWalletType } from 'lightcone/api/localStorgeAPI';
+import Authereum from 'authereum';
+import Web3 from 'web3';
 
 class AuthereumService extends Component {
   componentDidUpdate(prevProps, prevState) {
@@ -32,8 +32,7 @@ class AuthereumService extends Component {
       this.props.authereum.startConnecting === true &&
       prevProps.authereum.startConnecting !==
         this.props.authereum.startConnecting &&
-      prevProps.authereum.referenceCount !==
-        this.props.authereum.referenceCount
+      prevProps.authereum.referenceCount !== this.props.authereum.referenceCount
     ) {
       this.createAuthereum();
     }
@@ -46,10 +45,10 @@ class AuthereumService extends Component {
       const provider = authereum.getProvider();
       let accounts;
       let connecting = false;
-      provider.on("disconnected", (error, payload) => {
+      provider.on('disconnected', (error, payload) => {
         // disconnect can be also triggered from other places.
         if (connecting) {
-          console.log("disconnect", error, payload);
+          console.log('disconnect', error, payload);
           this.props.connectToAuthereumComplete();
           notifyError(
             <I s="Failed to connect to Authereum!" />,
@@ -71,11 +70,7 @@ class AuthereumService extends Component {
       // Assign use window.ethereum
       window.ethereum = provider;
 
-      window.wallet = new Wallet(
-        "Authereum",
-        window.web3,
-        accounts[0]
-      );
+      window.wallet = new Wallet('Authereum', window.web3, accounts[0]);
 
       this.props.updateAccount({
         ...this.props.dexAccount.account,
@@ -84,7 +79,7 @@ class AuthereumService extends Component {
 
       this.setupSubscribe();
 
-      saveWalletType("Authereum");
+      saveWalletType('Authereum');
 
       // Set state
       this.props.getDataFromLocalStorage(window.wallet.address);
@@ -99,28 +94,28 @@ class AuthereumService extends Component {
 
   setupSubscribe() {
     // Subscribe to accounts change
-    window.ethereum.on("accountsChanged", (accounts) => {
+    window.ethereum.on('accountsChanged', (accounts) => {
       this.props.connectToAuthereum(true);
     });
 
     // Subscribe to chainId change
-    window.ethereum.on("chainChanged", (chainId) => {
+    window.ethereum.on('chainChanged', (chainId) => {
       this.props.connectToAuthereum(true);
     });
 
     // Subscribe to networkId change
-    window.ethereum.on("networkChanged", (networkId) => {
+    window.ethereum.on('networkChanged', (networkId) => {
       this.props.connectToAuthereum(true);
     });
 
     // Subscribe to session connection/open
-    window.ethereum.on("open", () => {
-      console.log("open");
+    window.ethereum.on('open', () => {
+      console.log('open');
     });
 
     // Subscribe to session disconnection/close
-    window.ethereum.on("close", (code, reason) => {
-      console.log("Authereum", code, reason);
+    window.ethereum.on('close', (code, reason) => {
+      console.log('Authereum', code, reason);
     });
   }
 
@@ -138,8 +133,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     connectToAuthereum: (startConnecting) =>
       dispatch(connectToAuthereum(startConnecting)),
-    connectToAuthereumComplete: () =>
-      dispatch(connectToAuthereumComplete()),
+    connectToAuthereumComplete: () => dispatch(connectToAuthereumComplete()),
     showConnectToWalletModal: (show) =>
       dispatch(showConnectToWalletModal(show)),
     updateAccount: (account) => dispatch(updateAccount(account)),
