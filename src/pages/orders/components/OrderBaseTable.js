@@ -246,7 +246,7 @@ class OrderBaseTable extends React.Component {
               paddingLeft: "14px",
             }}
           >
-            {order.market}
+            <a href={`../trade/${order.market}`}>{order.market} </a>
           </LargeTableRow>
         ),
         size: <LargeTableRow>{order.sizeInString} </LargeTableRow>,

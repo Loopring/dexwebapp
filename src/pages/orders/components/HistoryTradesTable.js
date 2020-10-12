@@ -195,7 +195,7 @@ class HistoryTradesTable extends React.Component {
               paddingLeft: "14px",
             }}
           >
-            {order.market}
+            <a href={`../trade/${order.market}`}>{order.market} </a>
           </LargeTableRow>
         ),
         size: (
