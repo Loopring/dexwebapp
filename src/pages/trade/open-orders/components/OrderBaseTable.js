@@ -248,14 +248,18 @@ class OrderBaseTable extends React.Component {
           </LargeTableRow>
         ),
         market: <LargeTableRow>{order.market}</LargeTableRow>,
-        size: <LargeTableRow>{order.sizeInString}</LargeTableRow>,
+        size: (
+          <LargeTableRow>
+            {isNaN(order.sizeInString)? '--': order.sizeInString}
+          </LargeTableRow>
+        ),
         fill_pctg: (
           <LargeTableRow
             style={{
               color: theme.textWhite,
             }}
           >
-            {order.filled}
+            {isNaN(order.filled.substr(0, order.filled.length - 1))? '--' : order.filled}
           </LargeTableRow>
         ),
         price: (
@@ -270,7 +274,7 @@ class OrderBaseTable extends React.Component {
         ),
         total: (
           <LargeTableRow>
-            {order.totalInString} {order.quoteToken}
+            {isNaN(order.totalInString)? '--': `${order.totalInString} ${order.quoteToken}`} 
           </LargeTableRow>
         ),
         date: (
