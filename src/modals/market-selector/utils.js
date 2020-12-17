@@ -43,13 +43,6 @@ export function checkMarketIsNew(markets) {
       'KAI-USDT',
       'PLTC-USDT',
       'QCAD-USDT',
-      'ADX-USDT',
-      'DEFIL-ETH',
-      'DEFIS-ETH',
-      'DOUGH-ETH',
-      'FIN-USDT',
-      'NIOX-ETH',
-      'OGN-USDT',
     ];
     if (existingMarkets.includes(market.market) === false) {
       market.isNew = true;

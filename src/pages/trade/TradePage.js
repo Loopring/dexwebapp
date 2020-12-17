@@ -17,11 +17,9 @@ import { Layout } from 'antd';
 
 import { toBig } from 'lightcone/common/formatter';
 import MarketService from 'components/services/MarketService';
-
-import SwapPoolPage from 'pages/swap/SwapPoolPage';
+import PageMobile from 'components/MobileIndicator';
 
 import { updateColumns } from 'redux/actions/LayoutManager';
-import { updatePrice } from 'redux/actions/TradePanel';
 import CookieConsent from 'react-cookie-consent';
 import KlineChart from 'pages/trade/kline-chart/KlineChart';
 import config from 'lightcone/config';
@@ -112,7 +110,7 @@ const TradePage = ({ match }) => {
             <TradeHistory
               getTimeStamp={(order) => order.timestamp}
               onClickTrade={(order, side) => {
-                dispatch(updatePrice(toBig(order.price).toFixed(), true));
+                this.props.updatePrice(toBig(order.price).toFixed(), true);
               }}
               sizeFormat={sizeFormat}
               priceFormat={priceFormat}
@@ -203,7 +201,7 @@ const TradePage = ({ match }) => {
         </Layout>
       </div>
       <div className="mobile-layout">
-        <SwapPoolPage />
+        <PageMobile />
       </div>
 
       <CookieConsent

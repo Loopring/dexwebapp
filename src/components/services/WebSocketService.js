@@ -240,12 +240,11 @@ class WebSocketService extends Component {
       // No websocket connection until a user login.
       tickerBuffer = null;
       tradeBuffer = [];
-    }
-
-    if (this.state.initialied === false) {
-      this.setup([...marketArgs, ...accountArgs], this.props.account.apiKey);
-    } else {
-      this.sub([...marketArgs, ...accountArgs], this.props.account.apiKey);
+      if (this.state.initialied === false) {
+        this.setup([...marketArgs, ...accountArgs], this.props.account.apiKey);
+      } else {
+        this.sub([...marketArgs, ...accountArgs], this.props.account.apiKey);
+      }
     }
   }
 
@@ -277,8 +276,15 @@ class WebSocketService extends Component {
 
     (async () => {
       try {
+        const signed = window.wallet.getApiKey();
+        // A race condition to get account.publicKeyX
+        const data = {
+          accountId: this.props.account.accountId,
+          publicKeyX: this.props.account.publicKeyX,
+          publicKeyY: this.props.account.publicKeyY,
+        };
         // ws api key is only valid one time.
-        const wsApiKey = await getWsApiKey();
+        const wsApiKey = await getWsApiKey(data, signed.signature);
         this.ws = new WebSocket(`${WESOCKET_URL}?wsApiKey=${wsApiKey}`);
 
         this.ws.onopen = () => {

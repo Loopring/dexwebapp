@@ -63,7 +63,7 @@ class Header extends React.PureComponent {
             width: '200px',
           }}
         >
-          <AssetDropdown options={options} selected={selected} size={'small'} />
+          <AssetDropdown options={options} selected={selected} small={true} />
         </div>
       </LargeTableHeader>
     );

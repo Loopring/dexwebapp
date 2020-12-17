@@ -107,11 +107,7 @@ export const MyOrdersReducer = (state = initialState, action) => {
      */
     case UPDATE_SOCKET_ORDER:
       const order = action.payload.order;
-      // TODO: 3.6. Is waiting order in 3.6?
-      if (
-        order.status === 'waiting' ||
-        order.status === 'TX_STATUS_PROCESSING'
-      ) {
+      if (order.status === 'waiting' || order.status === 'processing') {
         const openOrders = state.openOrders.filter(
           (o) => o.hash !== order.hash
         );

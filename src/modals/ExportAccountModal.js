@@ -2,7 +2,6 @@ import { Modal, Spin } from 'antd';
 
 import { connect } from 'react-redux';
 
-import * as fm from 'lightcone/common/formatter';
 import { showExportAccountModal } from 'redux/actions/ModalManager';
 import AppLayout from 'AppLayout';
 import I from 'components/I';
@@ -49,7 +48,7 @@ class ExportAccountModal extends React.Component {
         try {
           const valid = await window.wallet.verify(
             this.props.exchangeAddress,
-            Math.max(this.props.dexAccount.account.accountNonce - 1)
+            this.props.dexAccount.account.keyNonce
           );
           if (valid) {
             this.setState({
@@ -89,9 +88,7 @@ class ExportAccountModal extends React.Component {
       json['apiKey'] = this.props.dexAccount.account.apiKey;
       json['publicKeyX'] = this.props.dexAccount.account.publicKeyX;
       json['publicKeyY'] = this.props.dexAccount.account.publicKeyY;
-      json['privateKey'] = dexAccount.account.accountKey
-        ? fm.toHex(fm.toBig(dexAccount.account.accountKey))
-        : '';
+      json['privateKey'] = dexAccount.account.accountKey;
 
       container = (
         <div

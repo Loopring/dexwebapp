@@ -5,6 +5,7 @@ import styled, { withTheme } from 'styled-components';
 
 import AppLayout from 'AppLayout';
 
+import '@ant-design/compatible/assets/index.css';
 import { ActionButton } from 'styles/Styles';
 import { Button, Spin } from 'antd';
 
@@ -14,10 +15,7 @@ import {
 } from 'redux/actions/MyOrders';
 
 import { fetchMyAccountPage } from 'redux/actions/MyAccountPage';
-import {
-  getStorageId,
-  submitOrderToLightcone,
-} from 'lightcone/api/LightconeAPI';
+import { getOrderId, submitOrderToLightcone } from 'lightcone/api/LightconeAPI';
 import { updateAmount, updatePrice } from 'redux/actions/TradePanel';
 import AssetPanel from 'pages/trade/asset-panel/AssetPanel';
 import NumericInput from 'components/NumericInput';
@@ -380,10 +378,11 @@ class TradePanel extends React.Component {
     const holdBalance = balances.find(
       (ba) => ba.tokenId === selectedToken.tokenId
     );
-    if (holdBalance) {
-      return Number(holdBalance.available.replace(/,/g, ''));
+    try {
+      return holdBalance ? Number(holdBalance.available) : 0;
+    } catch {
+      return 0;
     }
-    return 0;
   };
 
   onPriceValueChange = (value) => {
@@ -583,24 +582,19 @@ class TradePanel extends React.Component {
           throw new Error('please login first');
         }
 
-        // TODO: 3.6 /api/v2/orderId is not found
         // Get order id
         const accountId = this.props.dexAccount.account.accountId;
         const apiKey = this.props.dexAccount.account.apiKey;
         // Use token sell id
-        const storageId = await getStorageId(accountId, tokenSId, apiKey);
-        const orderId = storageId.orderId;
+        const orderId = await getOrderId(accountId, tokenSId, apiKey);
 
         // Timestamp in second
         const validSince = new Date().getTime() / 1000 - 3600;
+        const validUntil = new Date().getTime() / 1000 + 3600 * 24 * 10000;
 
-        // TODO: how to set validUntil
-        const validUntil = new Date().getTime() / 1000 + 3600 * 1 * 10000;
-
-        console.log('exchange', exchange);
-        const signedOrderData = window.wallet.submitOrder(
+        const signedOrder = window.wallet.submitOrder(
           exchange.tokens,
-          exchange.exchangeAddress,
+          exchange.exchangeId,
           tokenS,
           tokenB,
           amountS,
@@ -610,16 +604,14 @@ class TradePanel extends React.Component {
           validUntil,
           config.getLabel(),
           isBuy,
-          config.getChannelId(),
-          'LIMIT_ORDER'
+          config.getChannelId()
         );
 
-        signedOrderData['storageId'] = orderId;
-
-        await submitOrderToLightcone(signedOrderData, apiKey);
+        await submitOrderToLightcone(signedOrder, apiKey);
 
         saveAccountToLocal(this.props.dexAccount.account);
 
+        console.log('TradePanel fetchMyAccountPage');
         // Get the balance from API immediately
         this.props.fetchMyAccountPage(
           this.props.dexAccount.account.accountId,
@@ -658,7 +650,7 @@ class TradePanel extends React.Component {
         );
       } catch (err) {
         console.log(err);
-        notifyError(<I s="Failed to swap." />, this.props.theme);
+        notifyError(<I s="Failed to submit your order." />, this.props.theme);
       } finally {
         this.setState({
           loading: false,

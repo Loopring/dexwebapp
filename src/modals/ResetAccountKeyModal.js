@@ -5,9 +5,9 @@ import { faArrowRight } from '@fortawesome/free-solid-svg-icons/faArrowRight';
 import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
 import { faClock } from '@fortawesome/free-solid-svg-icons/faClock';
 import { faGraduationCap } from '@fortawesome/free-solid-svg-icons/faGraduationCap';
-import { fetchAllExchangeInfo } from 'redux/actions/ExchangeInfo';
-
-import * as fm from 'lightcone/common/formatter';
+import { fetchGasPrice } from 'redux/actions/GasPrice';
+import { fetchNonce } from 'redux/actions/Nonce';
+import { formatter } from 'lightcone/common';
 import { getWalletType, saveUpdateRecord } from 'lightcone/api/localStorgeAPI';
 import { loginModal, resetPasswordModal } from 'redux/actions/ModalManager';
 import { notifyError, notifySuccess } from 'redux/actions/Notification';
@@ -17,13 +17,11 @@ import I from 'components/I';
 import React from 'react';
 import WhyIcon from 'components/WhyIcon';
 
-import { ActionButton, AssetDropdownMenuItem } from 'styles/Styles';
+import { ActionButton } from 'styles/Styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MyModal } from './styles/Styles';
 import { Spin } from 'antd';
-import { accountUpdate } from 'lightcone/api/LightconeAPI';
 import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
-import AssetDropdown from 'modals/components/AssetDropdown';
 
 import { sleep } from './components/utils';
 import AppLayout from 'AppLayout';
@@ -36,9 +34,7 @@ import config from 'lightcone/config';
 class ResetAccountKeyModal extends React.Component {
   state = {
     loading: false,
-    feeToken: null,
     processingNum: 1,
-    feeBalance: 0,
   };
 
   title = (<I s="Reset Layer-2 Keypair" />);
@@ -52,9 +48,48 @@ class ResetAccountKeyModal extends React.Component {
     return (
       <Section>
         <ul>
+          {config.getFeeByType('deposit', this.props.exchange.onchainFees) &&
+            Number(
+              config.fromWEI(
+                'ETH',
+                Number(
+                  config.getFeeByType('update', this.props.exchange.onchainFees)
+                    .fee
+                ) +
+                  config.getFeeByType(
+                    'deposit',
+                    this.props.exchange.onchainFees
+                  ).fee,
+                this.props.exchange.tokens
+              )
+            ) > 0 && (
+              <li>
+                <I s="ResetAccountKeyInstruction_Fee_1" />
+                {config.getFeeByType('deposit', this.props.exchange.onchainFees)
+                  ? config.fromWEI(
+                      'ETH',
+                      Number(
+                        config.getFeeByType(
+                          'update',
+                          this.props.exchange.onchainFees
+                        ).fee
+                      ) +
+                        config.getFeeByType(
+                          'deposit',
+                          this.props.exchange.onchainFees
+                        ).fee,
+                      this.props.exchange.tokens
+                    )
+                  : '-'}{' '}
+                ETH
+                <I s="ResetAccountKeyInstruction_Fee_2" />
+                <WhyIcon text="FeeWhy" />
+              </li>
+            )}
+
           <li>
             <I s="ResetAccountKeyInstruction_Timing" />
-            <WhyIcon text="RestAccount_Time_Why" />
+            <WhyIcon text="TimingWhy" />
           </li>
         </ul>
 
@@ -97,74 +132,15 @@ class ResetAccountKeyModal extends React.Component {
 
       if (
         this.props.isVisible === true &&
-        this.props.exchange &&
-        this.props.exchange.updateFees &&
-        this.props.exchange.tokens &&
-        (this.props.balances !== prevProps.balances ||
-          this.props.exchange !== prevProps.exchange ||
-          !this.state.feeToken)
+        this.props.dexAccount.account.address
       ) {
-        this.initFeeToken();
+        (async () => {
+          this.props.fetchNonce(this.props.dexAccount.account.address);
+          this.props.fetchGasPrice();
+        })();
       }
     }
   }
-
-  componentDidMount() {
-    if (
-      this.props.exchange &&
-      this.props.exchange.updateFees &&
-      this.props.exchange.updateFees.length > 0 &&
-      this.props.exchange.tokens
-    ) {
-      this.initFeeToken();
-    }
-  }
-
-  initFeeToken = () => {
-    // Assume we can always use ETH
-    const ethUpdateFee = this.props.exchange.updateFees.find(
-      (a) => a.token === 'ETH'
-    );
-    console.log('ethUpdateFee', ethUpdateFee);
-    const tokenConfig = config.getTokenBySymbol(
-      ethUpdateFee.token,
-      this.props.exchange.tokens
-    );
-    const amount = config.fromWEI(
-      ethUpdateFee.token,
-      ethUpdateFee.fee,
-      this.props.exchange.tokens
-    );
-    tokenConfig.fee = Number(amount);
-    tokenConfig.feeInWei = ethUpdateFee.fee;
-
-    if (this.props.balances.balances) {
-      this.setState({
-        feeBalance: this.getAvailableAmount(
-          this.state.feeToken
-            ? this.state.feeToken.symbol
-            : this.props.exchange.updateFees[0].token,
-          this.props.balances.balances
-        ),
-      });
-    }
-
-    this.setState({
-      feeToken: this.state.feeToken || tokenConfig,
-    });
-  };
-
-  getAvailableAmount = (symbol, balances) => {
-    const tokens = this.props.exchange.tokens;
-    const selectedToken = config.getTokenBySymbol(symbol, tokens);
-    const holdBalance = balances.find(
-      (ba) => ba.tokenId === selectedToken.tokenId
-    );
-
-    return holdBalance
-      ? fm.toBig(holdBalance.totalAmount).minus(holdBalance.frozenAmount)
-      : fm.toBig(0);
-  };
 
   onClose = () => {
     this.props.closeModal();
@@ -192,50 +168,21 @@ class ResetAccountKeyModal extends React.Component {
     this.props.updateAccount(newAccount);
   };
 
-  newUpdateAccount = async (keyPair, feeConfig) => {
-    try {
-      const { dexAccount, exchange } = this.props;
-      const validUntil =
-        Math.ceil(new Date().getTime() / 1000) + 3600 * 24 * 60;
-
-      // offchainRequest是奇数， order是偶数
-      const data = {
-        owner: dexAccount.account.owner,
-        exchange: exchange.exchangeAddress,
-        feeToken: feeConfig.tokenId,
-        maxFeeAmount: feeConfig.feeInWei,
-        accountId: dexAccount.account.accountId,
-        publicKeyX: fm.formatEddsaKey(fm.toHex(fm.toBig(keyPair.publicKeyX))),
-        publicKeyY: fm.formatEddsaKey(fm.toHex(fm.toBig(keyPair.publicKeyY))),
-        nonce: dexAccount.account.accountNonce,
-        validUntil: Math.floor(validUntil),
-      };
-
-      const result = await window.wallet.accountUpdate(data);
-      const apiKey = await accountUpdate(data, result.ecdsaSig);
-
-      // notifySuccess(<I s="LoginApiKeyNotification" />, this.props.theme);
-    } catch (err) {
-      console.log('accountUpdate failed', err);
-      // notifyError(<I s="LoginApiKeySetFailedNotification" />, this.props.theme);
-      // Throw error so that users can retry
-      throw err;
-    } finally {
-      this.onClose();
-    }
-  };
-
   onProceed = () => {
     this.setState({
       loading: true,
     });
-    const { dexAccount, exchange } = this.props;
+    const { dexAccount, exchange, nonce, gasPrice } = this.props;
 
     (async () => {
       try {
+        const fee = formatter
+          .toBig(config.getFeeByType('update', exchange.onchainFees).fee)
+          .plus(config.getFeeByType('deposit', exchange.onchainFees).fee);
+
         const { keyPair } = await window.wallet.generateKeyPair(
           exchange.exchangeAddress,
-          dexAccount.account.accountNonce
+          dexAccount.account.keyNonce + 1
         );
 
         if (!keyPair || keyPair.secretKey === undefined) {
@@ -250,12 +197,26 @@ class ResetAccountKeyModal extends React.Component {
           await sleep(6000);
         }
 
-        await this.newUpdateAccount(keyPair, this.state.feeToken);
+        await window.wallet.createOrUpdateAccount(
+          keyPair,
+          {
+            from: window.wallet.address,
+            exchangeAddress: exchange.exchangeAddress,
+            fee: fee.toString(),
+            chainId: exchange.chainId,
+            token: config.getTokenBySymbol('ETH', exchange.tokens),
+            amount: '',
+            permission: '',
+            nonce: nonce.nonce,
+            gasPrice: gasPrice.gasPrice,
+          },
+          true
+        );
 
         const account = {
           ...dexAccount.account,
-          publicKeyX: fm.formatEddsaKey(fm.toHex(fm.toBig(keyPair.publicKeyX))),
-          publicKeyY: fm.formatEddsaKey(fm.toHex(fm.toBig(keyPair.publicKeyY))),
+          publicKeyX: keyPair.publicKeyX,
+          publicKeyY: keyPair.publicKeyY,
           accountKey: keyPair.secretKey,
           state: RESETTING,
         };
@@ -279,24 +240,9 @@ class ResetAccountKeyModal extends React.Component {
     })();
   };
 
-  handleSelectedFeeToken = (token) => {
-    this.setState({
-      feeToken: token,
-    });
-
-    if (this.props.balances.balances) {
-      this.setState({
-        feeBalance: this.getAvailableAmount(
-          token.symbol,
-          this.props.balances.balances
-        ),
-      });
-    }
-  };
-
   render() {
-    const { theme, exchange } = this.props;
-    const { feeToken, processingNum } = this.state;
+    const { theme } = this.props;
+    const { processingNum } = this.state;
 
     let indicator = (
       <ModalIndicator
@@ -372,51 +318,6 @@ class ResetAccountKeyModal extends React.Component {
       <div />
     );
 
-    // Select tokens as fee token
-    let feeTokenOptions =
-      exchange.updateFees && exchange.tokens
-        ? exchange.updateFees
-            .sort((a, b) => (a === 'ETH' ? false : true))
-            .map((feeToken, i) => {
-              const tokenConfig = config.getTokenBySymbol(
-                feeToken.token,
-                exchange.tokens
-              );
-              const option = {};
-              option.key = tokenConfig.symbol;
-
-              const amount = Number(
-                config.fromWEI(
-                  tokenConfig.symbol,
-                  feeToken.fee,
-                  exchange.tokens
-                )
-              );
-              tokenConfig.fee = amount;
-              tokenConfig.feeInWei = feeToken.fee;
-
-              option.text = amount + ' ' + tokenConfig.symbol;
-              const menuItem = (
-                <AssetDropdownMenuItem
-                  key={tokenConfig.symbol}
-                  onClick={() => {
-                    this.handleSelectedFeeToken(tokenConfig);
-                  }}
-                >
-                  <span>
-                    {amount} {tokenConfig.symbol}
-                  </span>
-                </AssetDropdownMenuItem>
-              );
-
-              return menuItem;
-            })
-        : [];
-
-    feeTokenOptions.sort(function (x, y) {
-      return x.key === 'ETH' ? -1 : y.key === 'ETH' ? 1 : 0;
-    });
-
     return (
       <MyModal
         centered
@@ -433,23 +334,9 @@ class ResetAccountKeyModal extends React.Component {
         <Spin indicator={indicator} spinning={this.state.loading}>
           {indicatorPlaceholder}
           <Section>{this.getInstructions()}</Section>
-          <Section>
-            <Group label={<I s="reset_keypair_fee_token" />}>
-              <AssetDropdown
-                options={feeTokenOptions}
-                selected={
-                  feeToken ? (
-                    <span>
-                      {feeToken.fee} {feeToken.symbol}
-                    </span>
-                  ) : (
-                    <span />
-                  )
-                }
-              />
-            </Group>
-            {this.props.showLoginModal &&
-            this.props.dexAccount.account.state !== 'LOGGED_IN' ? (
+          {this.props.showLoginModal &&
+          this.props.dexAccount.account.state !== 'LOGGED_IN' ? (
+            <Section>
               <Group>
                 <div style={{ height: '20px' }}>
                   <a
@@ -465,20 +352,13 @@ class ResetAccountKeyModal extends React.Component {
                   </a>
                 </div>
               </Group>
-            ) : (
-              <span />
-            )}
-          </Section>
+            </Section>
+          ) : (
+            <span />
+          )}
+
           <Section>
-            <ActionButton
-              onClick={() => this.onProceed()}
-              disabled={
-                this.props.dexAccount.account.state === 'LOGGED_IN' &&
-                (!this.state.feeToken ||
-                  !this.state.feeBalance ||
-                  this.state.feeBalance.lt(this.state.feeToken.feeInWei))
-              }
-            >
+            <ActionButton onClick={() => this.onProceed()}>
               {this.buttonLabel}
             </ActionButton>
           </Section>
@@ -489,9 +369,9 @@ class ResetAccountKeyModal extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  const { modalManager, dexAccount, exchange, balances } = state;
+  const { modalManager, dexAccount, nonce, gasPrice, exchange } = state;
   const isVisible = modalManager.isResetPasswordModalVisible;
-  return { isVisible, modalManager, dexAccount, exchange, balances };
+  return { isVisible, modalManager, dexAccount, nonce, gasPrice, exchange };
 };
 
 const mapDispatchToProps = (dispatch) => {
@@ -499,7 +379,8 @@ const mapDispatchToProps = (dispatch) => {
     showLoginModal: () => dispatch(loginModal(true)),
     closeModal: () => dispatch(resetPasswordModal(false)),
     updateAccount: (account) => dispatch(updateAccount(account)),
-    fetchAllExchangeInfo: () => dispatch(fetchAllExchangeInfo()),
+    fetchNonce: (address) => dispatch(fetchNonce(address)),
+    fetchGasPrice: () => dispatch(fetchGasPrice()),
   };
 };
 

@@ -6,7 +6,6 @@ import { faArrowAltCircleUp } from '@fortawesome/free-solid-svg-icons/faArrowAlt
 import { faCircleNotch } from '@fortawesome/free-solid-svg-icons/faCircleNotch';
 import { faCode } from '@fortawesome/free-solid-svg-icons/faCode';
 import { faCrown } from '@fortawesome/free-solid-svg-icons/faCrown';
-
 import { faKey } from '@fortawesome/free-solid-svg-icons/faKey';
 import { faLock } from '@fortawesome/free-solid-svg-icons/faLock';
 import { faLockOpen } from '@fortawesome/free-solid-svg-icons/faLockOpen';
@@ -404,13 +403,6 @@ class EntranceButton extends React.Component {
                       >
                         <I s="Switch Wallet" />
                       </SwitchWalletButton>
-                      {/* <SideBarButton
-                        key="reset-api-key"
-                        onClick={() => this.pressedResetApiKeyButton()}
-                      >
-                        <MenuFontAwesomeIcon icon={faKey} />
-                        <I s="Active API Key" />
-                      </SideBarButton> */}
                     </div>
                   </SideBarDiv>
                   <MyAddressLinks />
@@ -469,29 +461,6 @@ class EntranceButton extends React.Component {
                     <AccountToolTipDiv>
                       <I s="NoAccountTooltip" />
                     </AccountToolTipDiv>
-
-                    {/* <SideBarButton
-                      key="deposit"
-                      onClick={this.pressedDepositButton}
-                    >
-                      <MenuFontAwesomeIcon icon={faArrowAltCircleDown} />
-                      <I s="Deposit" />
-                    </SideBarButton>
-                    <SideBarButton
-                      key="reset-api-key"
-                      onClick={() => this.pressedResetApiKeyButton()}
-                    >
-                      <MenuFontAwesomeIcon icon={faKey} />
-                      <I s="Active API Key" />
-                    </SideBarButton> */}
-
-                    {/* <SideBarButton
-                      key="withdraw"
-                      onClick={this.pressedWithdrawButton}
-                    >
-                      <MenuFontAwesomeIcon icon={faArrowAltCircleUp} />
-                      <I s="Withdraw" />
-                    </SideBarButton> */}
 
                     <div style={{ margin: '16px' }}>
                       <ActionButton
@@ -572,13 +541,6 @@ class EntranceButton extends React.Component {
                       >
                         <I s="Switch Wallet" />
                       </SwitchWalletButton>
-                      {/* <SideBarButton
-                        key="reset-api-key"
-                        onClick={() => this.pressedResetApiKeyButton()}
-                      >
-                        <MenuFontAwesomeIcon icon={faKey} />
-                        <I s="Active API Key" />
-                      </SideBarButton> */}
                     </div>
                   </SideBarDiv>
                   <MyAddressLinks />
@@ -655,14 +617,6 @@ class EntranceButton extends React.Component {
                       >
                         <I s="Switch Wallet" />
                       </SwitchWalletButton>
-
-                      {/* <SideBarButton
-                        key="reset-api-key"
-                        onClick={() => this.pressedResetApiKeyButton()}
-                      >
-                        <MenuFontAwesomeIcon icon={faKey} />
-                        <I s="Active API Key" />
-                      </SideBarButton> */}
                     </div>
                   </SideBarDiv>
 
@@ -674,20 +628,21 @@ class EntranceButton extends React.Component {
                   </SideBarGroupLabel>
 
                   <SideBarButton
-                    key="deposit"
-                    onClick={this.pressedDepositButton}
-                  >
-                    <MenuFontAwesomeIcon icon={faArrowAltCircleDown} />
-                    <I s="Deposit" />
-                  </SideBarButton>
-
-                  <SideBarButton
                     key="reset-account-key"
                     onClick={() => this.pressedResetPasswordButton()}
                   >
                     <MenuFontAwesomeIcon icon={faKey} />
                     <I s="Reset Layer-2 Keypair" />
                   </SideBarButton>
+
+                  <SideBarButton
+                    key="reset-api-key"
+                    onClick={() => this.pressedResetApiKeyButton()}
+                  >
+                    <MenuFontAwesomeIcon icon={faKey} />
+                    <I s="Reset API Key" />
+                  </SideBarButton>
+
                   <CommonLinks />
                 </div>
               );
@@ -804,14 +759,6 @@ class EntranceButton extends React.Component {
                       >
                         <I s="Switch Wallet" />
                       </SwitchWalletButton>
-
-                      {/* <SideBarButton
-                        key="reset-api-key"
-                        onClick={() => this.pressedResetApiKeyButton()}
-                      >
-                        <MenuFontAwesomeIcon icon={faKey} />
-                        <I s="Active API Key" />
-                      </SideBarButton> */}
                     </div>
                   </SideBarDiv>
                   <MyAddressLinks />
@@ -845,23 +792,21 @@ class EntranceButton extends React.Component {
                     <I s="Withdraw" />
                   </SideBarButton>
 
-                  {
-                    <SideBarButton
-                      key="reset-account-key"
-                      onClick={() => this.pressedResetPasswordButton()}
-                    >
-                      <MenuFontAwesomeIcon icon={faKey} />
-                      <I s="Reset Layer-2 Keypair" />
-                    </SideBarButton>
-                  }
+                  <SideBarButton
+                    key="reset-account-key"
+                    onClick={() => this.pressedResetPasswordButton()}
+                  >
+                    <MenuFontAwesomeIcon icon={faKey} />
+                    <I s="Reset Layer-2 Keypair" />
+                  </SideBarButton>
 
-                  {/* <SideBarButton
+                  <SideBarButton
                     key="reset-api-key"
                     onClick={() => this.pressedResetApiKeyButton()}
                   >
                     <MenuFontAwesomeIcon icon={faKey} />
-                    <I s="Active API Key" />
-                  </SideBarButton> */}
+                    <I s="Reset API Key" />
+                  </SideBarButton>
 
                   <SideBarButton
                     key="export"
@@ -950,13 +895,6 @@ class EntranceButton extends React.Component {
                   >
                     <I s="Switch Wallet" />
                   </SwitchWalletButton>
-                  {/* <SideBarButton
-                    key="reset-api-key"
-                    onClick={() => this.pressedResetApiKeyButton()}
-                  >
-                    <MenuFontAwesomeIcon icon={faKey} />
-                    <I s="Active API Key" />
-                  </SideBarButton> */}
                 </div>
               </SideBarDiv>
 

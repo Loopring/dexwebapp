@@ -49,7 +49,7 @@ class DepositTable extends React.Component {
           </TextCompactTableHeader>
         ),
         dataIndex: 'date',
-        width: '14%',
+        width: '10%',
       },
       {
         title: (
@@ -62,7 +62,7 @@ class DepositTable extends React.Component {
           </TextCompactTableHeader>
         ),
         dataIndex: 'asset',
-        width: '18%',
+        width: '16%',
       },
       {
         title: (
@@ -71,9 +71,8 @@ class DepositTable extends React.Component {
           </TextCompactTableHeader>
         ),
         dataIndex: 'amount',
-        width: '20%',
+        width: '12%',
       },
-      /*
       {
         title: (
           <TextCompactTableHeader>
@@ -81,9 +80,8 @@ class DepositTable extends React.Component {
           </TextCompactTableHeader>
         ),
         dataIndex: 'fee',
-        width: '14%',
+        width: '12%',
       },
-      */
       {
         title: (
           <TextCompactTableHeader>
@@ -91,9 +89,9 @@ class DepositTable extends React.Component {
           </TextCompactTableHeader>
         ),
         dataIndex: 'txHash',
-        width: '20%',
+        width: '18%',
       },
-      /*
+
       {
         title: (
           <TextCompactTableHeader>
@@ -103,7 +101,6 @@ class DepositTable extends React.Component {
         dataIndex: 'depositType',
         width: '10%',
       },
-      */
       {
         title: (
           <TextCompactTableHeader
@@ -123,7 +120,7 @@ class DepositTable extends React.Component {
           </TextCompactTableHeader>
         ),
         dataIndex: 'status',
-        width: '20%',
+        width: '14%',
       },
     ];
 
@@ -131,7 +128,7 @@ class DepositTable extends React.Component {
     for (let i = 0; i < this.props.data.length; i++) {
       const transaction = this.props.data[i];
       var status = '-';
-      if (transaction.status === 'TX_STATUS_PROCESSING') {
+      if (transaction.status === 'processing') {
         status = (
           <LargeTableRowProcessing
             style={{ color: theme.highlight, textAlign: 'left' }}
@@ -142,7 +139,7 @@ class DepositTable extends React.Component {
             </div>
           </LargeTableRowProcessing>
         );
-      } else if (transaction.status === 'TX_STATUS_PROCESSED') {
+      } else if (transaction.status === 'processed') {
         status = (
           <LargeTableRowProcessed
             style={{ color: theme.green, textAlign: 'left' }}
@@ -153,7 +150,7 @@ class DepositTable extends React.Component {
             </div>
           </LargeTableRowProcessed>
         );
-      } else if (transaction.status === 'TX_STATUS_FAILED') {
+      } else if (transaction.status === 'failed') {
         status = (
           <LargeTableRowFailed style={{ color: theme.red, textAlign: 'left' }}>
             <StatusFontAwesomeIcon icon={faExclamationCircle} />
@@ -162,7 +159,7 @@ class DepositTable extends React.Component {
             </div>
           </LargeTableRowFailed>
         );
-      } else if (transaction.status === 'TX_STATUS_RECEIVED') {
+      } else if (transaction.status === 'received') {
         status =
           this.props.blockNum - transaction.blockNum <= 30 ? (
             <LargeTableRowProcessing
@@ -170,10 +167,9 @@ class DepositTable extends React.Component {
             >
               <StatusFontAwesomeIcon icon={faClock} />
               <div>
-                <I s="Confirming" />
-                {/* (
-                {Math.max(this.props.blockNum - transaction.blockNum, 0)} / 18) */}
-                <WhyIcon text="StatusConfirmingDeposit" />
+                <I s="Confirming" />(
+                {Math.max(this.props.blockNum - transaction.blockNum, 0)} / 30)
+                <WhyIcon text="StatusConfirming" />
               </div>
             </LargeTableRowProcessing>
           ) : (
@@ -188,8 +184,8 @@ class DepositTable extends React.Component {
           );
       }
 
-      // No deposit type in 3.6
-      /*
+      let type = '-';
+
       if (transaction.depositType === 'deposit') {
         type = <I s="Deposit" />;
       } else if (transaction.depositType === 'update_account') {
@@ -197,7 +193,6 @@ class DepositTable extends React.Component {
       } else {
         type = <I s="Activate Layer-2" />;
       }
-      */
 
       data.push({
         key: i,
@@ -207,15 +202,7 @@ class DepositTable extends React.Component {
               paddingLeft: '14px',
             }}
           >
-            {' '}
-            {transaction.tokenName &&
-            transaction.tokenName.split('-').length - 1 >= 2 ? (
-              <div>{transaction.symbol}</div>
-            ) : (
-              <div>
-                {transaction.symbol} - <I s={transaction.tokenName} />{' '}
-              </div>
-            )}
+            {transaction.symbol} - <I s={transaction.tokenName} />
           </LargeTableRow>
         ),
         amount: (
@@ -223,7 +210,6 @@ class DepositTable extends React.Component {
             {transaction.amountInUI} {transaction.symbol}
           </LargeTableRow>
         ),
-        /*
         fee: (
           <LargeTableRow
             style={{
@@ -233,7 +219,6 @@ class DepositTable extends React.Component {
             {transaction.feeInUI} ETH
           </LargeTableRow>
         ),
-        */
         date: (
           <LargeTableRow
             style={{
@@ -267,7 +252,7 @@ class DepositTable extends React.Component {
             {status}
           </div>
         ),
-        // depositType: <LargeTableRow>{type}</LargeTableRow>,
+        depositType: <LargeTableRow>{type}</LargeTableRow>,
       });
     }
 

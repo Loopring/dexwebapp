@@ -20,8 +20,6 @@ import DexAccountService from 'components/services/DexAccountService';
 import ExportAccountModal from 'modals/ExportAccountModal';
 import LoginModal from 'modals/LoginModal';
 import ReferralModal from 'modals/ReferralModal';
-import WalletConnectIndicatorModal from 'modals/WalletConnectIndicatorModal';
-
 import TransferModal from 'modals/TransferModal';
 import WechatModal from 'modals/WechatModal';
 
@@ -32,7 +30,7 @@ import WalletConnectService from 'components/services/wallet-services/WalletConn
 import WalletLinkService from 'components/services/wallet-services/WalletLinkService';
 import WalletService from 'components/services/wallet-services/WalletService';
 
-import NewRegisterAccountModal from 'modals/NewRegisterAccountModal';
+import RegisterAccountModal from 'modals/RegisterAccountModal';
 import ResetAccountKeyModal from 'modals/ResetAccountKeyModal';
 import ResetApiKeyModal from 'modals/ResetApiKeyModal';
 import WebSocketService from 'components/services/WebSocketService';
@@ -45,7 +43,6 @@ import { LOGGED_IN } from 'redux/actions/DexAccount';
 import {
   getLastAccountPage,
   getLastOrderPage,
-  getLastPoolPage,
   getLastTradePage,
 } from 'lightcone/api/localStorgeAPI';
 import config from 'lightcone/config';
@@ -63,7 +60,6 @@ const LoopringWalletButton = styled(Button)`
   cursor: pointer;
   margin-left: 6px;
   margin-right: 6px;
-  padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.9rem;
   font-weight: 600;
@@ -116,10 +112,13 @@ const NavMenu = styled(Menu)`
 `;
 
 class TopNavBar extends React.Component {
-  state = {
-    lastTradePage: getLastTradePage(),
-    isSettingsVisible: false,
-  };
+  constructor(props, context) {
+    super(props, context);
+    this.state = {
+      lastTradePage: getLastTradePage(),
+      isSettingsVisible: false,
+    };
+  }
 
   componentDidMount() {
     const inMaintenanceMode = config.getMaintenanceMode();
@@ -171,10 +170,6 @@ class TopNavBar extends React.Component {
     history.push('/trade/' + this.props.currentMarket);
   };
 
-  pushToSwapPage = () => {
-    history.push('/swap');
-  };
-
   handleSettingsVisibleChange = (isSettingsVisible) => {
     this.setState({ isSettingsVisible });
 
@@ -213,7 +208,7 @@ class TopNavBar extends React.Component {
             }}
             ref={(menuButton) => (this._settingsButtonElement = menuButton)}
           >
-            <NewRegisterAccountModal refer_id={this.state.refer_id} />
+            <RegisterAccountModal refer_id={this.state.refer_id} />
             <LoginModal />
             <DepositModal />
             <TransferModal />
@@ -236,9 +231,6 @@ class TopNavBar extends React.Component {
             <ConfirmLogoutModal />
             <ConnectToWalletModal />
             <ExportAccountModal />
-            <WalletConnectIndicatorModal />
-            {/* <SwapSelectTokenModal /> */}
-
             <NavMenu
               mode="horizontal"
               style={{
@@ -254,10 +246,23 @@ class TopNavBar extends React.Component {
                   marginLeft: '0px',
                 }}
               >
-                <SiteLogo pushToPage={this.pushToSwapPage} />
+                <SiteLogo pushToTradePage={this.pushToTradePage} />
               </NavButtonWrapper>
 
               {onMaintenancePage === false && (
+                <NavButtonWrapper key="trade" disabled={disableTopTabs}>
+                  <NavButton
+                    active={onTradePage ? 1 : 0}
+                    onClick={() => {
+                      this.pushToTradePage();
+                    }}
+                  >
+                    <I s="Trade" />
+                  </NavButton>
+                </NavButtonWrapper>
+              )}
+
+              {/* {onMaintenancePage === false && (
                 <NavButtonWrapper key="swap" disabled={disableTopTabs}>
                   <NavButton
                     active={this.props.pathname.includes('swap') ? 1 : 0}
@@ -268,26 +273,9 @@ class TopNavBar extends React.Component {
                     <I s="Swap" />
                   </NavButton>
                 </NavButtonWrapper>
-              )}
+              )} */}
 
               {onMaintenancePage === false && (
-                <NavButtonWrapper key="pool" disabled={disableTopTabs}>
-                  <NavButton
-                    active={this.props.pathname.includes('pool') ? 1 : 0}
-                    onClick={() => {
-                      if (getLastPoolPage() === '') {
-                        history.push('/pool');
-                      } else {
-                        history.push(`/pool/${getLastPoolPage()}`);
-                      }
-                    }}
-                  >
-                    <I s="Pool" />
-                  </NavButton>
-                </NavButtonWrapper>
-              )}
-
-              {/* {onMaintenancePage === false && (
                 <NavButtonWrapper
                   key="liquidity-mining"
                   disabled={disableTopTabs}
@@ -301,19 +289,6 @@ class TopNavBar extends React.Component {
                     }}
                   >
                     <I s="Liquidity Mining" />
-                  </NavButton>
-                </NavButtonWrapper>
-              )} */}
-
-              {onMaintenancePage === false && (
-                <NavButtonWrapper key="trade" disabled={disableTopTabs}>
-                  <NavButton
-                    active={onTradePage ? 1 : 0}
-                    onClick={() => {
-                      this.pushToTradePage();
-                    }}
-                  >
-                    <I s="Trade" />
                   </NavButton>
                 </NavButtonWrapper>
               )}
@@ -402,9 +377,6 @@ class TopNavBar extends React.Component {
                   }}
                 >
                   <LoopringWalletButton
-                    style={{
-                      paddingLeft: '1px',
-                    }}
                     onClick={() => {
                       window.open('https://loopring.io', '_blank');
                     }}
@@ -438,10 +410,10 @@ class TopNavBar extends React.Component {
                       paddingRight: '0px',
                     }}
                     onClick={() => {
-                      window.open('https://v1.loopring.io', '_blank');
+                      window.open('https://exchange.loopring.io', '_blank');
                     }}
                   >
-                    <I s="Go to Loopring v1" />
+                    <I s="Goto Loopring v2" />
                   </LoopringWalletButton>
                 </div>
               </NavButtonWrapper>
@@ -453,6 +425,7 @@ class TopNavBar extends React.Component {
               <NavButtonWrapper
                 key="logo"
                 style={{
+                  width: `calc(${AppLayout.tradePanelWidth})`,
                   height: AppLayout.topNavBarHeight,
                   background: theme.background + '!important',
                   borderRightStyle: 'solid',
@@ -460,37 +433,8 @@ class TopNavBar extends React.Component {
                   borderRightColor: theme.foreground,
                 }}
               >
-                <SiteLogo pushToPage={this.pushToSwapPage} />
+                <SiteLogo />
               </NavButtonWrapper>
-              {onMaintenancePage === false && (
-                <NavButtonWrapper key="swap" disabled={disableTopTabs}>
-                  <NavButton
-                    active={this.props.pathname.includes('swap') ? 1 : 0}
-                    onClick={() => {
-                      history.push('/swap');
-                    }}
-                  >
-                    <I s="Swap" />
-                  </NavButton>
-                </NavButtonWrapper>
-              )}
-
-              {onMaintenancePage === false && (
-                <NavButtonWrapper key="pool" disabled={disableTopTabs}>
-                  <NavButton
-                    active={this.props.pathname.includes('pool') ? 1 : 0}
-                    onClick={() => {
-                      if (getLastPoolPage() === '') {
-                        history.push('/pool');
-                      } else {
-                        history.push(`/pool/${getLastPoolPage()}`);
-                      }
-                    }}
-                  >
-                    <I s="Pool" />
-                  </NavButton>
-                </NavButtonWrapper>
-              )}
             </NavMenu>
           </div>
         </ConfigProvider>

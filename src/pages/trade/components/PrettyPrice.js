@@ -7,19 +7,19 @@ import { countTrailingZeroes } from './defaults/util';
 
 const SidePrimary = styled.span`
   color: ${(props) => {
-    return props.side === 'buy' ? props.buyPrimary : props.sellPrimary;
+      return props.side === 'buy' ? props.buyPrimary : props.sellPrimary;
   }};
 `;
 
 const SideSecondary = styled.span`
   color: ${(props) => {
-    return props.side === 'buy' ? props.buyPrimary : props.sellPrimary;
+      return props.side === 'buy' ? props.buyPrimary : props.sellPrimary;
   }};
 `;
 
 const SideBar = styled.span`
   color: ${(props) => {
-    return props.side === 'buy' ? props.buyPrimary : props.sellPrimary;
+      return props.side === 'buy' ? props.buyPrimary : props.sellPrimary;
   }};
 `;
 
@@ -33,9 +33,9 @@ const NoSideSecondary = styled.span`
 
 const DotColor = styled.span(
   ({ side, digitsAfterDecimal, price, prePrice, buyPrimary, sellPrimary }) => {
-    return {
-      color: side === 'buy' ? buyPrimary : sellPrimary,
-    };
+      return {
+        color: side === 'buy' ? buyPrimary : sellPrimary,
+      };
   }
 );
 

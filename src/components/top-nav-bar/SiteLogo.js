@@ -6,7 +6,7 @@ import React, { useContext } from 'react';
 
 import config from 'lightcone/config';
 
-const SiteLogo = ({ pushToPage }) => {
+const SiteLogo = ({ pushToTradePage }) => {
   const theme = useContext(ThemeContext);
 
   // TODO: need to disable the img click
@@ -39,7 +39,7 @@ const SiteLogo = ({ pushToPage }) => {
           }}
           onClick={() => {
             if (onMaintenancePage === false) {
-              pushToPage();
+              pushToTradePage();
             }
           }}
         />
@@ -66,7 +66,7 @@ const SiteLogo = ({ pushToPage }) => {
               color: theme.primary,
             }}
           >
-            <I s={'v2'} />
+            <I s={'Beta1'} />
           </span>
         </Tooltip>
       </div>

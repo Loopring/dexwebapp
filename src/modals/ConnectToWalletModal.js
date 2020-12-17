@@ -152,8 +152,7 @@ const ConnectToWalletModal = () => {
   return (
     <MyModal
       centered
-      // width={'600px'}
-      width={'540px'}
+      width={'600px'}
       title={
         <TextPopupTitle>
           <I s="Connect Wallet" />
@@ -168,11 +167,10 @@ const ConnectToWalletModal = () => {
       <Section
         style={{
           textAlign: 'center',
-          marginBottom: '24px',
         }}
       >
         <Row className="row">
-          <Col span={12}>
+          <Col span={8}>
             <WalletTypeDiv
               onClick={() => {
                 onMetaMaskClick();
@@ -188,7 +186,7 @@ const ConnectToWalletModal = () => {
               </div>
             </WalletTypeDiv>
           </Col>
-          {/* <Col span={8}>
+          <Col span={8}>
             <WalletTypeDiv
               onClick={() => {
                 onMewConnectClick();
@@ -205,8 +203,8 @@ const ConnectToWalletModal = () => {
                 </HighlightTextSpan>
               </div>
             </WalletTypeDiv>
-          </Col> */}
-          <Col span={12}>
+          </Col>
+          <Col span={8}>
             <WalletTypeDiv
               onClick={() => {
                 onWalletConnectClick();
@@ -223,7 +221,7 @@ const ConnectToWalletModal = () => {
             </WalletTypeDiv>
           </Col>
         </Row>
-        {/* <Row
+        <Row
           className="row"
           style={{
             marginTop: '20px',
@@ -265,7 +263,7 @@ const ConnectToWalletModal = () => {
               </div>
             </WalletTypeDiv>
           </Col>
-        </Row> */}
+        </Row>
       </Section>
     </MyModal>
   );

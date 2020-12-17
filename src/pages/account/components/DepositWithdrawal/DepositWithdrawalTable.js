@@ -1,6 +1,5 @@
 import { connect } from 'react-redux';
 import {
-  fetchAmmTransactions,
   fetchDeposits,
   fetchTransfers,
   fetchWithdrawals,
@@ -15,7 +14,6 @@ import {
 } from 'lightcone/api/v1/onchainwithdrawal';
 import { notifyError, notifySuccess } from 'redux/actions/Notification';
 import { withTheme } from 'styled-components';
-import AmmTransactionTable from 'pages/account/components/DepositWithdrawal/AmmTransactionTable';
 import DepositBaseTable from 'pages/account/components/DepositWithdrawal/DepositTable';
 import DepositWithdrawalHeader from 'pages/account/components/DepositWithdrawalHeader';
 import I from 'components/I';
@@ -62,8 +60,7 @@ class DepositWithdrawalTable extends React.Component {
       this.props.type === 'deposit' &&
       this.props.balances.deposits.find(
         (deposit) =>
-          deposit.status === 'TX_STATUS_RECEIVED' ||
-          deposit.status === 'TX_STATUS_PROCESSING'
+          deposit.status === 'received' || deposit.status === 'processing'
       )
     ) {
       if (this.timeout) {
@@ -75,9 +72,7 @@ class DepositWithdrawalTable extends React.Component {
     if (
       this.props.type === 'withdrawals' &&
       this.props.balances.withdrawals.find(
-        (w) =>
-          w.status === 'TX_STATUS_RECEIVED' ||
-          w.status === 'TX_STATUS_PROCESSING'
+        (w) => w.status === 'received' || w.status === 'processing'
       )
     ) {
       if (this.timeout) {
@@ -102,7 +97,6 @@ class DepositWithdrawalTable extends React.Component {
         fetchDeposits,
         fetchWithdrawals,
         fetchTransfers,
-        fetchAmmTransactions,
       } = this.props;
       if (
         !!dexAccount.account.accountId &&
@@ -115,15 +109,7 @@ class DepositWithdrawalTable extends React.Component {
           tokenSymbol = balances.tokenFilter;
         }
 
-        if (this.props.type === 'amm-transaction') {
-          fetchAmmTransactions(
-            balances.ammTransactionLimit,
-            offset !== -1 ? offset : balances.ammTransactionOffset,
-            dexAccount.account.accountId,
-            dexAccount.account.apiKey,
-            exchange.tokens
-          );
-        } else if (this.props.type === 'transfer') {
+        if (this.props.type === 'transfer') {
           fetchTransfers(
             balances.transferLimit,
             offset !== -1 ? offset : balances.transferOffset,
@@ -163,10 +149,7 @@ class DepositWithdrawalTable extends React.Component {
 
   onChange = (page) => {
     let offset = 0;
-
-    if (this.props.type === 'amm-transaction') {
-      offset = this.props.balances.ammTransactionLimit * (page - 1);
-    } else if (this.props.type === 'transfer') {
+    if (this.props.type === 'transfer') {
       offset = this.props.balances.transferLimit * (page - 1);
     } else if (this.props.type === 'deposit') {
       offset = this.props.balances.depositLimit * (page - 1);
@@ -230,26 +213,7 @@ class DepositWithdrawalTable extends React.Component {
     let current;
     let loading;
 
-    if (type === 'amm-transaction') {
-      data = balances.ammTransactions;
-      total = balances.ammTransactionTotalNum;
-      limit = balances.ammTransactionLimit;
-      current = Math.floor(balances.ammTransactionOffset / limit) + 1;
-      loading = balances.isAmmTransactionsLoading;
-      return (
-        <div>
-          <AmmTransactionTable
-            placeHolder="NoAmmTransactions"
-            data={data}
-            total={total}
-            limit={limit}
-            current={current}
-            onChange={this.onChange}
-            loading={!exchange.isInitialized || loading}
-          />
-        </div>
-      );
-    } else if (type === 'transfer') {
+    if (type === 'transfer') {
       data = balances.transfers;
       total = balances.transferTotalNum;
       limit = balances.transferLimit;
@@ -343,8 +307,6 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(
         fetchTransfers(limit, offset, accountId, tokenSymbol, apiKey, tokens)
       ),
-    fetchAmmTransactions: (limit, offset, accountId, apiKey, tokens) =>
-      dispatch(fetchAmmTransactions(limit, offset, accountId, apiKey, tokens)),
   };
 };
 

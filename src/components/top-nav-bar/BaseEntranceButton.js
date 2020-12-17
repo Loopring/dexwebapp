@@ -10,15 +10,11 @@ const BaseEntranceButtonStyled = styled(Button)`
   border-radius: 4px;
   font-size: 0.9rem;
   font-weight: 600;
+  min-width: 164px;
 
   &:hover {
     border-radius: 4px;
-    // border: 1px solid ${(props) =>
-      props.color || props.theme.primary} !important;
-  }
-
-  .svg-inline--fa {
-    padding-top: 1px !important;
+    border: 1px solid ${(props) => props.color || props.theme.primary} !important;
   }
 `;
 
@@ -39,6 +35,7 @@ const BaseEntranceButton = ({
       style={{
         cursor: 'default',
         display: 'flex',
+
         alignItems: 'center',
         justifyContent: 'center',
         height: AppLayout.topNavBarHeight,
@@ -56,20 +53,15 @@ const BaseEntranceButton = ({
             marginRight: marginRight,
           }}
         >
-          {icon ? (
-            <FontAwesomeIcon
-              style={{
-                width: '14px',
-                height: '14px',
-                marginRight: '8px',
-              }}
-              icon={icon}
-              spin={spin || false}
-            />
-          ) : (
-            <div />
-          )}
-
+          <FontAwesomeIcon
+            style={{
+              width: '14px',
+              height: '14px',
+              marginRight: '12px',
+            }}
+            icon={icon}
+            spin={spin || false}
+          />
           <span>{title}</span>
         </BaseEntranceButtonStyled>
       </div>

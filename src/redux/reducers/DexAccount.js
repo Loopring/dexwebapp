@@ -112,7 +112,6 @@ export const DexAccountReducer = (state = initialState, action) => {
           ...state.account,
           state: REGISTERED,
           accountKey: '',
-          apiKey: undefined,
         },
       };
     }

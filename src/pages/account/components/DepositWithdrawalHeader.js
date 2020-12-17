@@ -143,7 +143,7 @@ class DepositWithdrawalHeader extends React.PureComponent {
               <AssetDropdown
                 options={options}
                 selected={selected}
-                size={'small'}
+                small={'true'}
               />
             </div>
           </Col>

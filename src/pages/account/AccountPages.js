@@ -17,11 +17,6 @@ const accountSubPages = [
     url: '/account/balances',
   },
   {
-    id: 'amm-transactions',
-    label: 'AMM Transactions',
-    url: '/account/amm-transactions',
-  },
-  {
     id: 'transfers',
     label: 'Transfers',
     url: '/account/transfers',
@@ -60,17 +55,6 @@ const MyBalancesPage = () => {
   return (
     <SimpleSecondaryPageLayout pageId="balances" navbarConfig={accountSubPages}>
       <BalanceTable />
-    </SimpleSecondaryPageLayout>
-  );
-};
-
-const MyAmmTransactionPage = () => {
-  return (
-    <SimpleSecondaryPageLayout
-      pageId="amm-transactions"
-      navbarConfig={accountSubPages}
-    >
-      <DepositWithdrawalTable type="amm-transaction" />
     </SimpleSecondaryPageLayout>
   );
 };
@@ -140,7 +124,6 @@ const MyReferralRewardsPage = () => {
 
 export {
   MyBalancesPage,
-  MyAmmTransactionPage,
   MyTransferPage,
   MyDepositsPage,
   MyWithdrawalsPage,

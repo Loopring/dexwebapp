@@ -25,10 +25,7 @@ const LiteTheme = {
 
   background: '#DFE6EF',
   foreground: '#F9FCFD',
-  foreground2: '#EDF2F7',
   lightForeground: '#F9FCFD',
-
-  formDivFilter: 'drop-shadow(0 2px 2px rgba(255, 255, 255, 0.2))',
 
   sidePanelBackground: '#EDF2F7',
   buttonBackground: '#CAD1D5',
@@ -38,10 +35,9 @@ const LiteTheme = {
 
   textWhiteBulk: '#050505',
   textDim: '#05050590',
-  textDim2: '#808080',
   textSidebarMenu: '#050505',
   textLowContrast: '#05050590',
-  textBigButton: 'rgba(255,255,255,1)',
+  textBigButton: 'rgba(255,255,255,.8)',
   textSelection: 'rgba(255,255,255,.8)',
 
   popupBackground: '#F0F5F9',

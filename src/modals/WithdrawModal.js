@@ -10,6 +10,9 @@ import {
 
 import { Spin } from 'antd';
 import { connect } from 'react-redux';
+import { fetchGasPrice } from 'redux/actions/GasPrice';
+import { fetchNonce } from 'redux/actions/Nonce';
+import { fetchWalletBalance } from 'modals/components/utils';
 import { showWithdrawModal } from 'redux/actions/ModalManager';
 import { withTheme } from 'styled-components';
 import AppLayout from 'AppLayout';
@@ -25,7 +28,6 @@ import WhyIcon from 'components/WhyIcon';
 
 import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
 import { formatter } from 'lightcone/common';
-import { getStorageId, submitWithdraw } from 'lightcone/api/LightconeAPI';
 import { getWalletType } from 'lightcone/api/localStorgeAPI';
 import { notifyError, notifySuccess } from 'redux/actions/Notification';
 import WalletConnectIndicator from 'modals/components/WalletConnectIndicator';
@@ -39,6 +41,8 @@ class WithdrawModal extends React.Component {
     errorMessage2: '',
     loading: false,
     amount: null,
+    ethBalance: 0,
+    ethEnough: true,
     balance: 0,
     validateAmount: true,
     availableAmount: 0,
@@ -55,8 +59,28 @@ class WithdrawModal extends React.Component {
     ) {
       const { balances } = this.props.balances;
       const selectedTokenSymbol = this.props.modalManager.withdrawalToken;
+      (async () => {
+        const ethBalance = (
+          await fetchWalletBalance(
+            this.props.dexAccount.account.address,
+            ['ETH'],
+            this.props.exchange.tokens
+          )
+        )[0].balance;
+        const fee = this.getFeeCost();
+        this.setState({
+          ethBalance: ethBalance,
+          ethEnough: fee <= ethBalance,
+        });
+      })();
+
       const holdAmount = this.getAvailableAmount(selectedTokenSymbol, balances);
       const balance = this.getHoldBalance(selectedTokenSymbol, balances);
+
+      (async () => {
+        this.props.fetchNonce(this.props.dexAccount.account.address);
+        this.props.fetchGasPrice();
+      })();
 
       this.setState({
         balance: balance,
@@ -89,6 +113,7 @@ class WithdrawModal extends React.Component {
     // Reset amount and error message
     this.setState({
       amount: null,
+      ethEnough: true,
       validateAmount: true,
       availableAmount: amount,
     });
@@ -101,19 +126,15 @@ class WithdrawModal extends React.Component {
     const holdBalance = balances.find(
       (ba) => ba.tokenId === selectedToken.tokenId
     );
-
-    const avaliableBalance = holdBalance
-      ? formatter
-          .toBig(holdBalance.totalAmount)
-          .minus(holdBalance.frozenAmount)
-          .minus(this.getFeeCost(symbol))
-      : formatter.toBig(0);
-
-    return config.fromWEI(
-      selectedToken.symbol,
-      avaliableBalance.isPositive() ? avaliableBalance : 0,
-      tokens
-    );
+    return holdBalance
+      ? config.fromWEI(
+          selectedToken.symbol,
+          formatter
+            .toBig(holdBalance.totalAmount)
+            .minus(holdBalance.frozenAmount),
+          tokens
+        )
+      : config.fromWEI(selectedToken.symbol, 0, tokens);
   };
 
   getHoldBalance = (symbol, balances) => {
@@ -134,14 +155,18 @@ class WithdrawModal extends React.Component {
       : config.fromWEI(selectedToken.symbol, 0, tokens);
   };
 
-  getFeeCost = (token) => {
-    if (this.props.exchange && this.props.exchange.withdrawalFees) {
-      const feeConfig = config.getFeeByToken(
-        token,
-        this.props.exchange.withdrawalFees
-      );
-      return feeConfig ? feeConfig.fee : '0';
-    } else return '0';
+  getFeeCost = () => {
+    const gasPrice = formatter.fromGWEI(this.props.gasPrice.gasPrice);
+    const withdrawalGas = config.getGasLimitByType('withdraw').gas;
+    const gasCost = gasPrice.times(withdrawalGas);
+    const fee = config.getFeeByType('withdraw', this.props.exchange.onchainFees)
+      .fee;
+
+    return Number(
+      config.fromWEI('ETH', gasCost.plus(fee), this.props.exchange.tokens, {
+        ceil: true,
+      })
+    );
   };
 
   onAmountValueChange = (value) => {
@@ -198,62 +223,38 @@ class WithdrawModal extends React.Component {
     }
   };
 
-  submitOffchainWithdrawal_3_6() {
+  submitWithdraw = () => {
     this.setState({
       loading: true,
     });
 
+    console.log('submitWithdraw');
+
+    let symbol = this.props.modalManager.withdrawalToken;
+
     (async () => {
       try {
-        let { amount } = this.state;
+        const {
+          tokens,
+          onchainFees,
+          exchangeAddress,
+          chainId,
+        } = this.props.exchange;
 
-        const { tokens } = this.props.exchange;
-        const { dexAccount } = this.props;
+        console.log('Before window.wallet.onchainWithdrawal');
 
-        let symbol = this.props.modalManager.withdrawalToken;
-
-        const tokenConf = config.getTokenBySymbol(symbol, tokens);
-
-        const storageId = await getStorageId(
-          dexAccount.account.accountId,
-          tokenConf.tokenId,
-          dexAccount.account.apiKey
+        await window.wallet.onchainWithdrawal(
+          {
+            exchangeAddress,
+            chainId,
+            token: config.getTokenBySymbol(symbol, tokens),
+            amount: this.state.amount,
+            nonce: this.props.nonce.nonce,
+            gasPrice: this.props.gasPrice.gasPrice,
+            fee: config.getFeeByType('withdraw', onchainFees).fee,
+          },
+          true
         );
-
-        const validUntil =
-          Math.ceil(new Date().getTime() / 1000) + 3600 * 24 * 60;
-
-        const amountInBN = config.toWEI(symbol, amount, tokens);
-        const amountFInBN = this.getFeeCost(symbol);
-
-        let data = {
-          exchange: this.props.exchange.exchangeAddress,
-          accountID: dexAccount.account.accountId,
-          accountId: dexAccount.account.accountId,
-          owner: dexAccount.account.owner,
-          from: dexAccount.account.owner,
-          to: dexAccount.account.owner,
-          extraData: '',
-          tokenID: tokenConf.tokenId,
-          token: tokenConf.tokenId,
-          amount: amountInBN,
-          feeTokenID: tokenConf.tokenId,
-          feeToken: tokenConf.tokenId,
-          maxFeeAmount: amountFInBN,
-          validUntil: Math.floor(validUntil),
-          storageID: storageId.offchainId,
-          storageId: storageId.offchainId,
-          // TODO: How to get minGas?
-          minGas: 30,
-        };
-
-        const { ecdsaSig, eddsaSig } = await window.wallet.signOffchainWithdraw(
-          data
-        );
-
-        data['eddsaSig'] = eddsaSig;
-
-        await submitWithdraw(data, ecdsaSig, dexAccount.account.apiKey);
 
         notifySuccess(
           <I s="WithdrawInstructionNotification" />,
@@ -273,7 +274,7 @@ class WithdrawModal extends React.Component {
         });
       }
     })();
-  }
+  };
 
   onClick = () => {
     if (this.validateAmount() === false) {
@@ -287,7 +288,7 @@ class WithdrawModal extends React.Component {
       });
     }
 
-    this.submitOffchainWithdrawal_3_6();
+    this.submitWithdraw();
   };
 
   enterAmount = (e) => {
@@ -306,7 +307,7 @@ class WithdrawModal extends React.Component {
 
   render() {
     const theme = this.props.theme;
-    const { tokens } = this.props.exchange;
+    const { tokens, onchainFees } = this.props.exchange;
     const selectedTokenSymbol = this.props.modalManager.withdrawalToken;
     const selectedToken = config.getTokenBySymbol(selectedTokenSymbol, tokens);
     const options = tokens
@@ -327,15 +328,8 @@ class WithdrawModal extends React.Component {
             }}
           >
             <span>
-              {token.name.split('-').length - 1 >= 2 ? (
-                <div>{token.symbol}</div>
-              ) : (
-                <div>
-                  {token.symbol} - <I s={token.name} />{' '}
-                </div>
-              )}{' '}
-              {token.memo ? '(' : ''} {token.memo ? <I s={token.memo} /> : ''}{' '}
-              {token.memo ? ')' : ''}
+              {token.symbol} - <I s={token.name} /> {token.memo ? '(' : ''}{' '}
+              {token.memo ? <I s={token.memo} /> : ''} {token.memo ? ')' : ''}
             </span>
           </AssetDropdownMenuItem>
         );
@@ -411,24 +405,24 @@ class WithdrawModal extends React.Component {
                 <I s="WithdrawInstruction_Timing" />
                 <WhyIcon text="TimingWhy" />
               </li>
-              {this.getFeeCost(selectedTokenSymbol) &&
+              {config.getFeeByType('withdraw', onchainFees) &&
                 Number(
                   config.fromWEI(
-                    selectedTokenSymbol,
-                    this.getFeeCost(selectedTokenSymbol),
+                    'ETH',
+                    config.getFeeByType('withdraw', onchainFees).fee,
                     tokens
                   )
                 ) > 0 && (
                   <li>
                     <I s="WithdrawInstruction_Fee_1" />{' '}
-                    {this.getFeeCost(selectedTokenSymbol)
+                    {config.getFeeByType('withdraw', onchainFees)
                       ? config.fromWEI(
-                          selectedTokenSymbol,
-                          this.getFeeCost(selectedTokenSymbol),
+                          'ETH',
+                          config.getFeeByType('withdraw', onchainFees).fee,
                           tokens
                         )
                       : '-'}{' '}
-                    {selectedTokenSymbol.toUpperCase()}
+                    ETH
                     <I s="WithdrawInstruction_Fee_2" />{' '}
                     <WhyIcon text="FeeWhy" />
                   </li>
@@ -445,13 +439,7 @@ class WithdrawModal extends React.Component {
                 options={options}
                 selected={
                   <span>
-                    {selectedToken.name.split('-').length - 1 >= 2 ? (
-                      <div>{selectedToken.symbol}</div>
-                    ) : (
-                      <div>
-                        {selectedToken.symbol} - <I s={selectedToken.name} />{' '}
-                      </div>
-                    )}{' '}
+                    {selectedToken.symbol} - <I s={selectedToken.name} />{' '}
                     {selectedToken.memo ? '(' : ''}{' '}
                     {selectedToken.memo ? <I s={selectedToken.memo} /> : ''}{' '}
                     {selectedToken.memo ? ')' : ''}
@@ -488,7 +476,7 @@ class WithdrawModal extends React.Component {
                 selectedToken={selectedToken}
                 amount={this.state.amount}
                 availableAmount={this.state.availableAmount}
-                ethEnough={true}
+                ethEnough={this.state.ethEnough}
                 validateAmount={this.state.validateAmount}
                 errorMessage1={this.state.errorMessage1}
                 errorToken={this.state.errorToken}
@@ -503,7 +491,7 @@ class WithdrawModal extends React.Component {
           >
             <LabelValue
               label={<I s="Layer-2 Balance" />}
-              value={this.state.balance}
+              value={this.state.availableAmount}
               unit={selectedTokenSymbol.toUpperCase()}
               onClick={() => this.withdrawAll()}
             />
@@ -522,7 +510,8 @@ class WithdrawModal extends React.Component {
               disabled={
                 this.state.amount <= 0 ||
                 !this.state.validateAmount ||
-                this.state.loading
+                this.state.loading ||
+                !this.state.ethEnough
               }
               onClick={() => this.onClick()}
             >
@@ -536,13 +525,22 @@ class WithdrawModal extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  const { modalManager, dexAccount, balances, exchange } = state;
+  const {
+    modalManager,
+    dexAccount,
+    balances,
+    nonce,
+    gasPrice,
+    exchange,
+  } = state;
   const isVisible = modalManager.isWithdrawModalVisible;
   return {
     isVisible,
     modalManager,
     dexAccount,
     balances,
+    nonce,
+    gasPrice,
     exchange,
   };
 };
@@ -551,6 +549,8 @@ const mapDispatchToProps = (dispatch) => {
   return {
     closeModal: () => dispatch(showWithdrawModal(false)),
     showModal: (token) => dispatch(showWithdrawModal(true, token)),
+    fetchNonce: (address) => dispatch(fetchNonce(address)),
+    fetchGasPrice: () => dispatch(fetchGasPrice()),
   };
 };
 

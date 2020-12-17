@@ -1,4 +1,3 @@
-import * as fm from 'lightcone/common/formatter';
 import { Col, Row } from 'antd';
 import { ThemeContext } from 'styled-components';
 import React, { useContext } from 'react';
@@ -34,7 +33,7 @@ const LabelValue = ({ label, value, unit, onClick }) => {
           }
         }}
       >
-        {fm.numberWithCommas(value)}
+        {value}
 
         {unit ? (
           <span

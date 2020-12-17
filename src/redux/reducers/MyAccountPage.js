@@ -1,11 +1,9 @@
 import {
-  EMPTY_AMM_TRANSACTIONS,
   EMPTY_BALANCES,
   EMPTY_DEPOSITS,
   EMPTY_TRANSFERS,
   EMPTY_WITHDRAWALS,
   HIDE_LOW_BALANCE_ASSETS,
-  UPDATE_AMM_TRANSACTIONS,
   UPDATE_BALANCE,
   UPDATE_DEPOSITS,
   UPDATE_MY_BALANCES,
@@ -22,7 +20,7 @@ import {
 
 const initialState = {
   balances: [],
-  hideLowBalanceAssets: getHideLowBalanceAssets(),
+  hideLowBalanceAssets: getHideLowBalanceAssets() ? true : false,
 
   tokenFilter: 'All',
 
@@ -43,12 +41,6 @@ const initialState = {
   transferTotalNum: 0,
   transfers: [],
   isTransfersLoading: true,
-
-  ammTransactionOffset: 0,
-  ammTransactionLimit: 20,
-  ammTransactionTotalNum: 0,
-  ammTransactions: [],
-  isAmmTransactionsLoading: true,
 };
 
 export const MyAccountPageReducer = (state = initialState, action) => {
@@ -105,7 +97,7 @@ export const MyAccountPageReducer = (state = initialState, action) => {
         depositLimit: 20,
         depositTotalNum: 0,
         deposits: [],
-        isDepositsLoading: true,
+        isDepositsLoading: false,
       };
     }
 
@@ -127,7 +119,7 @@ export const MyAccountPageReducer = (state = initialState, action) => {
         withdrawalLimit: 20,
         withdrawalTotalNum: 0,
         withdrawals: [],
-        isWithdrawalsLoading: true,
+        isWithdrawalsLoading: false,
       };
     }
 
@@ -149,29 +141,7 @@ export const MyAccountPageReducer = (state = initialState, action) => {
         transferLimit: 20,
         transferTotalNum: 0,
         transfers: [],
-        isTransfersLoading: true,
-      };
-    }
-
-    case UPDATE_AMM_TRANSACTIONS: {
-      return {
-        ...state,
-        ammTransactionOffset: action.payload.offset,
-        ammTransactionLimit: action.payload.limit,
-        ammTransactionTotalNum: action.payload.totalNum,
-        ammTransactions: action.payload.transactions,
-        isAmmTransactionsLoading: false,
-      };
-    }
-
-    case EMPTY_AMM_TRANSACTIONS: {
-      return {
-        ...state,
-        ammTransactionOffset: 0,
-        ammTransactionLimit: 20,
-        ammTransactionTotalNum: 0,
-        ammTransactions: [],
-        isAmmTransactionsLoading: true,
+        isTransfersLoading: false,
       };
     }
 

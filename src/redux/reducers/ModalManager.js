@@ -1,5 +1,4 @@
 import {
-  CLOSE_RISK_ALERT,
   SHOW_CONNECT_TO_WALLET_MODAL,
   SHOW_DEPOSIT,
   SHOW_ENTER_PASSWORD,
@@ -11,16 +10,10 @@ import {
   SHOW_RESET_API_KEY_MODAL,
   SHOW_RESET_PASSWORD_MODAL,
   SHOW_SIDEBAR,
-  SHOW_SWAP_SELECT_TOKEN_MODAL,
   SHOW_TRANSFER,
-  SHOW_WALLET_CONNECT_INDICATOR,
   SHOW_WECHAT_MODAL,
   SHOW_WITHDRAW,
 } from 'redux/actions/ModalManager';
-import {
-  getRiskAlertVisible,
-  saveRiskAlertVisible,
-} from 'lightcone/api/localStorgeAPI';
 
 const initialState = {
   isRegisterAccountModalVisible: false,
@@ -40,12 +33,6 @@ const initialState = {
   isEnterPasswordModalVisible: false,
   isSideBarVisible: false,
   isConnectToWalletModalVisiable: false,
-  isSwapSelectTokenModalVisible: false,
-  swapToken: null,
-  isSwapToken0: true,
-  isRiskAlertVisible: getRiskAlertVisible(),
-  isWalletConnectIndicatorModalVisible: false,
-  walletConnectIndicatorType: '',
 };
 
 export const ModalManagerReducer = (state = initialState, action) => {
@@ -147,25 +134,6 @@ export const ModalManagerReducer = (state = initialState, action) => {
       return {
         ...state,
         isConnectToWalletModalVisiable: action.payload.show,
-      };
-    case SHOW_SWAP_SELECT_TOKEN_MODAL:
-      return {
-        ...state,
-        isSwapSelectTokenModalVisible: action.payload.show,
-        swapToken: action.payload.swapToken,
-        isSwapToken0: action.payload.isSwapToken0,
-      };
-    case SHOW_WALLET_CONNECT_INDICATOR:
-      return {
-        ...state,
-        isWalletConnectIndicatorModalVisible: action.payload.show,
-        walletConnectIndicatorType: action.payload.walletConnectIndicatorType,
-      };
-    case CLOSE_RISK_ALERT:
-      saveRiskAlertVisible();
-      return {
-        ...state,
-        isRiskAlertVisible: false,
       };
     default:
       return state;

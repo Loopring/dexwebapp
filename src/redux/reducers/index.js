@@ -1,7 +1,6 @@
 import { combineReducers } from 'redux';
 import { connectRouter } from 'connected-react-router';
 
-import { AmmMarketsReducer } from './swap/AmmMarkets';
 import { AuthereumReducer } from './Authereum';
 import { CommissionRewardReducer } from './CommissionReward';
 import { DexAccountReducer } from './DexAccount';
@@ -29,9 +28,6 @@ import { NotifyCenterReducer } from './NotifyCenter';
 import { OrderBookReducer } from './market/OrderBook';
 import { TickerReducer } from './market/Ticker';
 import { TradeHistoryReducer } from './market/TradeHistory';
-
-// Swap
-import { CurrentSwapFormReducer } from './swap/CurrentSwapForm';
 
 const rootReducer = (history) =>
   combineReducers({
@@ -61,8 +57,6 @@ const rootReducer = (history) =>
     commissionReward: CommissionRewardReducer,
     userPreferences: UserPreferenceManagerReducer,
     notifyCenter: NotifyCenterReducer,
-    ammMarkets: AmmMarketsReducer,
-    swapForm: CurrentSwapFormReducer,
   });
 
 export default rootReducer;

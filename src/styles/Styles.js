@@ -20,14 +20,14 @@ const NavButtonWrapper = styled(Menu.Item)`
         ? props.theme.sidePanelBackground
         : props.theme.background} !important;
     border: none !important;
-    padding: 0 8px;
+    padding: 0 20px!
     margin-left: 0 !important;
     margin-right: 0 !important;
-    list-style-type: none !important;
+    list-style-type: none!important;
   }
 
   &.ant-menu-item-disabled {
-    display: none;
+    display:none;
   }
 `;
 
@@ -68,22 +68,15 @@ const BaseActionButton = styled(Button)`
   border-radius: 20px!important;
   color: ${(props) => props.theme.textBigButton}!important;
   text-transform: uppercase!important;
-  // transition: 1s!important;
-  // filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.4));
+  transition: 1s!important;
 
   &:hover {
      
   }
 
   &[disabled],&[disabled]:hover {
-    background: ${(props) =>
-      props.disabledbuttonbackground
-        ? props.disabledbuttonbackground
-        : props.theme.buttonBackground}!important;
-    color: ${(props) =>
-      props.disabledcolor
-        ? props.disabledcolor
-        : props.theme.textDim}!important;
+    background: ${(props) => props.theme.buttonBackground}!important;
+    color: ${(props) => props.theme.textDim}!important;
   }
 }
 `;
@@ -125,7 +118,7 @@ const TransferOutlineButton = styled(OutlineButton)`
     background-color: transparent !important;
     border: 1px solid ${(props) => props.theme.inputBorderActiveColor}!important;
   }
-  &:disabled {
+   &:disabled {
     color: ${(props) => props.theme.inputBorderActiveColor}!important;
   }
 `;
@@ -167,25 +160,6 @@ const WithdrawOutlineButton = styled(OutlineButton)`
 `;
 
 const CancelOrderButton = WithdrawOutlineButton;
-
-const ViewMoreButton = styled(OutlineButton)`
-  margin: 0px;
-  padding-top: 0px !important;
-  padding-bottom: 0px !important;
-  padding-left: 4px !important;
-  padding-right: 4px !important;
-  margin-right: 4px;s
-  border-color: transparent !important;
-  color: ${(props) => props.theme.textDim}!important;
-`;
-
-const ViewAmmTransactionButton = styled(OutlineButton)`
-  margin: 0px;
-  padding: 0px;
-  font-size: 1rem !important;
-  border: 0px solid ${(props) => props.theme.inputBorderColor}!important;
-  color: ${(props) => props.theme.primary}!important;
-`;
 
 const SimpleTableContainer = styled.div`
   min-height: 540px;
@@ -293,8 +267,6 @@ export {
   DepositOutlineButton,
   WithdrawOutlineButton,
   CancelOrderButton,
-  ViewMoreButton,
-  ViewAmmTransactionButton,
   NavButtonWrapper,
   SimpleTableContainer,
   LargeTableContainer,

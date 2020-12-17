@@ -50,15 +50,7 @@ function map(trades, configTokens) {
   for (let i = 0; i < trades.length; i = i + 1) {
     const trade = trades[i];
     let updatedTrade = { ...trade };
-
-    let market = updatedTrade.market;
-    // TODO: replace LP-
-    if (market.startsWith('AMM-')) {
-      market = market.replace('AMM-', '');
-    } else if (market.startsWith('LP-')) {
-      market = market.replace('LP-', '');
-    }
-
+    const market = updatedTrade.market;
     const tokens = market.split('-');
     const baseToken = tokens[0];
     const quoteToken = tokens[1];
@@ -86,8 +78,6 @@ function map(trades, configTokens) {
     const total = Number(
       parseFloat(updatedTrade.sizeInString) * parseFloat(trade.price)
     );
-
-    // TODO: total in string is not accurate.
     const totalInString = total.toFixed(token.precision);
     updatedTrade['totalInString'] = totalInString;
 

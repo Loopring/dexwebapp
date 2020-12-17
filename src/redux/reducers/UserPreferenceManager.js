@@ -20,7 +20,7 @@ const language = getLanguage();
 const currency = getCurrency();
 const themeName = getThemeName();
 
-export const getAutoThemeName = () => {
+const getAutoThemeName = () => {
   const hours = new Date().getHours();
   const isDayTime = hours > 6 && hours < 20;
   return isDayTime ? 'light' : 'dark';

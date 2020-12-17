@@ -25,20 +25,6 @@ function trackEvent(message) {
   } catch (error) {}
 }
 
-export function notifyInfo(message, theme, duration) {
-  trackEvent(message);
-  notification.info({
-    message: message,
-    closeIcon: closeIcon(theme),
-    icon: null,
-    duration: duration || 3,
-    top: topPosition,
-    style: {
-      background: theme.notificationBackground,
-    },
-  });
-}
-
 export function notifySuccess(message, theme, duration) {
   trackEvent(message);
   notification.success({

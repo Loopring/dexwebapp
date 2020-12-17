@@ -3,11 +3,6 @@ import request from 'lightcone/common/request';
 
 export async function getData(exchangeTokens, market, interval, end) {
   try {
-    // TODO: replace LP-
-    if (market.startsWith('LP-')) {
-      market = market.replace('LP-', '');
-    }
-
     let params = {
       market,
       interval,

@@ -11,10 +11,6 @@
   "uatWsUrl":"ws.uat.loopring.io",
   "prodServerUrl": "api.loopring.io",
   "prodWsUrl":"ws.loopring.io",
-  "uat2ServerUrl": "uat2.loopring.io",
-  "uat2WsUrl":"ws.uat2.loopring.io",
-  "prod36ServerUrl": "api3.loopring.io",
-  "prod36WsUrl":"ws.api3.loopring.io",
   "defaultChannelId":"hebao::subchannel::0001",
   "txs": [
     {
@@ -27,7 +23,7 @@
     },
     {
       "type": "deposit",
-      "gas": 150000
+      "gas": 350000
     },
     {
       "type": "create",
@@ -35,7 +31,7 @@
     },
     {
       "type": "depositTo",
-      "gas": 150000
+      "gas": 350000
     },
     {
       "type": "claim",
@@ -79,5 +75,16 @@
     }
   ],
   "localTokens": [
+    {
+      "address" : "0x80fB784B7eD66730e8b1DBd9820aFD29931aab03",
+      "symbol" : "LEND",
+      "name" : "EthLend Token",
+      "memo": "Old",
+      "decimals" : 18,
+      "enabled": true,
+      "tokenId" : 26,
+      "depositEnabled": false,
+      "transferEnabled": false
+    }
   ]
 }

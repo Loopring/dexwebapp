@@ -25,10 +25,7 @@ const DarkTheme = {
 
   background: yankeesBlueDarker,
   foreground: yankeesBlue,
-  foreground2: '#1c1d24',
   lightForeground: russianViolet,
-
-  formDivFilter: 'drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2))',
 
   sidePanelBackground: gunmetal,
   buttonBackground: '#616774',
@@ -38,7 +35,6 @@ const DarkTheme = {
 
   textWhiteBulk: '#9FA0BF',
   textDim: '#E0E0E080',
-  textDim2: '#A0A0A0',
   textSidebarMenu: '#E0E0E0',
   textLowContrast: '#424242',
   textBigButton: 'rgba(255,255,255,.8)',

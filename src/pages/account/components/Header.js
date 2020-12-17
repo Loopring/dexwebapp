@@ -165,8 +165,6 @@ class Header extends React.PureComponent {
   }
 
   render() {
-    console.log('this.props.dexAccount.account', this.props.dexAccount.account);
-
     if (
       !!this.props.dexAccount.account.accountId &&
       !!this.props.dexAccount.account.accountKey &&

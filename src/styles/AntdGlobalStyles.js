@@ -7,7 +7,7 @@ const AntdGlobalStyles = createGlobalStyle`
   transition:none!important;
 }
 .ant-spin-blur {
-  opacity: 0 !important;
+  opacity: 0!important;
   transition: none!important;
 }
 
@@ -293,10 +293,6 @@ td.ant-table-column-sort {
   display: none;
 }
 
-.ant-menu-horizontal {
-  border-bottom: none !important;
-}
-
 .ant-descriptions-header {
   margin-bottom: 0;
 }
@@ -319,54 +315,6 @@ td.ant-table-column-sort {
   color: ${(props) => props.theme.textWhite}!important;
   font-size: 0.85rem;
   font-weight: 400;
-}
-
-.ant-alert-warning {
-  border: none;
-  text-align: center;
-  background: yellow;
-}
-
-.ant-slider-rail {
-  background: ${(props) => props.theme.textDim};
-}
-
-.ant-slider:hover .ant-slider-rail {
-  background: ${(props) => props.theme.textDim};
-}
-
-.ant-slider-step {
-  background: transparent;
-}
-
-.ant-slider-handle {
-  border: solid 2px ${(props) => props.theme.textDim};
-}
-
-.ant-slider-track {
-  background-color: ${(props) => props.theme.primary};
-}
-
-.ant-slider:hover .ant-slider-track {
-  background-color: ${(props) => props.theme.primary};
-}
-
-.ant-slider:focus .ant-slider-track {
-  background-color: ${(props) => props.theme.primary};
-}
-
-.ant-slider-dot-active {
-  border-color: ${(props) => props.theme.primary};
-  background-color: ${(props) => props.theme.primary};
-}
-
-.ant-slider:hover .ant-slider-handle:not(.ant-tooltip-open) {
-  border-color: ${(props) => props.theme.primary};
-}
-
-.ant-slider-handle:focus {
-  -webkit-box-shadow: unset;
-  box-shadow: unset;
 }
 
 `;

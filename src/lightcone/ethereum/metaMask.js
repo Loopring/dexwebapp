@@ -23,11 +23,9 @@ export async function sign(web3, account, hash) {
   return new Promise((resolve) => {
     web3.eth.sign(hash, account, function (err, result) {
       if (!err) {
-        console.log('sig result', result);
         const r = result.slice(0, 66);
         const s = addHexPrefix(result.slice(66, 130));
-        let v = toNumber(addHexPrefix(result.slice(130, 132)));
-        if (v === 0 || v === 1) v = v + 27; // 修复ledger的签名
+        const v = toNumber(addHexPrefix(result.slice(130, 132)));
         resolve({ result: { r, s, v } });
       } else {
         const errorMsg = err.message.substring(0, err.message.indexOf(' at '));
@@ -35,45 +33,6 @@ export async function sign(web3, account, hash) {
       }
     });
   });
-}
-
-/**
- * @description sign EIP217
- * @param web3
- * @param account
- * @param method
- * @param params
- * @returns {Promise.<*>}
- */
-export async function signEip712(web3, account, method, params) {
-  const response = await new Promise((resolve) => {
-    web3.currentProvider.sendAsync(
-      {
-        method,
-        params,
-        account,
-      },
-      function (err, result) {
-        if (err) {
-          resolve({ error: { message: err.message } });
-          return;
-        }
-
-        if (result.error) {
-          resolve({ error: { message: result.error.message } });
-          return;
-        }
-
-        resolve({ result: result.result });
-      }
-    );
-  });
-
-  if (response['result']) {
-    return response;
-  } else {
-    throw new Error(response['error']['message']);
-  }
 }
 
 /**
@@ -123,7 +82,7 @@ export async function personalSign(web3, account, msg, walletType) {
             msg,
             result
           );
-
+          console.log(JSON.stringify(walletValid));
           if (walletValid.result) {
             resolve({ sig: result });
           } else {
@@ -133,7 +92,7 @@ export async function personalSign(web3, account, msg, walletType) {
               msg,
               result
             );
-
+            console.log(JSON.stringify(walletValid2));
             if (walletValid2.result) {
               resolve({ sig: result });
             } else {
@@ -165,10 +124,7 @@ export async function ecRecover(web3, account, msg, sig) {
         resolve({
           result: address.toLowerCase() === account.toLowerCase(),
         });
-      else {
-        console.log('in web3.eth.personal.ecRecover', err, address);
-        resolve({ error: err });
-      }
+      else resolve({ error: err });
     });
   });
 }

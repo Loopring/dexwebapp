@@ -91,10 +91,7 @@ export const MyOrderPageReducer = (state = initialState, action) => {
      */
     case UPDATE_SOCKET_ALL_ORDER:
       const order = action.payload.order;
-      if (
-        order.status === 'waiting' ||
-        order.status === 'TX_STATUS_PROCESSING'
-      ) {
+      if (order.status === 'waiting' || order.status === 'processing') {
         const openOrders = state.openOrders.filter(
           (o) => o.hash !== order.hash
         );

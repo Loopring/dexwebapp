@@ -2,9 +2,10 @@ import { Redirect, Route, Switch } from 'react-router';
 import React from 'react';
 
 import {
-  MyAmmTransactionPage,
   MyBalancesPage,
   MyDepositsPage,
+  MyLiquidityMiningRankingsPage,
+  MyLiquidityMiningRewardsPage,
   MyReferralRewardsPage,
   MyTransferPage,
   MyWithdrawalsPage,
@@ -36,12 +37,6 @@ import { FeesPage } from 'pages/docs/DocumentPages';
 
 import MaintenancePage from 'pages/maintenance/MaintenancePage';
 import NotFoundPage from 'pages/not-found/NotFoundPage';
-
-import SwapPage from 'pages/swap/SwapPage';
-import SwapPoolAddLiquidityPage from 'pages/swap/SwapPoolAddLiquidityPage';
-import SwapPoolPage from 'pages/swap/SwapPoolPage';
-import SwapPoolRemoveLiquidityPage from 'pages/swap/SwapPoolRemoveLiquidityPage';
-
 import TopNavBar from 'components/top-nav-bar/TopNavBar';
 import TradePage from 'pages/trade/TradePage';
 
@@ -55,7 +50,8 @@ const routes = (
         exact
         path="/"
         render={() => {
-          return <Redirect to={'/swap'} />;
+          let lastTradePage = getLastTradePage();
+          return <Redirect to={`/trade/${lastTradePage}`} />;
         }}
       />
       <Route
@@ -83,11 +79,6 @@ const routes = (
         }}
       />
 
-      <Route
-        exact
-        path="/account/amm-transactions"
-        component={MyAmmTransactionPage}
-      />
       <Route exact path="/account/transfers" component={MyTransferPage} />
       <Route exact path="/account/balances" component={MyBalancesPage} />
       <Route exact path="/account/deposits" component={MyDepositsPage} />
@@ -113,42 +104,14 @@ const routes = (
       <Route
         exact
         path="/liquidity-mining/rewards"
-        // component={MyLiquidityMiningRewardsPage}
-        render={() => {
-          return <Redirect to={'/swap'} />;
-        }}
+        component={MyLiquidityMiningRewardsPage}
       />
       <Route
         exact
         path="/liquidity-mining/ranking"
-        // component={MyLiquidityMiningRankingsPage}
-        render={() => {
-          return <Redirect to={'/swap'} />;
-        }}
+        component={MyLiquidityMiningRankingsPage}
       />
-
-      <Route exact path="/swap" component={SwapPage} />
-      <Route
-        exact
-        path="/swap/"
-        render={() => {
-          return <Redirect to={'/swap'} />;
-        }}
-      />
-      <Route exact path="/swap/:pair" component={SwapPage} />
-
-      <Route exact path="/pool" component={SwapPoolPage} />
-      <Route
-        exact
-        path="/pool/add/:pair"
-        component={SwapPoolAddLiquidityPage}
-      />
-      <Route
-        exact
-        path="/pool/remove/:pair"
-        component={SwapPoolRemoveLiquidityPage}
-      />
-
+      <Route exact path="/swap" componnet={MyLiquidityMiningRankingsPage} />
       <Route exact path="/support/system-status" component={SystenStatusPage} />
       <Route exact path="/support/eth" component={SupportEthPage} />
       <Route exact path="/support/lrc" component={SupportLrcPage} />

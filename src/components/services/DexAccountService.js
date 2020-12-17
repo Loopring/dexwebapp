@@ -19,16 +19,9 @@ import { loginModal, registerAccountModal } from 'redux/actions/ModalManager';
 import { getApiKey, lightconeGetAccount } from 'lightcone/api/LightconeAPI';
 
 import { canShowLoginModal } from 'components/services/utils';
-import { notifyInfo } from 'redux/actions/Notification';
-import { withTheme } from 'styled-components';
-import I from 'components/I';
 import Wallet from 'lightcone/wallet/wallet';
 
 class DexAccountService extends React.Component {
-  state = {
-    showFrozenNotification: false,
-  };
-
   componentDidUpdate(prevProps, prevState) {
     if (
       prevProps.dexAccount.account.state !== this.props.dexAccount.account.state
@@ -48,9 +41,10 @@ class DexAccountService extends React.Component {
           updateAccount({
             ...relayAccount,
             address: window.wallet.address,
+            keyNonce: relayAccount.keyNonce ? relayAccount.keyNonce : 0,
           });
         } catch (err) {
-          console.log(err);
+          // console.log(err);
         }
         break;
 
@@ -68,12 +62,14 @@ class DexAccountService extends React.Component {
                 updateAccount({
                   ...account,
                   ...relayAccount,
+                  keyNonce: relayAccount.keyNonce ? relayAccount.keyNonce : 0,
                   state: LOGGED_IN,
                 });
               } else {
                 updateAccount({
                   ...account,
                   ...relayAccount,
+                  keyNonce: relayAccount.keyNonce ? relayAccount.keyNonce : 0,
                   state: RESETTING,
                 });
               }
@@ -81,6 +77,7 @@ class DexAccountService extends React.Component {
               updateAccount({
                 ...relayAccount,
                 address: window.wallet.address,
+                keyNonce: relayAccount.keyNonce ? relayAccount.keyNonce : 0,
                 state: REGISTERED,
               });
               if (
@@ -93,7 +90,6 @@ class DexAccountService extends React.Component {
             }
           }
         } catch (e) {
-          console.log(e);
           if (e.message.indexOf('account not found')) {
             if (
               !!this.props.exchange.exchangeId &&
@@ -121,7 +117,6 @@ class DexAccountService extends React.Component {
               window.wallet.address
             );
             if (relayAccount) {
-              clearInterval(this.interval);
               if (
                 relayAccount.publicKeyX === account.publicKeyX &&
                 relayAccount.publicKeyY === account.publicKeyY &&
@@ -130,12 +125,14 @@ class DexAccountService extends React.Component {
                 updateAccount({
                   ...account,
                   accountId: relayAccount.accountId,
+                  keyNonce: relayAccount.keyNonce ? relayAccount.keyNonce : 0,
                   state: LOGGED_IN,
                 });
               } else {
                 updateAccount({
                   ...account,
                   accountId: relayAccount.accountId,
+                  keyNonce: relayAccount.keyNonce ? relayAccount.keyNonce : 0,
                   state: REGISTERED,
                 });
               }
@@ -163,6 +160,7 @@ class DexAccountService extends React.Component {
             ) {
               removeUpdateRecord(window.wallet.address);
               updateAccount({
+                keyNonce: relayAccount.keyNonce ? relayAccount.keyNonce : 0,
                 state: REGISTERED,
               });
               clearInterval(this.lockInterval);
@@ -176,6 +174,7 @@ class DexAccountService extends React.Component {
               updateAccount({
                 ...account,
                 accountId: relayAccount.accountId,
+                keyNonce: relayAccount.keyNonce ? relayAccount.keyNonce : 0,
                 state: REGISTERED,
               });
               clearInterval(this.lockInterval);
@@ -186,19 +185,8 @@ class DexAccountService extends React.Component {
         break;
 
       case LOGGED_IN:
-        console.log('LOGGED_IN');
         if (this.interval) {
           clearInterval(this.interval);
-        }
-
-        if (
-          account.frozen === true &&
-          this.state.showFrozenNotification === false
-        ) {
-          this.setState({
-            showFrozenNotification: true,
-          });
-          notifyInfo(<I s="AccountFrozenNotification" />, props.theme, 60);
         }
 
         // Update keys only
@@ -216,6 +204,8 @@ class DexAccountService extends React.Component {
         const signed = window.wallet.getApiKey();
         const data = {
           accountId: account.accountId,
+          publicKeyX: account.publicKeyX,
+          publicKeyY: account.publicKeyY,
         };
 
         try {
@@ -224,9 +214,7 @@ class DexAccountService extends React.Component {
             ...account,
             apiKey,
           });
-        } catch (error) {
-          console.log('DexAccountService LOGGED_IN', error);
-        }
+        } catch (error) {}
         break;
 
       default:
@@ -252,6 +240,4 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export default withTheme(
-  connect(mapStateToProps, mapDispatchToProps)(DexAccountService)
-);
+export default connect(mapStateToProps, mapDispatchToProps)(DexAccountService);

@@ -13,7 +13,6 @@ const NumericInput = ({
   color,
   onKeyDown,
   disabled,
-  addonAfter,
 }) => {
   function inputOnChange(e) {
     // Avoid invalid input that may cause crash
@@ -108,7 +107,6 @@ const NumericInput = ({
       }
       onKeyDown={onKeyDown}
       disabled={disabled}
-      addonAfter={addonAfter}
     />
   );
 };

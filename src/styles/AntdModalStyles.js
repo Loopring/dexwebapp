@@ -4,15 +4,12 @@ const AntdModalStyles = createGlobalStyle`
 
 .ant-modal-content {
   background-color: ${(props) => props.theme.popupBackground};
-  border-radius: 12px;
 }
 
 .ant-modal-content > .ant-modal-header {
   background-color: ${(props) => props.theme.popupHeaderBackground};
   border-bottom: none;
   padding: 14px 24px;
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
 }
 
 .ant-modal-title {
@@ -21,10 +18,6 @@ const AntdModalStyles = createGlobalStyle`
 
 .ant-modal-body {
   padding: 18px 60px;
-
-  @media only screen and (max-width: 770px) {
-    padding: 18px 20px;
-  }
 }
 
 .ant-modal-close-x {

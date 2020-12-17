@@ -25,6 +25,7 @@ import Moment from 'moment';
 
 class OrderBaseTable extends React.Component {
   onClickCancel = (order) => {
+    // Send cancel request...
     (async () => {
       try {
         const apiKey = this.props.dexAccount.account.apiKey;
@@ -163,10 +164,7 @@ class OrderBaseTable extends React.Component {
       const order = this.props.data[i];
 
       var status = '-';
-      if (
-        order.status === 'TX_STATUS_PROCESSING' ||
-        order.status === 'waiting'
-      ) {
+      if (order.status === 'processing' || order.status === 'waiting') {
         status = (
           <LargeTableRowStatus
             style={{
@@ -258,27 +256,17 @@ class OrderBaseTable extends React.Component {
             </a>
           </LargeTableRow>
         ),
-        size: (
-          <LargeTableRow>
-            {isNaN(order.sizeInString) ? '--' : order.sizeInString}
-          </LargeTableRow>
-        ),
+        size: <LargeTableRow>{order.sizeInString} </LargeTableRow>,
         filled: (
           <LargeTableRow
             style={{
               color: theme.textWhite,
             }}
           >
-            {isNaN(order.filled.substr(0, order.filled.length - 1))
-              ? '--'
-              : order.filled}
+            {order.filled}
           </LargeTableRow>
         ),
-        fillAmount: (
-          <LargeTableRow>
-            {isNaN(order.filledSizeInString) ? '--' : order.filledSizeInString}{' '}
-          </LargeTableRow>
-        ),
+        fillAmount: <LargeTableRow>{order.filledSizeInString} </LargeTableRow>,
         price: (
           <LargeTableRow
             style={{
@@ -291,9 +279,7 @@ class OrderBaseTable extends React.Component {
         ),
         total: (
           <LargeTableRow>
-            {isNaN(order.totalInString)
-              ? '--'
-              : `${order.totalInString} ${order.quoteToken}`}
+            {order.totalInString} {order.quoteToken}
           </LargeTableRow>
         ),
         fee: (
@@ -305,8 +291,8 @@ class OrderBaseTable extends React.Component {
             {order.feeInString}{' '}
             {order.feeInString !== '-'
               ? order.side === 'BUY'
-                ? order.baseToken
-                : order.quoteToken
+                ? order.market.split('-')[0]
+                : order.market.split('-')[1]
               : ''}
           </LargeTableRow>
         ),

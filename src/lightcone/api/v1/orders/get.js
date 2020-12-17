@@ -55,15 +55,7 @@ export function map(orders, configTokens) {
   for (let i = 0; i < orders.length; i = i + 1) {
     const order = orders[i];
     let updatedOrder = { ...order };
-
-    let market = updatedOrder.market;
-    // TODO: replace LP-
-    if (market.startsWith('AMM-')) {
-      market = market.replace('AMM-', '');
-    } else if (market.startsWith('LP-')) {
-      market = market.replace('LP-', '');
-    }
-
+    const market = updatedOrder.market;
     const tokens = market.split('-');
     const baseToken = tokens[0];
     const quoteToken = tokens[1];

@@ -17,6 +17,7 @@ import { faBug } from '@fortawesome/free-solid-svg-icons/faBug';
 import { faClipboardCheck } from '@fortawesome/free-solid-svg-icons/faClipboardCheck';
 import { faDiscord } from '@fortawesome/free-brands-svg-icons/faDiscord';
 import { faDollarSign } from '@fortawesome/free-solid-svg-icons/faDollarSign';
+import { faFile } from '@fortawesome/free-solid-svg-icons/faFile';
 
 import { faFileSignature } from '@fortawesome/free-solid-svg-icons/faFileSignature';
 import { faMagnet } from '@fortawesome/free-solid-svg-icons/faMagnet';
@@ -119,7 +120,7 @@ class CommonLinks extends React.Component {
           <I s="MenuTechnicalResourcesGroup" />
         </SideBarGroupLabel>
 
-        {/* <SideBarButton
+        <SideBarButton
           key="api"
           onClick={() => {
             if (userPreferences.language === 'zh') {
@@ -131,21 +132,23 @@ class CommonLinks extends React.Component {
         >
           <MenuFontAwesomeIcon icon={faFile} />
           <I s="Exchange API" />
-        </SideBarButton> */}
+        </SideBarButton>
 
         <SideBarButton
           key="dexcongtract"
           onClick={() => {
+            const addr =
+              this.props.chainId === 1
+                ? 'loopringio.eth'
+                : this.props.exchangeAddres;
             window.open(
-              `${getEtherscanLink(this.props.chainId)}/address/${
-                this.props.exchangeAddress
-              }`,
+              `${getEtherscanLink(this.props.chainId)}/address/${addr}`,
               '_blank'
             );
           }}
         >
           <MenuFontAwesomeIcon icon={faPencilRuler} />
-          <I s="DEX Smart Contract (3.6)" />
+          <I s="DEX Smart Contract (Beta1)" />
         </SideBarButton>
 
         <SideBarButton
@@ -215,7 +218,7 @@ const mapStateToProps = (state) => {
   const { exchange } = state;
   return {
     chainId: exchange.chainId,
-    exchangeAddress: exchange.exchangeAddress,
+    exchangeAddress: exchange.exchangeAddres,
   };
 };
 

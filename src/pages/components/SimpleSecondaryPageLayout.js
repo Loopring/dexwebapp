@@ -4,9 +4,8 @@ import { ThemeContext } from 'styled-components';
 import React, { useContext } from 'react';
 
 import AppLayout from 'AppLayout';
-
+import PageMobile from 'components/MobileIndicator';
 import SecondaryNavBar from 'components/SecondaryNavBar';
-import SwapPage from 'pages/swap/SwapPage';
 import TableLoadingSpin from 'components/TableLoadingSpin';
 
 const SimpleSecondaryPageLayout = ({
@@ -49,7 +48,7 @@ const SimpleSecondaryPageLayout = ({
           </div>
         </div>
         <div className="mobile-layout">
-          <SwapPage />
+          <PageMobile />
         </div>
       </Layout.Content>
     </Layout>

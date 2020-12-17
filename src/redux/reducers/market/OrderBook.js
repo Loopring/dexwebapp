@@ -58,13 +58,7 @@ export const OrderBookReducer = (state = initialState, action) => {
     case UPDATE_SOCKET_ORDER_BOOKS:
       const starVersion = action.payload.startVersion;
       const endVersion = action.payload.endVersion;
-
-      let market = action.payload.market;
-      // TODO: replace LP-
-      if (market.startsWith('LP-')) {
-        market = market.replace('LP-', '');
-      }
-
+      const market = action.payload.market;
       const configTokens = action.payload.configTokens;
       const tokens = market.split('-');
       const baseToken = tokens[0];

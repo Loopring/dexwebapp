@@ -238,31 +238,3 @@ export function toFixed(number, precision, ceil) {
 
   throw new Error('Unsupported type');
 }
-
-export function formatEddsaKey(key) {
-  const hexKey = clearHexPrefix(key);
-  return addHexPrefix(String(hexKey).padStart(64, '0'));
-}
-
-/**
- * Returns a number with commas as thousands separators
- * @param number number
- * @returns {*}
- */
-export function numberWithCommas(number) {
-  if (number) {
-    number = number.toString().replace(/,/g, '');
-    if (isNaN(Number(number))) {
-      return '-';
-    }
-    try {
-      var parts = number.toString().split('.');
-      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-      return parts.join('.');
-    } catch (error) {
-      return '-';
-    }
-  } else {
-    return number;
-  }
-}

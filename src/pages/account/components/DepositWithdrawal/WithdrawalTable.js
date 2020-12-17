@@ -75,7 +75,7 @@ class WithdrawalTable extends React.Component {
           </TextCompactTableHeader>
         ),
         dataIndex: 'amount',
-        width: '16%',
+        width: '10%',
       },
       {
         title: (
@@ -84,7 +84,7 @@ class WithdrawalTable extends React.Component {
           </TextCompactTableHeader>
         ),
         dataIndex: 'realAmount',
-        width: '16%',
+        width: '10%',
       },
       {
         title: (
@@ -95,7 +95,6 @@ class WithdrawalTable extends React.Component {
         dataIndex: 'fee',
         width: '10%',
       },
-      /*
       {
         title: (
           <TextCompactTableHeader>
@@ -105,7 +104,6 @@ class WithdrawalTable extends React.Component {
         dataIndex: 'txHash',
         width: '12%',
       },
-      */
       {
         title: (
           <TextCompactTableHeader>
@@ -113,7 +111,7 @@ class WithdrawalTable extends React.Component {
           </TextCompactTableHeader>
         ),
         dataIndex: 'withdrawHash',
-        width: '20%',
+        width: '12%',
       },
       {
         title: (
@@ -141,22 +139,19 @@ class WithdrawalTable extends React.Component {
     const data = [];
     for (let i = 0; i < this.props.data.length; i++) {
       const transaction = this.props.data[i];
-
-      console.log('transaction ', transaction);
-
       var status = '-';
-      if (transaction.status === 'TX_STATUS_PROCESSING') {
+      if (transaction.status === 'processing') {
         status = (
           <LargeTableRowProcessing
             style={{ color: theme.highlight, textAlign: 'left' }}
           >
             <StatusFontAwesomeIcon icon={faCircleNotch} spin />
             <div>
-              <I s="Processing" /> <WhyIcon text="WithdrawStatusProcessing" />
+              <I s="Processing" /> <WhyIcon text="StatusProcessing" />
             </div>
           </LargeTableRowProcessing>
         );
-      } else if (transaction.status === 'TX_STATUS_PROCESSED') {
+      } else if (transaction.status === 'processed') {
         status = (
           <LargeTableRowProcessed
             style={{ color: theme.green, textAlign: 'left' }}
@@ -167,7 +162,7 @@ class WithdrawalTable extends React.Component {
             </div>
           </LargeTableRowProcessed>
         );
-      } else if (transaction.status === 'TX_STATUS_FAILED') {
+      } else if (transaction.status === 'failed') {
         status = (
           <LargeTableRowFailed style={{ color: theme.red, textAlign: 'left' }}>
             <StatusFontAwesomeIcon icon={faExclamationCircle} />
@@ -185,7 +180,7 @@ class WithdrawalTable extends React.Component {
             </div>
           </LargeTableRowFailed>
         );
-      } else if (transaction.status === 'TX_STATUS_RECEIVED') {
+      } else if (transaction.status === 'received') {
         status =
           this.props.blockNum - transaction.blockNum <= 30 ? (
             <LargeTableRowProcessing
@@ -194,8 +189,8 @@ class WithdrawalTable extends React.Component {
               <StatusFontAwesomeIcon icon={faClock} />
               <div>
                 <I s="Confirming" />(
-                {Math.max(this.props.blockNum - transaction.blockNum, 0)} / 18)
-                <WhyIcon text="StatusConfirmingWithdrawal" />
+                {Math.max(this.props.blockNum - transaction.blockNum, 0)} / 30)
+                <WhyIcon text="StatusConfirming" />
               </div>
             </LargeTableRowProcessing>
           ) : (
@@ -204,7 +199,7 @@ class WithdrawalTable extends React.Component {
             >
               <StatusFontAwesomeIcon icon={faCircleNotch} spin />
               <div>
-                <I s="Processing" /> <WhyIcon text="WithdrawStatusProcessing" />
+                <I s="Processing" /> <WhyIcon text="StatusProcessing" />
               </div>
             </LargeTableRowProcessing>
           );
@@ -217,14 +212,7 @@ class WithdrawalTable extends React.Component {
               paddingLeft: '14px',
             }}
           >
-            {transaction.tokenName &&
-            transaction.tokenName.split('-').length - 1 >= 2 ? (
-              <div>{transaction.symbol}</div>
-            ) : (
-              <div>
-                {transaction.symbol} - <I s={transaction.tokenName} />{' '}
-              </div>
-            )}
+            {transaction.symbol} - <I s={transaction.tokenName} />
           </LargeTableRow>
         ),
         amount: (
@@ -256,7 +244,6 @@ class WithdrawalTable extends React.Component {
             {Moment(transaction.timestamp).format(theme.timeFormat)}
           </LargeTableRow>
         ),
-        /*
         txHash: (
           <LargeTableRow>
             <a
@@ -266,11 +253,10 @@ class WithdrawalTable extends React.Component {
               target="_blank"
               rel="noopener noreferrer"
             >
-              {transaction.txHash ? transaction.txHashInUI : '-'}
+              {transaction.txHashInUI}
             </a>
           </LargeTableRow>
         ),
-        */
         withdrawHash: (
           <LargeTableRow>
             <a

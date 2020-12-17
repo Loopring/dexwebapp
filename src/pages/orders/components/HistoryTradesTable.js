@@ -207,7 +207,7 @@ class HistoryTradesTable extends React.Component {
         ),
         size: (
           <LargeTableRow>
-            {order.sizeInString} {order.baseToken}
+            {order.sizeInString} {order.market.split('-')[0]}
           </LargeTableRow>
         ),
         price: (
@@ -217,7 +217,7 @@ class HistoryTradesTable extends React.Component {
                 order.side === 'BUY' ? theme.buyPrimary : theme.sellPrimary,
             }}
           >
-            {Number(order.price)} {order.quoteToken}
+            {Number(order.price)} {order.market.split('-')[1]}
           </LargeTableRow>
         ),
         total: (
@@ -232,7 +232,9 @@ class HistoryTradesTable extends React.Component {
             }}
           >
             {order.feeInString}{' '}
-            {order.side === 'BUY' ? order.baseToken : order.quoteToken}
+            {order.side === 'BUY'
+              ? order.market.split('-')[0]
+              : order.market.split('-')[1]}
           </LargeTableRow>
         ),
         date: (

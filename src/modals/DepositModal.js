@@ -52,7 +52,6 @@ class DepositModal extends React.Component {
     approveTxCount: 0,
     ethEnough: true,
     processingNum: 1,
-    balanceOnEthereumDict: {},
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -86,104 +85,8 @@ class DepositModal extends React.Component {
         approveTxCount: 0,
         ethEnough: true,
         processingNum: 1,
-        balanceOnEthereumDict: {},
       });
     }
-  }
-
-  depositTo_3_6() {
-    this.setState({
-      loading: true,
-    });
-
-    (async () => {
-      try {
-        const { approveTxCount, amount } = this.state;
-
-        console.log('approveTxCount', approveTxCount);
-
-        const { gasPrice, exchange } = this.props;
-        // Deposit
-        let symbol = this.props.modalManager.depositToken;
-        let nonce = this.props.nonce.nonce;
-
-        const { chainId, tokens, exchangeAddress, depositAddress } = exchange;
-        console.log('depositAddress', depositAddress);
-
-        if (approveTxCount === 2) {
-          await window.wallet.approveZero(
-            config.getTokenBySymbol(symbol, tokens).address,
-            depositAddress,
-            chainId,
-            nonce,
-            gasPrice.gasPrice,
-            true
-          );
-          this.setState({
-            processingNum: this.state.processingNum + 1,
-          });
-          nonce += 1;
-          // Add a delay for WalletConnect. Their server is not real time to response.
-          // We can change 10 seconds to shorter
-          if (getWalletType() === 'WalletConnect') {
-            await sleep(6000);
-          }
-        }
-
-        // Approve
-        if (approveTxCount !== 0) {
-          await window.wallet.approveMax(
-            config.getTokenBySymbol(symbol, tokens).address,
-            depositAddress,
-            chainId,
-            nonce,
-            gasPrice.gasPrice,
-            true
-          );
-          nonce += 1;
-          this.setState({
-            processingNum: this.state.processingNum + 1,
-          });
-          // Add a delay for WalletConnect. Their server is not real time to response.
-          // We can change 10 seconds to shorter
-          if (getWalletType() === 'WalletConnect') {
-            await sleep(6000);
-          }
-        }
-
-        console.log(window.wallet);
-        await window.wallet.depositTo_3_6(
-          {
-            exchangeAddress,
-            chainId,
-            token: config.getTokenBySymbol(symbol, tokens),
-            fee: 0, // No deposit fee
-            amount,
-            nonce,
-            gasPrice: gasPrice.gasPrice,
-          },
-          true
-        );
-        notifySuccess(
-          <I s="DepositInstructionNotification" />,
-          this.props.theme,
-          15
-        );
-      } catch (err) {
-        console.log('depositTo_3_6', err);
-        notifyError(
-          <I s="DepositInstructionNotificationFailed" />,
-          this.props.theme
-        );
-      } finally {
-        this.props.closeModal();
-        this.setState({
-          loading: false,
-          amount: null,
-          processingNum: 1,
-        });
-      }
-    })();
   }
 
   handleCurrencyTypeSelect = (tokenSymbol) => {
@@ -201,16 +104,15 @@ class DepositModal extends React.Component {
   loadData(tokenSymbol, loadETH = false) {
     (async () => {
       try {
-        let tokenBalance = (
+        const tokenBalance = (
           await fetchWalletBalance(
             this.props.dexAccount.account.address,
             [tokenSymbol],
             this.props.exchange.tokens
           )
         )[0].balance;
-        tokenBalance = tokenBalance.toString().replace(/,/g, '');
 
-        let ethBalance =
+        const ethBalance =
           tokenSymbol.toUpperCase() === 'ETH'
             ? tokenBalance
             : loadETH
@@ -222,7 +124,6 @@ class DepositModal extends React.Component {
                 )
               )[0].balance
             : this.state.ethBalance;
-        ethBalance = ethBalance.toString().replace(/,/g, '');
 
         const allowance = await fetchAllowance(
           this.props.dexAccount.account.address,
@@ -260,16 +161,6 @@ class DepositModal extends React.Component {
               : ethEnough;
         }
 
-        const balanceOnEthereumDict = {};
-        const walletBalances = await fetchWalletBalance(
-          this.props.dexAccount.account.address,
-          this.props.exchange.tokens.map((token) => token.symbol),
-          this.props.exchange.tokens
-        );
-        walletBalances.forEach((ba) => {
-          balanceOnEthereumDict[ba.symbol] = ba.balance;
-        });
-
         this.setState({
           availableAmount: tokenBalance,
           ethBalance,
@@ -277,7 +168,6 @@ class DepositModal extends React.Component {
           ethEnough,
           approveTxCount: txCount,
           validateAmount,
-          balanceOnEthereumDict,
         });
       } catch (error) {}
     })();
@@ -288,8 +178,11 @@ class DepositModal extends React.Component {
     const approveGas = approveTxCount * config.getGasLimitByType('approve').gas;
     const depositGas = config.getGasLimitByType('depositTo').gas;
     const gasCost = gasPrice.times(approveGas + depositGas);
+    const fee = config.getFeeByType('deposit', this.props.exchange.onchainFees)
+      .fee;
+
     return Number(
-      config.fromWEI('ETH', gasCost, this.props.exchange.tokens, {
+      config.fromWEI('ETH', gasCost.plus(fee), this.props.exchange.tokens, {
         ceil: true,
       })
     );
@@ -314,7 +207,7 @@ class DepositModal extends React.Component {
     } else {
       ethEnough =
         cost + (value && Number(value) >= 0 ? Number(value) : 0) <=
-        Number(this.state.ethBalance);
+        this.state.ethBalance;
     }
 
     // Check validateAmount
@@ -376,6 +269,105 @@ class DepositModal extends React.Component {
     }
   };
 
+  submitDeposit = () => {
+    this.setState({
+      loading: true,
+    });
+
+    console.log(this.state.approveTxCount);
+
+    const { approveTxCount, amount } = this.state;
+
+    // Deposit
+    let symbol = this.props.modalManager.depositToken;
+
+    (async () => {
+      try {
+        const { gasPrice, exchange } = this.props;
+        const { chainId, tokens, exchangeAddress, onchainFees } = exchange;
+        // Gas price and nonce directly
+        let nonce = this.props.nonce.nonce;
+
+        if (approveTxCount === 2) {
+          await window.wallet.approveZero(
+            config.getTokenBySymbol(symbol, tokens).address,
+            exchangeAddress,
+            chainId,
+            nonce,
+            gasPrice.gasPrice,
+            true
+          );
+          this.setState({
+            processingNum: this.state.processingNum + 1,
+          });
+          nonce += 1;
+          // Add a delay for WalletConnect. Their server is not real time to response.
+          // We can change 10 seconds to shorter
+          if (getWalletType() === 'WalletConnect') {
+            await sleep(6000);
+          }
+        }
+
+        // Approve
+        if (approveTxCount !== 0) {
+          await window.wallet.approveMax(
+            config.getTokenBySymbol(symbol, tokens).address,
+            exchangeAddress,
+            chainId,
+            nonce,
+            gasPrice.gasPrice,
+            true
+          );
+          nonce += 1;
+          this.setState({
+            processingNum: this.state.processingNum + 1,
+          });
+          // Add a delay for WalletConnect. Their server is not real time to response.
+          // We can change 10 seconds to shorter
+          if (getWalletType() === 'WalletConnect') {
+            await sleep(6000);
+          }
+        }
+
+        await window.wallet.depositTo(
+          {
+            exchangeAddress,
+            chainId,
+            token: config.getTokenBySymbol(symbol, tokens),
+            fee: config.getFeeByType('deposit', onchainFees).fee,
+            amount,
+            nonce,
+            gasPrice: gasPrice.gasPrice,
+          },
+          true
+        );
+
+        this.setState({
+          processingNum: this.state.processingNum + 1,
+        });
+
+        notifySuccess(
+          <I s="DepositInstructionNotification" />,
+          this.props.theme,
+          15
+        );
+      } catch (err) {
+        console.error('deposit failed', err);
+        notifyError(
+          <I s="DepositInstructionNotificationFailed" />,
+          this.props.theme
+        );
+      } finally {
+        this.props.closeModal();
+        this.setState({
+          loading: false,
+          amount: null,
+          processingNum: 1,
+        });
+      }
+    })();
+  };
+
   onClose = () => {
     this.props.closeModal();
   };
@@ -392,7 +384,7 @@ class DepositModal extends React.Component {
       });
     }
 
-    this.depositTo_3_6();
+    this.submitDeposit();
   };
 
   enterAmount = (e) => {
@@ -406,15 +398,11 @@ class DepositModal extends React.Component {
     const selectedTokenSymbol = this.props.modalManager.depositToken;
     let amount;
     let txCount = 0;
-    // availableAmount may has commas.
-    let availableAmount = this.state.availableAmount
-      .toString()
-      .replace(/,/g, '');
     if (selectedTokenSymbol.toUpperCase() === 'ETH') {
       const fee = this.getFeeCost(0);
-      amount = Number(availableAmount) - fee;
+      amount = Number(this.state.availableAmount) - fee;
     } else {
-      amount = Number(availableAmount);
+      amount = Number(this.state.availableAmount);
       if (amount > this.state.allowance) {
         txCount = this.state.allowance === 0 ? 1 : 2;
       }
@@ -435,7 +423,7 @@ class DepositModal extends React.Component {
     const theme = this.props.theme;
 
     const { availableAmount, approveTxCount, processingNum } = this.state;
-    const { tokens } = this.props.exchange;
+    const { tokens, onchainFees } = this.props.exchange;
 
     const selectedTokenSymbol = this.props.modalManager.depositToken;
     const { balances } = this.props.balances;
@@ -455,44 +443,28 @@ class DepositModal extends React.Component {
         )
       : config.fromWEI(selectedToken.symbol, 0, tokens);
 
-    let options = [];
-    if (this.props.exchange.isInitialized) {
-      options = tokens
-        .filter(
-          (token) =>
-            token.enabled &&
-            token.depositEnabled &&
-            this.state.balanceOnEthereumDict[token.symbol] &&
-            parseFloat(this.state.balanceOnEthereumDict[token.symbol]) > 0
-        )
-        .map((token, i) => {
-          const option = {};
-          option.key = token.symbol;
-          option.text = token.symbol + ' - ' + token.name;
+    const options = tokens
+      .filter((token) => token.enabled && token.depositEnabled)
+      .map((token, i) => {
+        const option = {};
+        option.key = token.symbol;
+        option.text = token.symbol + ' - ' + token.name;
 
-          const menuItem = (
-            <AssetDropdownMenuItem
-              key={i}
-              onClick={() => {
-                this.handleCurrencyTypeSelect(token.symbol);
-              }}
-            >
-              <span>
-                {token.name.split('-').length - 1 >= 2 ? (
-                  <div>{token.symbol}</div>
-                ) : (
-                  <div>
-                    {token.symbol} - <I s={token.name} />{' '}
-                  </div>
-                )}
-              </span>
-            </AssetDropdownMenuItem>
-          );
+        const menuItem = (
+          <AssetDropdownMenuItem
+            key={i}
+            onClick={() => {
+              this.handleCurrencyTypeSelect(token.symbol);
+            }}
+          >
+            <span>
+              {token.symbol} - <I s={token.name} />
+            </span>
+          </AssetDropdownMenuItem>
+        );
 
-          return menuItem;
-        });
-    }
-
+        return menuItem;
+      });
     const tipIcons = [];
     const tips = [];
     tipIcons.push(
@@ -648,14 +620,6 @@ class DepositModal extends React.Component {
 
     let isWalletConnectLoading =
       this.state.loading && tips.length === 1 && getWalletType() !== 'MetaMask';
-    let indicatorMarginBottom = '18px';
-    if (isWalletConnectLoading === false && this.state.loading) {
-      if (approveTxCount === 0) {
-        indicatorMarginBottom = '26px';
-      } else {
-        indicatorMarginBottom = '72px';
-      }
-    }
 
     return (
       <MyModal
@@ -679,7 +643,6 @@ class DepositModal extends React.Component {
           <Section
             style={{
               display: isWalletConnectLoading ? 'none' : 'block',
-              marginBottom: indicatorMarginBottom,
             }}
           >
             <Instruction>
@@ -690,10 +653,32 @@ class DepositModal extends React.Component {
                 <I s="DepositInstruction_Timing" />
                 <WhyIcon text="TimingWhy" />
               </li>
-              {/* <li>
+              {config.getFeeByType('deposit', onchainFees) &&
+                Number(
+                  config.fromWEI(
+                    'ETH',
+                    config.getFeeByType('deposit', onchainFees).fee,
+                    tokens
+                  )
+                ) > 0 && (
+                  <li>
+                    <I s="DepositInstruction_Fee_1" />{' '}
+                    {config.getFeeByType('deposit', onchainFees)
+                      ? config.fromWEI(
+                          'ETH',
+                          config.getFeeByType('deposit', onchainFees).fee,
+                          tokens
+                        )
+                      : '-'}{' '}
+                    ETH
+                    <I s="DepositInstruction_Fee_2" />
+                    <WhyIcon text="FeeWhy" />
+                  </li>
+                )}
+              <li>
                 <I s="DepositInstruction_KeepEther" />
                 <WhyIcon text="DepositInstruction_KeepEtherWhy" />
-              </li> */}
+              </li>
             </ul>
           </Section>
 
@@ -707,13 +692,7 @@ class DepositModal extends React.Component {
                 options={options}
                 selected={
                   <span>
-                    {selectedToken.name.split('-').length - 1 >= 2 ? (
-                      <div>{selectedToken.symbol}</div>
-                    ) : (
-                      <div>
-                        {selectedToken.symbol} - <I s={selectedToken.name} />{' '}
-                      </div>
-                    )}
+                    {selectedToken.symbol} - <I s={selectedToken.name} />
                   </span>
                 }
               />

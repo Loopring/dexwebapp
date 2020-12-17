@@ -8,7 +8,7 @@ import I from 'components/I';
 import React from 'react';
 import styled, { withTheme } from 'styled-components';
 
-import { CancelOrderButton, ViewMoreButton } from 'styles/Styles';
+import { CancelOrderButton, OutlineButton } from 'styles/Styles';
 import { LOGGED_IN } from 'redux/actions/DexAccount';
 import {
   emptyMyOpenOrders,
@@ -38,6 +38,17 @@ const CancelAllPopconfirm = styled(Popconfirm)`
   && {
     font-size: 0.85rem;
   }
+`;
+
+const ViewMoreButton = styled(OutlineButton)`
+  margin: 0px;
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  margin-right: 4px;
+  border-color: transparent !important;
+  color: ${(props) => props.theme.textDim}!important;
 `;
 
 class TabHeader extends React.Component {
@@ -80,7 +91,6 @@ class TabHeader extends React.Component {
           this.props.tokens
         );
       } catch (err) {
-        console.log('error', err);
         notifyError(<I s="Failed to cancel your order." />, this.props.theme);
       }
     })();

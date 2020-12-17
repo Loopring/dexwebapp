@@ -7,8 +7,6 @@ import {
 
 import { getTransferHistory } from 'lightcone/api/v1/transfer';
 
-import { getAmmUserTransactions } from 'lightcone/api/AmmAPI';
-
 export const UPDATE_MY_BALANCES = 'UPDATE_MY_BALANCES';
 
 export const UPDATE_BALANCE = 'UPDATE_BALANCE';
@@ -26,9 +24,6 @@ export const HIDE_LOW_BALANCE_ASSETS = 'HIDE_LOW_BALANCE_ASSETS';
 
 export const UPDATE_TRANSFERS = 'UPDATE_TRANSFERS';
 export const EMPTY_TRANSFERS = 'EMPTY_TRANSFERS';
-
-export const UPDATE_AMM_TRANSACTIONS = 'UPDATE_AMM_TRANSACTIONS';
-export const EMPTY_AMM_TRANSACTIONS = 'EMPTY_AMM_TRANSACTIONS';
 
 export function emptyBalances() {
   return {
@@ -101,9 +96,7 @@ export function fetchDeposits(
           tokens
         );
         dispatch(updateDeposits(response));
-      } catch (error) {
-        console.log(error);
-      }
+      } catch (error) {}
     })();
   };
 }
@@ -207,39 +200,6 @@ export function fetchTransfers(
         );
         dispatch(updateTransfers(response));
       } catch (error) {}
-    })();
-  };
-}
-
-export function updateAmmTransactions(payload) {
-  return {
-    type: UPDATE_AMM_TRANSACTIONS,
-    payload,
-  };
-}
-
-export function emptyAmmTransactions() {
-  return {
-    type: EMPTY_AMM_TRANSACTIONS,
-    payload: {},
-  };
-}
-
-export function fetchAmmTransactions(limit, offset, accountId, apiKey, tokens) {
-  return (dispatch) => {
-    (async () => {
-      try {
-        const response = await getAmmUserTransactions(
-          accountId,
-          limit,
-          offset,
-          apiKey,
-          tokens
-        );
-        dispatch(updateAmmTransactions(response));
-      } catch (error) {
-        console.log('error', error);
-      }
     })();
   };
 }

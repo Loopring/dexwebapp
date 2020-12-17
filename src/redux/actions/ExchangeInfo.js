@@ -52,7 +52,6 @@ export function fetchAllExchangeInfo() {
       const marketNames = markets.map((val) => {
         return val.market;
       });
-
       const tokens = await getTokensFromRelay();
       dispatch(initializeInfo(info, markets, marketNames, tokens));
     })();

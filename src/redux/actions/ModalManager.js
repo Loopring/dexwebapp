@@ -5,7 +5,6 @@ export const SHOW_WITHDRAW = 'SHOW_WITHDRAW';
 export const SHOW_LOGOUT_MODAL = 'SHOW_LOGOUT_MODAL';
 export const SHOW_EXPORT_ACCOUNT = 'SHOW_EXPORT_ACCOUNT';
 export const SHOW_ENTER_PASSWORD = 'SHOW_ENTER_PASSWORD';
-export const SHOW_WALLET_CONNECT_INDICATOR = 'SHOW_WALLET_CONNECT_INDICATOR';
 
 export const SHOW_LOGIN_MODAL = 'SHOW_LOGIN_MODAL';
 export const SHOW_RESET_PASSWORD_MODAL = 'SHOW_RESET_PASSWORD_MODAL';
@@ -17,9 +16,6 @@ export const SHOW_REFERRAL_MODAL = 'SHOW_REFERRAL_MODAL';
 export const SHOW_SIDEBAR = 'SHOW_SIDEBAR';
 
 export const SHOW_CONNECT_TO_WALLET_MODAL = 'SHOW_CONNECT_TO_WALLET_MODAL';
-export const SHOW_SWAP_SELECT_TOKEN_MODAL = 'SHOW_SWAP_SELECT_TOKEN_MODAL';
-
-export const CLOSE_RISK_ALERT = 'CLOSE_RISK_ALERT';
 
 export function registerAccountModal(show) {
   return {
@@ -146,37 +142,6 @@ export function showConnectToWalletModal(show) {
     type: SHOW_CONNECT_TO_WALLET_MODAL,
     payload: {
       show,
-    },
-  };
-}
-
-export function showSwapSelectTokenModal(show, swapToken, isSwapToken0) {
-  return {
-    type: SHOW_SWAP_SELECT_TOKEN_MODAL,
-    payload: {
-      show,
-      swapToken,
-      isSwapToken0,
-    },
-  };
-}
-
-export function closeRickAlert() {
-  return {
-    type: CLOSE_RISK_ALERT,
-    payload: {},
-  };
-}
-
-export function showWalletConnectIndicatorModal(
-  show,
-  walletConnectIndicatorType
-) {
-  return {
-    type: SHOW_WALLET_CONNECT_INDICATOR,
-    payload: {
-      show,
-      walletConnectIndicatorType,
     },
   };
 }

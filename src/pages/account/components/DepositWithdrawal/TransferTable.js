@@ -131,7 +131,7 @@ class TransferTable extends React.Component {
     for (let i = 0; i < this.props.data.length; i++) {
       const transaction = this.props.data[i];
       var status = '-';
-      if (transaction.status === 'TX_STATUS_PROCESSING') {
+      if (transaction.status === 'processing') {
         status = (
           <LargeTableRowProcessing
             style={{ color: theme.highlight, textAlign: 'left' }}
@@ -142,7 +142,7 @@ class TransferTable extends React.Component {
             </div>
           </LargeTableRowProcessing>
         );
-      } else if (transaction.status === 'TX_STATUS_PROCESSED') {
+      } else if (transaction.status === 'processed') {
         status = (
           <LargeTableRowProcessed
             style={{ color: theme.green, textAlign: 'left' }}
@@ -153,7 +153,7 @@ class TransferTable extends React.Component {
             </div>
           </LargeTableRowProcessed>
         );
-      } else if (transaction.status === 'TX_STATUS_FAILED') {
+      } else if (transaction.status === 'failed') {
         status = (
           <LargeTableRowFailed style={{ color: theme.red, textAlign: 'left' }}>
             <StatusFontAwesomeIcon icon={faExclamationCircle} />
@@ -162,7 +162,7 @@ class TransferTable extends React.Component {
             </div>
           </LargeTableRowFailed>
         );
-      } else if (transaction.status === 'TX_STATUS_RECEIVED') {
+      } else if (transaction.status === 'received') {
         status = (
           <Tooltip placement="bottom" title={<I s={'StatusConfirming'} />}>
             <LargeTableRowProcessing
@@ -185,13 +185,6 @@ class TransferTable extends React.Component {
         memo = <I s="Reward" />;
       }
 
-      let isLpToken = false;
-      if (transaction && transaction.tokenName) {
-        isLpToken =
-          transaction.tokenName &&
-          transaction.tokenName.split('-').length - 1 >= 2;
-      }
-
       data.push({
         key: i,
         asset: (
@@ -200,13 +193,7 @@ class TransferTable extends React.Component {
               paddingLeft: '14px',
             }}
           >
-            {isLpToken ? (
-              <div>{transaction.symbol}</div>
-            ) : (
-              <div>
-                {transaction.symbol} - <I s={transaction.tokenName} />{' '}
-              </div>
-            )}
+            {transaction.symbol} - <I s={transaction.tokenName} />
           </LargeTableRow>
         ),
         amount: (

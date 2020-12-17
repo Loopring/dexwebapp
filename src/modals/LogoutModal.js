@@ -46,9 +46,7 @@ class LogoutModal extends React.Component {
     if (window.wallet && window.wallet.walletType === 'WalletConnect') {
       (async () => {
         try {
-          if (window.ethereum.close) {
-            await window.ethereum.close();
-          }
+          await window.ethereum.close();
           this.props.logoutAll();
         } catch (error) {
           console.log(error);
@@ -61,7 +59,7 @@ class LogoutModal extends React.Component {
     setTimeout(() => {
       this.onClose();
       this.setState({ loading: false });
-    }, 2000);
+    }, 100);
   };
 
   onClose = () => {
@@ -86,7 +84,7 @@ class LogoutModal extends React.Component {
       >
         <Spin
           spinning={this.state.loading}
-          indicator={<ModalIndicator title="Locking..." marginTop="30px" />}
+          indicator={<ModalIndicator title="Locking..." marginTop="60px" />}
         >
           <Section>
             <Instruction>

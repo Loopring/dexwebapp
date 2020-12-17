@@ -94,8 +94,6 @@ class MyAddressLinks extends React.Component {
           <I s="Show on Etherscan" />
         </SideBarButton>
 
-        {/*
-        // Retry WalletConnect feature is not stable. 
         {getWalletType() === 'WalletConnect' ? (
           <SideBarButton
             key="reconnect"
@@ -108,7 +106,7 @@ class MyAddressLinks extends React.Component {
           </SideBarButton>
         ) : (
           <div />
-        )} */}
+        )}
 
         {getWalletType() === 'MewConnect' ? (
           <SideBarButton

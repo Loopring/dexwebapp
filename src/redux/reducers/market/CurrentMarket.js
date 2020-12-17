@@ -21,7 +21,7 @@ function getCurrentMarketInitState() {
   // Get init market from localStorage
   let lastTradePage = getLastTradePage();
   if (lastTradePage === null) {
-    lastTradePage = 'DAI-USDT';
+    lastTradePage = 'LRC-USDT';
   }
 
   // Return default init market

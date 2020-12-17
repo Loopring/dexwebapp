@@ -2,7 +2,6 @@ import { connect } from 'react-redux';
 import I from 'components/I';
 import React from 'react';
 
-import * as fm from 'lightcone/common/formatter';
 import { withTheme } from 'styled-components';
 import config from 'lightcone/config';
 
@@ -23,8 +22,8 @@ class AssetPanel extends React.Component {
       prevProps.balances !== this.props.balances ||
       prevProps.exchange.tokens !== this.props.exchange.tokens ||
       prevProps.currentMarket.current !== this.props.currentMarket.current ||
-      // (this.props.legalPrice &&
-      //   prevProps.legalPrice.prices !== this.props.legalPrice.prices) ||
+      (this.props.legalPrice &&
+        prevProps.legalPrice.prices !== this.props.legalPrice.prices) ||
       prevProps.dexAccount.account.address !==
         this.props.dexAccount.account.address
     ) {
@@ -33,7 +32,6 @@ class AssetPanel extends React.Component {
   }
 
   updateLabels = () => {
-    // console.log('updateLabels', this.props.legalPrice);
     const { balances, currentMarket, exchange } = this.props;
     const { prices } = this.props.legalPrice;
 
@@ -45,8 +43,8 @@ class AssetPanel extends React.Component {
     if (
       balances &&
       balances.length &&
-      // prices &&
-      // prices.length &&
+      prices &&
+      prices.length &&
       exchange.tokens
     ) {
       const baseToken = config.getTokenBySymbol(
@@ -170,7 +168,7 @@ class AssetPanel extends React.Component {
                 color: theme.textWhite,
               }}
             >
-              {fm.numberWithCommas(this.state.baseTokenAvailableAmount)}
+              {this.state.baseTokenAvailableAmount}
             </Col>
           </Row>
           <Row
@@ -217,7 +215,7 @@ class AssetPanel extends React.Component {
                 color: theme.textWhite,
               }}
             >
-              {fm.numberWithCommas(this.state.quoteTokenAvailableAmount)}
+              {this.state.quoteTokenAvailableAmount}
             </Col>
           </Row>
           <Row

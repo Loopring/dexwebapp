@@ -1,9 +1,5 @@
 import {
-  emptyAmmTransactions,
   emptyBalances,
-  emptyDeposits,
-  emptyTransfers,
-  emptyWithdrawals,
   updateMyAccountPage,
 } from 'redux/actions/MyAccountPage';
 import {
@@ -87,10 +83,6 @@ export function logoutAll() {
       try {
         dispatch(logout());
         dispatch(emptyBalances());
-        dispatch(emptyAmmTransactions());
-        dispatch(emptyTransfers());
-        dispatch(emptyDeposits());
-        dispatch(emptyWithdrawals());
         dispatch(emptyMyOpenOrders([]));
         dispatch(emptyMyHistoryOrders([]));
         dispatch(updateMyAccountPage([]));

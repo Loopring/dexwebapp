@@ -28,5 +28,5 @@ export default {
     'calc(50vh - 56px - 52px - 44px - 44px - 32px - 32px)',
 
   simpleSecondaryPageHeight: 'calc(100vh - 56px)',
-  modalWidth: '540px',
+  modalWidth: '536px',
 };

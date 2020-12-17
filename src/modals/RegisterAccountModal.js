@@ -62,6 +62,44 @@ class RegisterAccountModal extends React.Component {
             <I s="RegisterAccountInstruction_Timing" />
             <WhyIcon text="TimingWhy" />
           </li>
+          {config.getFeeByType('deposit', this.props.exchange.onchainFees) &&
+            Number(
+              config.fromWEI(
+                'ETH',
+                Number(
+                  config.getFeeByType('create', this.props.exchange.onchainFees)
+                    .fee
+                ) +
+                  config.getFeeByType(
+                    'deposit',
+                    this.props.exchange.onchainFees
+                  ).fee,
+                this.props.exchange.tokens
+              )
+            ) > 0 && (
+              <li>
+                <I s="RegisterAccountInstruction_Fee_1" />
+                {config.getFeeByType('deposit', this.props.exchange.onchainFees)
+                  ? config.fromWEI(
+                      'ETH',
+                      Number(
+                        config.getFeeByType(
+                          'create',
+                          this.props.exchange.onchainFees
+                        ).fee
+                      ) +
+                        config.getFeeByType(
+                          'deposit',
+                          this.props.exchange.onchainFees
+                        ).fee,
+                      this.props.exchange.tokens
+                    )
+                  : '-'}{' '}
+                ETH
+                <I s="RegisterAccountInstruction_Fee_2" />
+                <WhyIcon text="RegisterAccountInstruction_FeeWhy" />
+              </li>
+            )}
         </ul>
 
         <div
@@ -166,9 +204,9 @@ class RegisterAccountModal extends React.Component {
 
     (async () => {
       try {
-        const fee = formatter.toBig(
-          config.getFeeByType('create', exchange.onchainFees).fee
-        );
+        const fee = formatter
+          .toBig(config.getFeeByType('create', exchange.onchainFees).fee)
+          .plus(config.getFeeByType('deposit', exchange.onchainFees).fee);
 
         const { keyPair } = await window.wallet.generateKeyPair(
           exchange.exchangeAddress,
