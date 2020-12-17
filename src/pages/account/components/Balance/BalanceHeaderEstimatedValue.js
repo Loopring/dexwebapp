@@ -1,11 +1,9 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { HighlightTextSpan, RegularTextSpan } from "styles/Styles";
-import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
-import { faCircleNotch } from "@fortawesome/free-solid-svg-icons/faCircleNotch";
-import I from "components/I";
-import React from "react";
-import styled, { withTheme } from "styled-components";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { HighlightTextSpan, RegularTextSpan } from 'styles/Styles';
+import { faCircleNotch } from '@fortawesome/free-solid-svg-icons/faCircleNotch';
+import I from 'components/I';
+import React, { useContext } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 
 const Card = styled.div`
   padding: 0px;
@@ -25,52 +23,50 @@ const ContentDiv = styled.div`
   color: ${(props) => props.theme.textWhite};
 `;
 
-class BalanceHeaderEstimatedValue extends React.PureComponent {
-  render() {
-    return (
-      <Card>
-        <div>
-          <TitleDiv>
-            <HighlightTextSpan>
-              <I s={this.props.title} />
-            </HighlightTextSpan>
-          </TitleDiv>
-          <ContentDiv>
-            {this.props.isLoading ? (
-              <FontAwesomeIcon
-                style={{
-                  display: "inline-block",
-                  margin: "24px",
-                  width: "14px",
-                  height: "14px",
-                }}
-                color={this.props.theme.textDim}
-                icon={faCircleNotch}
-                spin={true}
-              />
-            ) : (
+const BalanceHeaderEstimatedValue = ({
+  title,
+  isLoading,
+  estimatedValue,
+  sum,
+}) => {
+  const theme = useContext(ThemeContext);
+  return (
+    <Card>
+      <div>
+        <TitleDiv>
+          <HighlightTextSpan>
+            <I s={title} />
+          </HighlightTextSpan>
+        </TitleDiv>
+        <ContentDiv>
+          {isLoading ? (
+            <FontAwesomeIcon
+              style={{
+                display: 'inline-block',
+                margin: '24px',
+                width: '14px',
+                height: '14px',
+              }}
+              color={theme.textDim}
+              icon={faCircleNotch}
+              spin={true}
+            />
+          ) : (
+            <div>
               <div>
-                <div>
-                  <HighlightTextSpan style={{ fontSize: "2rem" }}>
-                    {this.props.estimatedValue}
-                  </HighlightTextSpan>
-                </div>
-                <div style={{ marginTop: "0px" }}>
-                  <RegularTextSpan>≈ {this.props.sum} </RegularTextSpan>
-                </div>
+                <HighlightTextSpan style={{ fontSize: '2rem' }}>
+                  {estimatedValue}
+                </HighlightTextSpan>
               </div>
-            )}
-          </ContentDiv>
-        </div>
-      </Card>
-    );
-  }
-}
-
-const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({}, dispatch);
+              <div style={{ marginTop: '0px' }}>
+                <RegularTextSpan>≈ {sum} </RegularTextSpan>
+              </div>
+            </div>
+          )}
+        </ContentDiv>
+      </div>
+    </Card>
+  );
 };
 
-export default withTheme(
-  connect(null, mapDispatchToProps)(BalanceHeaderEstimatedValue)
-);
+export default BalanceHeaderEstimatedValue;

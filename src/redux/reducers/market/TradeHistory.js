@@ -2,7 +2,7 @@ import {
   EMPTY_TRADES,
   EXTEND_TRADES,
   UPDATE_TRADES,
-} from "redux/actions/market/TradeHistory";
+} from 'redux/actions/market/TradeHistory';
 
 const initialState = {
   trades: [],

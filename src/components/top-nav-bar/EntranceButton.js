@@ -1,20 +1,21 @@
-import { Button, notification } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { connect } from "react-redux";
-import { faArrowAltCircleDown } from "@fortawesome/free-solid-svg-icons/faArrowAltCircleDown";
-import { faArrowAltCircleUp } from "@fortawesome/free-solid-svg-icons/faArrowAltCircleUp";
-import { faCircleNotch } from "@fortawesome/free-solid-svg-icons/faCircleNotch";
-import { faCode } from "@fortawesome/free-solid-svg-icons/faCode";
-import { faCrown } from "@fortawesome/free-solid-svg-icons/faCrown";
-import { faKey } from "@fortawesome/free-solid-svg-icons/faKey";
-import { faLock } from "@fortawesome/free-solid-svg-icons/faLock";
-import { faLockOpen } from "@fortawesome/free-solid-svg-icons/faLockOpen";
-import { faPlug } from "@fortawesome/free-solid-svg-icons/faPlug";
-import { faSpinner } from "@fortawesome/free-solid-svg-icons/faSpinner";
-import { faUserCircle } from "@fortawesome/free-solid-svg-icons/faUserCircle";
-import { faUserFriends } from "@fortawesome/free-solid-svg-icons/faUserFriends";
-import { faWaveSquare } from "@fortawesome/free-solid-svg-icons/faWaveSquare";
-import { history } from "redux/configureStore";
+import { Button, notification } from 'antd';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { connect } from 'react-redux';
+import { faArrowAltCircleDown } from '@fortawesome/free-solid-svg-icons/faArrowAltCircleDown';
+import { faArrowAltCircleUp } from '@fortawesome/free-solid-svg-icons/faArrowAltCircleUp';
+import { faCircleNotch } from '@fortawesome/free-solid-svg-icons/faCircleNotch';
+import { faCode } from '@fortawesome/free-solid-svg-icons/faCode';
+import { faCrown } from '@fortawesome/free-solid-svg-icons/faCrown';
+
+import { faKey } from '@fortawesome/free-solid-svg-icons/faKey';
+import { faLock } from '@fortawesome/free-solid-svg-icons/faLock';
+import { faLockOpen } from '@fortawesome/free-solid-svg-icons/faLockOpen';
+import { faPlug } from '@fortawesome/free-solid-svg-icons/faPlug';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons/faSpinner';
+import { faUserCircle } from '@fortawesome/free-solid-svg-icons/faUserCircle';
+import { faUserFriends } from '@fortawesome/free-solid-svg-icons/faUserFriends';
+import { faWaveSquare } from '@fortawesome/free-solid-svg-icons/faWaveSquare';
+import { history } from 'redux/configureStore';
 import {
   loginModal,
   registerAccountModal,
@@ -28,19 +29,19 @@ import {
   showSideBar,
   showTransferModal,
   showWithdrawModal,
-} from "redux/actions/ModalManager";
-import I from "components/I";
-import React from "react";
-import WhyIcon from "components/WhyIcon";
-import styled, { withTheme } from "styled-components";
+} from 'redux/actions/ModalManager';
+import I from 'components/I';
+import React from 'react';
+import WhyIcon from 'components/WhyIcon';
+import styled, { withTheme } from 'styled-components';
 
-import { ActionButton } from "styles/Styles";
+import { ActionButton } from 'styles/Styles';
 
-import BaseEntranceButton from "components/top-nav-bar/BaseEntranceButton";
+import BaseEntranceButton from 'components/top-nav-bar/BaseEntranceButton';
 
-import { AddressAvatarButton } from "./side-bar/AddressAvatarButton";
-import CommonLinks from "./side-bar/CommonLinks";
-import MyAddressLinks from "./side-bar/MyAddressLinks";
+import { AddressAvatarButton } from './side-bar/AddressAvatarButton';
+import CommonLinks from './side-bar/CommonLinks';
+import MyAddressLinks from './side-bar/MyAddressLinks';
 
 import {
   LOGGED_IN,
@@ -51,8 +52,10 @@ import {
   UNDEFINED,
   WALLET_UNCONNECTED,
   updateAccount,
-} from "redux/actions/DexAccount";
-import { notifyWarning } from "redux/actions/Notification";
+} from 'redux/actions/DexAccount';
+import { notifyWarning } from 'redux/actions/Notification';
+
+import { tracker } from 'components/DefaultTracker';
 
 import {
   MenuFontAwesomeIcon,
@@ -60,7 +63,7 @@ import {
   SideBarDrawer,
   SideBarGroupLabel,
   SideBarGroupSeperator,
-} from "../SideBarDrawer";
+} from '../SideBarDrawer';
 
 const SideBarDiv = styled.div`
   padding-top: 32px;
@@ -96,7 +99,7 @@ const SwitchWalletButton = styled(Button)`
 
 class EntranceButton extends React.Component {
   state = {
-    buttonType: "UNKNOWN",
+    buttonType: 'UNKNOWN',
   };
 
   defaultButton = (
@@ -119,15 +122,15 @@ class EntranceButton extends React.Component {
   };
 
   getWalletAddress = () => {
-    let walletAddress = "";
+    let walletAddress = '';
     if (
-      typeof this.props.dexAccount.account !== "undefined" &&
-      typeof this.props.dexAccount.account.address !== "undefined" &&
+      typeof this.props.dexAccount.account !== 'undefined' &&
+      typeof this.props.dexAccount.account.address !== 'undefined' &&
       window.wallet
     ) {
       walletAddress = this.props.dexAccount.account.address;
       walletAddress =
-        walletAddress.substring(0, 7) + "..." + walletAddress.slice(-7);
+        walletAddress.substring(0, 7) + '...' + walletAddress.slice(-7);
     }
     return walletAddress;
   };
@@ -196,7 +199,6 @@ class EntranceButton extends React.Component {
     });
   }
 
-  // TODO: replace with debounce
   scheduleButtonUpdate(pendingButton) {
     if (this.pendingButton.type !== pendingButton.type) {
       this.pendingButton = pendingButton;
@@ -208,6 +210,13 @@ class EntranceButton extends React.Component {
         });
 
         this.checkConnectWalletModal();
+
+        tracker.trackEvent({
+          type: 'USER_STATE',
+          data: {
+            state: pendingButton.type,
+          },
+        });
       }, pendingButton.timeout || 1500);
     }
   }
@@ -215,7 +224,7 @@ class EntranceButton extends React.Component {
   checkConnectWalletModal() {
     setTimeout(() => {
       const { account } = this.props.dexAccount;
-      if (this.props.pathname.startsWith("/invite/")) {
+      if (this.props.pathname.startsWith('/invite/')) {
         if (
           account.state === WALLET_UNCONNECTED ||
           account.state === UNDEFINED
@@ -224,7 +233,7 @@ class EntranceButton extends React.Component {
         } else if (account.state === NOT_REGISTERED) {
           this.showRegisterAccountModal();
         } else {
-          history.push("/trade");
+          history.push('/trade');
           notifyWarning(
             <span>
               <I s="AccountHasRegisteredInInviteLink" />
@@ -289,11 +298,11 @@ class EntranceButton extends React.Component {
 
     if (account.state === WALLET_UNCONNECTED || account.state === UNDEFINED) {
       this.scheduleButtonUpdate({
-        type: "WALLET_UNCONNECTED",
+        type: 'WALLET_UNCONNECTED',
         timeout: 3000,
         button: () => (
           <BaseEntranceButton
-            onMouseEnter={this.showSideBar}
+            onClick={this.showSideBar}
             icon={faPlug}
             title={<I s="Connect Wallet" />}
             backgroundcolor={this.props.theme.primary}
@@ -325,7 +334,7 @@ class EntranceButton extends React.Component {
                   <I s="ConnectToWeb3Tip" />
                 </AccountToolTipDiv>
 
-                <div style={{ margin: "16px" }}>
+                <div style={{ margin: '16px' }}>
                   <ActionButton onClick={() => this.showConnectToWalletModal()}>
                     <I s="Connect Wallet" />
                   </ActionButton>
@@ -344,10 +353,10 @@ class EntranceButton extends React.Component {
 
         case RESETTING:
           this.scheduleButtonUpdate({
-            type: "RESETTING",
+            type: 'RESETTING',
             button: () => (
               <BaseEntranceButton
-                onMouseEnter={this.showSideBar}
+                onClick={this.showSideBar}
                 spin
                 icon={faCircleNotch}
                 color={this.props.theme.primary}
@@ -376,11 +385,11 @@ class EntranceButton extends React.Component {
                       icon={faCircleNotch}
                     />
                     <AccountToolTipDiv>
-                      <I s="AccountKeyResetNotification" />{" "}
+                      <I s="AccountKeyResetNotification" />{' '}
                       <WhyIcon text="StatusProcessing" />
                     </AccountToolTipDiv>
 
-                    <div style={{ margin: "16px" }}>
+                    <div style={{ margin: '16px' }}>
                       <ActionButton
                         buttonbackground={this.props.theme.primary}
                         onClick={this.pressedDepositButton}
@@ -389,12 +398,19 @@ class EntranceButton extends React.Component {
                       </ActionButton>
                       <SwitchWalletButton
                         style={{
-                          marginTop: "16px",
+                          marginTop: '16px',
                         }}
                         onClick={() => this.showConnectToWalletModal()}
                       >
                         <I s="Switch Wallet" />
                       </SwitchWalletButton>
+                      {/* <SideBarButton
+                        key="reset-api-key"
+                        onClick={() => this.pressedResetApiKeyButton()}
+                      >
+                        <MenuFontAwesomeIcon icon={faKey} />
+                        <I s="Active API Key" />
+                      </SideBarButton> */}
                     </div>
                   </SideBarDiv>
                   <MyAddressLinks />
@@ -411,6 +427,7 @@ class EntranceButton extends React.Component {
                     <MenuFontAwesomeIcon icon={faArrowAltCircleDown} />
                     <I s="Deposit" />
                   </SideBarButton>
+
                   <CommonLinks />
                 </div>
               );
@@ -420,10 +437,10 @@ class EntranceButton extends React.Component {
 
         case NOT_REGISTERED:
           this.scheduleButtonUpdate({
-            type: "NOT_REGISTERED",
+            type: 'NOT_REGISTERED',
             button: () => (
               <BaseEntranceButton
-                onMouseEnter={this.showSideBar}
+                onClick={this.showSideBar}
                 icon={faUserCircle}
                 color={this.props.theme.textBigButton}
                 backgroundcolor={this.props.theme.primary}
@@ -453,15 +470,38 @@ class EntranceButton extends React.Component {
                       <I s="NoAccountTooltip" />
                     </AccountToolTipDiv>
 
-                    <div style={{ margin: "16px" }}>
+                    {/* <SideBarButton
+                      key="deposit"
+                      onClick={this.pressedDepositButton}
+                    >
+                      <MenuFontAwesomeIcon icon={faArrowAltCircleDown} />
+                      <I s="Deposit" />
+                    </SideBarButton>
+                    <SideBarButton
+                      key="reset-api-key"
+                      onClick={() => this.pressedResetApiKeyButton()}
+                    >
+                      <MenuFontAwesomeIcon icon={faKey} />
+                      <I s="Active API Key" />
+                    </SideBarButton> */}
+
+                    {/* <SideBarButton
+                      key="withdraw"
+                      onClick={this.pressedWithdrawButton}
+                    >
+                      <MenuFontAwesomeIcon icon={faArrowAltCircleUp} />
+                      <I s="Withdraw" />
+                    </SideBarButton> */}
+
+                    <div style={{ margin: '16px' }}>
                       <ActionButton
                         onClick={() => this.showRegisterAccountModal()}
                       >
-                        <I s="Register Account" />
+                        <I s="Activate Layer-2" />
                       </ActionButton>
                       <SwitchWalletButton
                         style={{
-                          marginTop: "16px",
+                          marginTop: '16px',
                         }}
                         onClick={() => this.showConnectToWalletModal()}
                       >
@@ -481,10 +521,10 @@ class EntranceButton extends React.Component {
         case REGISTERING:
           // Lightcone API has the record for this address, however the browser doesn't have keys.
           this.scheduleButtonUpdate({
-            type: "REGISTERING",
+            type: 'REGISTERING',
             button: () => (
               <BaseEntranceButton
-                onMouseEnter={this.showSideBar}
+                onClick={this.showSideBar}
                 icon={faCircleNotch}
                 spin
                 title={<I s="Registering Account..." />}
@@ -513,11 +553,11 @@ class EntranceButton extends React.Component {
                       icon={faCircleNotch}
                     />
                     <AccountToolTipDiv>
-                      <I s="AccountBeingRegisteredNotification" />{" "}
+                      <I s="AccountBeingRegisteredNotification" />{' '}
                       <WhyIcon text="StatusProcessing" />
                     </AccountToolTipDiv>
 
-                    <div style={{ margin: "16px" }}>
+                    <div style={{ margin: '16px' }}>
                       <ActionButton
                         buttonbackground={this.props.theme.primary}
                         onClick={this.pressedDepositButton}
@@ -526,12 +566,19 @@ class EntranceButton extends React.Component {
                       </ActionButton>
                       <SwitchWalletButton
                         style={{
-                          marginTop: "16px",
+                          marginTop: '16px',
                         }}
                         onClick={() => this.showConnectToWalletModal()}
                       >
                         <I s="Switch Wallet" />
                       </SwitchWalletButton>
+                      {/* <SideBarButton
+                        key="reset-api-key"
+                        onClick={() => this.pressedResetApiKeyButton()}
+                      >
+                        <MenuFontAwesomeIcon icon={faKey} />
+                        <I s="Active API Key" />
+                      </SideBarButton> */}
                     </div>
                   </SideBarDiv>
                   <MyAddressLinks />
@@ -558,10 +605,10 @@ class EntranceButton extends React.Component {
         case REGISTERED: {
           // Lightcone API has the record for this address, however the browser doesn't have keys.
           this.scheduleButtonUpdate({
-            type: "REGISTERED",
+            type: 'REGISTERED',
             button: () => (
               <BaseEntranceButton
-                onMouseEnter={this.showSideBar}
+                onClick={this.showSideBar}
                 icon={faLock}
                 title={this.getWalletAddress()}
                 color={this.props.theme.red}
@@ -591,23 +638,31 @@ class EntranceButton extends React.Component {
                       <I s="NeedLoginTooltip" />
                     </AccountToolTipDiv>
 
-                    <div style={{ margin: "16px" }}>
+                    <div style={{ margin: '16px' }}>
                       <ActionButton
                         onClick={() => {
                           this.props.showLoginModal(true);
                           this.props.showSideBar(false);
                         }}
                       >
-                        <I s="Login" />
+                        <I s="Unlock" />
                       </ActionButton>
                       <SwitchWalletButton
                         style={{
-                          marginTop: "16px",
+                          marginTop: '16px',
                         }}
                         onClick={() => this.showConnectToWalletModal()}
                       >
                         <I s="Switch Wallet" />
                       </SwitchWalletButton>
+
+                      {/* <SideBarButton
+                        key="reset-api-key"
+                        onClick={() => this.pressedResetApiKeyButton()}
+                      >
+                        <MenuFontAwesomeIcon icon={faKey} />
+                        <I s="Active API Key" />
+                      </SideBarButton> */}
                     </div>
                   </SideBarDiv>
 
@@ -619,21 +674,20 @@ class EntranceButton extends React.Component {
                   </SideBarGroupLabel>
 
                   <SideBarButton
-                    key="reset"
-                    onClick={() => this.pressedResetPasswordButton()}
+                    key="deposit"
+                    onClick={this.pressedDepositButton}
                   >
-                    <MenuFontAwesomeIcon icon={faKey} />
-                    <I s="Reset Account Key" />
+                    <MenuFontAwesomeIcon icon={faArrowAltCircleDown} />
+                    <I s="Deposit" />
                   </SideBarButton>
 
                   <SideBarButton
-                    key="reset"
-                    onClick={() => this.pressedResetApiKeyButton()}
+                    key="reset-account-key"
+                    onClick={() => this.pressedResetPasswordButton()}
                   >
                     <MenuFontAwesomeIcon icon={faKey} />
-                    <I s="Reset API Key" />
+                    <I s="Reset Layer-2 Keypair" />
                   </SideBarButton>
-
                   <CommonLinks />
                 </div>
               );
@@ -677,26 +731,33 @@ class EntranceButton extends React.Component {
           const icon = isVIP ? faCrown : faLockOpen;
 
           const vipBadge = isVIP ? (
-            <div
-              style={{
-                color: this.props.theme.orange,
-                fontSize: '0.75rem',
-                paddingTop: '4px',
-                fontWeight: '600',
-                userSelect: 'none',
+            <a
+              onClick={() => {
+                window.open('/document/fees', '_blank');
+                this.props.showSideBar(false);
               }}
             >
-              <I s={vipLevel} />
-            </div>
+              <div
+                style={{
+                  color: this.props.theme.orange,
+                  fontSize: '0.75rem',
+                  paddingTop: '4px',
+                  fontWeight: '600',
+                  userSelect: 'none',
+                }}
+              >
+                <I s={vipLevel} />
+              </div>
+            </a>
           ) : (
             <span />
           );
 
           this.scheduleButtonUpdate({
-            type: "LOGGED_IN",
+            type: 'LOGGED_IN',
             button: () => (
               <BaseEntranceButton
-                onMouseEnter={this.showSideBar}
+                onClick={this.showSideBar}
                 icon={icon}
                 title={this.getWalletAddress()}
                 color={this.props.theme.primary}
@@ -728,21 +789,29 @@ class EntranceButton extends React.Component {
                     <AccountToolTipDiv>
                       <I s="YouHaveLoggedInTooltip" />
                     </AccountToolTipDiv>
-                    <div style={{ margin: "12px" }}>
+                    <div style={{ margin: '12px' }}>
                       <ActionButton
                         buttonbackground={this.props.theme.red}
                         onClick={() => this.props.showLogoutModal(true)}
                       >
-                        <I s="Logout" />
+                        <I s="Lock" />
                       </ActionButton>
                       <SwitchWalletButton
                         style={{
-                          marginTop: "16px",
+                          marginTop: '16px',
                         }}
                         onClick={() => this.showConnectToWalletModal()}
                       >
                         <I s="Switch Wallet" />
                       </SwitchWalletButton>
+
+                      {/* <SideBarButton
+                        key="reset-api-key"
+                        onClick={() => this.pressedResetApiKeyButton()}
+                      >
+                        <MenuFontAwesomeIcon icon={faKey} />
+                        <I s="Active API Key" />
+                      </SideBarButton> */}
                     </div>
                   </SideBarDiv>
                   <MyAddressLinks />
@@ -776,21 +845,23 @@ class EntranceButton extends React.Component {
                     <I s="Withdraw" />
                   </SideBarButton>
 
-                  <SideBarButton
-                    key="reset"
-                    onClick={() => this.pressedResetPasswordButton()}
-                  >
-                    <MenuFontAwesomeIcon icon={faKey} />
-                    <I s="Reset Account Key" />
-                  </SideBarButton>
+                  {
+                    <SideBarButton
+                      key="reset-account-key"
+                      onClick={() => this.pressedResetPasswordButton()}
+                    >
+                      <MenuFontAwesomeIcon icon={faKey} />
+                      <I s="Reset Layer-2 Keypair" />
+                    </SideBarButton>
+                  }
 
-                  <SideBarButton
-                    key="reset"
+                  {/* <SideBarButton
+                    key="reset-api-key"
                     onClick={() => this.pressedResetApiKeyButton()}
                   >
                     <MenuFontAwesomeIcon icon={faKey} />
-                    <I s="Reset API Key" />
-                  </SideBarButton>
+                    <I s="Active API Key" />
+                  </SideBarButton> */}
 
                   <SideBarButton
                     key="export"
@@ -818,19 +889,19 @@ class EntranceButton extends React.Component {
           break;
 
         default:
-          console.error("unhandled account state ", account.state);
+          console.error('unhandled account state ', account.state);
       }
     } else if (isDesiredNetwork === false) {
       const desiredNetwork = this.props.exchange.chainId;
-      let netWorkName = "EthereumMainNet";
-      if (desiredNetwork === 4) netWorkName = "EthereumRinkebyTestnet";
-      else if (desiredNetwork === 5) netWorkName = "EthereumGörliTestNet";
+      let netWorkName = 'EthereumMainNet';
+      if (desiredNetwork === 4) netWorkName = 'EthereumRinkebyTestnet';
+      else if (desiredNetwork === 5) netWorkName = 'EthereumGörliTestNet';
 
       this.scheduleButtonUpdate({
-        type: "WRONG_NETWORK",
+        type: 'WRONG_NETWORK',
         button: () => (
           <BaseEntranceButton
-            onMouseEnter={this.showSideBar}
+            onClick={this.showSideBar}
             backgroundcolor={this.props.theme.red}
             color={this.props.theme.textBigButton}
             icon={faWaveSquare}
@@ -864,21 +935,28 @@ class EntranceButton extends React.Component {
                     <I s={netWorkName} />
                   </span>
                 </AccountToolTipDiv>
-                <div style={{ margin: "12px" }}>
+                <div style={{ margin: '12px' }}>
                   <ActionButton
                     buttonbackground={this.props.theme.red}
                     onClick={() => this.props.showLogoutModal(true)}
                   >
-                    <I s="Logout" />
+                    <I s="Lock" />
                   </ActionButton>
                   <SwitchWalletButton
                     style={{
-                      marginTop: "16px",
+                      marginTop: '16px',
                     }}
                     onClick={() => this.showConnectToWalletModal()}
                   >
                     <I s="Switch Wallet" />
                   </SwitchWalletButton>
+                  {/* <SideBarButton
+                    key="reset-api-key"
+                    onClick={() => this.pressedResetApiKeyButton()}
+                  >
+                    <MenuFontAwesomeIcon icon={faKey} />
+                    <I s="Active API Key" />
+                  </SideBarButton> */}
                 </div>
               </SideBarDiv>
 
@@ -891,7 +969,7 @@ class EntranceButton extends React.Component {
 
     return (
       <div>
-        {this.state.buttonType === "UNKNOWN"
+        {this.state.buttonType === 'UNKNOWN'
           ? this.defaultButton
           : this.createButtonAndDrawer(this.pendingButton)}
       </div>

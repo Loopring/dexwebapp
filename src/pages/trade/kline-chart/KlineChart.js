@@ -1,13 +1,13 @@
-import { connect } from "react-redux";
-import { dispose, init } from "klinecharts";
-import { withUserPreferences } from "components/UserPreferenceContext";
+import { connect } from 'react-redux';
+import { dispose, init } from 'klinecharts';
+import { withUserPreferences } from 'components/UserPreferenceContext';
 
-import React, { PureComponent } from "react";
-import config from "lightcone/config";
-import styled, { withTheme } from "styled-components";
+import React, { PureComponent } from 'react';
+import config from 'lightcone/config';
+import styled, { withTheme } from 'styled-components';
 
-import "./KlineChart.less";
-import { getData } from "./utils";
+import './KlineChart.less';
+import { getData } from './utils';
 
 const Span = styled.span`
   font-size: 11.2px;
@@ -63,44 +63,44 @@ const SelectDropdownRow = styled.li`
 
 const periods = [
   {
-    label: "Line",
-    value: "Line",
+    label: 'Line',
+    value: 'Line',
   },
   // {
   //   label: '1m',
   //   value: '1min',
   // },
   {
-    label: "5m",
-    value: "5min",
+    label: '5m',
+    value: '5min',
   },
   {
-    label: "15m",
-    value: "15min",
+    label: '15m',
+    value: '15min',
   },
   {
-    label: "30m",
-    value: "30min",
+    label: '30m',
+    value: '30min',
   },
   {
-    label: "1H",
-    value: "1hr",
+    label: '1H',
+    value: '1hr',
   },
   {
-    label: "2H",
-    value: "2hr",
+    label: '2H',
+    value: '2hr',
   },
   {
-    label: "4H",
-    value: "4hr",
+    label: '4H',
+    value: '4hr',
   },
   {
-    label: "12H",
-    value: "12hr",
+    label: '12H',
+    value: '12hr',
   },
   {
-    label: "1D",
-    value: "1d",
+    label: '1D',
+    value: '1d',
   },
   // {
   //   label: '1W',
@@ -120,10 +120,10 @@ class KlineChart extends PureComponent {
 
     this.state = {
       currentPeriod: {
-        label: "1H",
-        value: "1hr",
+        label: '1H',
+        value: '1hr',
       },
-      currentCandleStickTechnicalIndicatorType: "MA",
+      currentCandleStickTechnicalIndicatorType: 'MA',
       noData: false,
     };
   }
@@ -165,22 +165,22 @@ class KlineChart extends PureComponent {
   }
 
   componentWillUnmount() {
-    window.removeEventListener("resize", this.onResize);
+    window.removeEventListener('resize', this.onResize);
     if (this.loadMoreDataTimer) {
       clearTimeout(this.loadMoreDataTimer);
     }
     this.clearUpdateDataTimer();
-    dispose("k-line-chart");
+    dispose('k-line-chart');
   }
 
   initKlineChart() {
-    this.kLineChart = init("k-line-chart");
-    window.addEventListener("resize", this.onResize);
+    this.kLineChart = init('k-line-chart');
+    window.addEventListener('resize', this.onResize);
 
     // Add a technical indicator
-    this.kLineChart.setTechnicalIndicatorParams("VOL", []);
+    this.kLineChart.setTechnicalIndicatorParams('VOL', []);
     // Set height here!
-    this.kLineChart.addTechnicalIndicator("VOL", 50);
+    this.kLineChart.addTechnicalIndicator('VOL', 50);
 
     this.setKlineChartStyles();
   }
@@ -237,17 +237,17 @@ class KlineChart extends PureComponent {
       },
       candleStick: {
         bar: {
-          style: "solid",
+          style: 'solid',
           upColor: theme.upColor,
           downColor: theme.downColor,
           noChangeColor: theme.upColor,
         },
         priceMark: {
           high: {
-            color: "transparent", // theme.upColor,
+            color: 'transparent', // theme.upColor,
           },
           low: {
-            color: "transparent", // theme.downColor,
+            color: 'transparent', // theme.downColor,
           },
           last: {
             upColor: theme.upColor,
@@ -315,13 +315,13 @@ class KlineChart extends PureComponent {
           },
         },
         prompt: {
-          displayRule: "always",
+          displayRule: 'always',
           candleStick: {
-            showType: "standard",
+            showType: 'standard',
             labels:
-              this.props.userPreferences.language === "zh"
-                ? ["  时间", "开", "收", "高", "低"]
-                : ["  Time", "O", "C", "H", "L"],
+              this.props.userPreferences.language === 'zh'
+                ? ['  时间', '开', '收', '高', '低']
+                : ['  Time', 'O', 'C', 'H', 'L'],
             text: {
               size: 11.2,
               color: theme.textDim,
@@ -340,18 +340,18 @@ class KlineChart extends PureComponent {
       },
       technicalIndicator: {
         bar: {
-          upColor: theme.upColor + "B0",
-          downColor: theme.downColor + "B0",
-          noChangeColor: theme.upColor + "B0",
+          upColor: theme.upColor + 'B0',
+          downColor: theme.downColor + 'B0',
+          noChangeColor: theme.upColor + 'B0',
         },
         line: {
           // Colors used in MA
           colors: [
             theme.textWhite,
             theme.orange,
-            "#F601FF",
+            '#F601FF',
             theme.primary,
-            "#1e88e5",
+            '#1e88e5',
           ],
         },
       },
@@ -366,7 +366,7 @@ class KlineChart extends PureComponent {
   resetChartPosition() {
     this.kLineChart.setOffsetRightSpace(0);
 
-    if (["12hr", "1d", "1w"].includes(this.state.currentPeriod.value)) {
+    if (['12hr', '1d', '1w'].includes(this.state.currentPeriod.value)) {
       this.kLineChart.setDataSpace(30);
     } else {
       this.kLineChart.setDataSpace(10);
@@ -436,7 +436,7 @@ class KlineChart extends PureComponent {
 
   // TODO: add latest data
   updateLatestData(period) {
-    console.log("updateData");
+    console.log('updateData');
   }
 
   clearUpdateDataTimer() {
@@ -449,13 +449,13 @@ class KlineChart extends PureComponent {
     const { currentPeriod } = this.state;
     // When the period is line, set the chart as a line chart, the other is a candle chart
     if (currentPeriod !== period) {
-      if (period.value === "Line") {
-        this.kLineChart.setCandleStickChartType("real_time");
-      } else if (currentPeriod.value === "Line") {
-        this.kLineChart.setCandleStickChartType("candle_stick");
+      if (period.value === 'Line') {
+        this.kLineChart.setCandleStickChartType('real_time');
+      } else if (currentPeriod.value === 'Line') {
+        this.kLineChart.setCandleStickChartType('candle_stick');
       }
       // Set the data of different periods after switching the period
-      if (period.value !== "Line") {
+      if (period.value !== 'Line') {
         this.applyNewData(period);
       }
 
@@ -477,10 +477,10 @@ class KlineChart extends PureComponent {
           {periods.map((period) => {
             let label = period.label;
             if (
-              this.props.userPreferences.language === "zh" &&
-              period.value === "Line"
+              this.props.userPreferences.language === 'zh' &&
+              period.value === 'Line'
             ) {
-              label = "分时";
+              label = '分时';
             }
             return currentPeriod.value === period.value ? (
               <PeriodSelected
@@ -499,7 +499,7 @@ class KlineChart extends PureComponent {
             <Select>
               <Span
                 style={{
-                  paddingRight: "4px",
+                  paddingRight: '4px',
                 }}
               >
                 {currentCandleStickTechnicalIndicatorType}
@@ -512,7 +512,7 @@ class KlineChart extends PureComponent {
                 backgroundColor: this.props.theme.background,
               }}
             >
-              {["MA", "BOLL", "SAR", "NO"].map((type) => {
+              {['MA', 'BOLL', 'SAR', 'NO'].map((type) => {
                 return (
                   <SelectDropdownRow
                     key={type}
@@ -534,7 +534,7 @@ class KlineChart extends PureComponent {
         </div>
         <div className="app-content">
           <div className="k-line-chart-container">
-            <div id="k-line-chart" style={{ height: "100%" }} />
+            <div id="k-line-chart" style={{ height: '100%' }} />
           </div>
         </div>
       </div>

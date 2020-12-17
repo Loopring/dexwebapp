@@ -1,6 +1,6 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
-import { Button, Input, Menu } from "antd";
+import { Button, Input, Menu } from 'antd';
 
 const Scroller = styled.div`
   width: 100%;
@@ -16,18 +16,18 @@ const Scroller = styled.div`
 const NavButtonWrapper = styled(Menu.Item)`
   && {
     background-color: ${(props) =>
-      props.useSidePanelBackground
+      props.usesidepanelbackground === 'true'
         ? props.theme.sidePanelBackground
-        : props.theme.background}!important;
+        : props.theme.background} !important;
     border: none !important;
-    padding: 0 20px!
+    padding: 0 8px;
     margin-left: 0 !important;
     margin-right: 0 !important;
-    list-style-type: none!important;
+    list-style-type: none !important;
   }
 
   &.ant-menu-item-disabled {
-    display:none;
+    display: none;
   }
 `;
 
@@ -68,15 +68,22 @@ const BaseActionButton = styled(Button)`
   border-radius: 20px!important;
   color: ${(props) => props.theme.textBigButton}!important;
   text-transform: uppercase!important;
-  transition: 1s!important;
+  // transition: 1s!important;
+  // filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.4));
 
   &:hover {
      
   }
 
   &[disabled],&[disabled]:hover {
-    background: ${(props) => props.theme.buttonBackground}!important;
-    color: ${(props) => props.theme.textDim}!important;
+    background: ${(props) =>
+      props.disabledbuttonbackground
+        ? props.disabledbuttonbackground
+        : props.theme.buttonBackground}!important;
+    color: ${(props) =>
+      props.disabledcolor
+        ? props.disabledcolor
+        : props.theme.textDim}!important;
   }
 }
 `;
@@ -118,6 +125,9 @@ const TransferOutlineButton = styled(OutlineButton)`
     background-color: transparent !important;
     border: 1px solid ${(props) => props.theme.inputBorderActiveColor}!important;
   }
+  &:disabled {
+    color: ${(props) => props.theme.inputBorderActiveColor}!important;
+  }
 `;
 
 const DepositOutlineButton = styled(OutlineButton)`
@@ -158,16 +168,35 @@ const WithdrawOutlineButton = styled(OutlineButton)`
 
 const CancelOrderButton = WithdrawOutlineButton;
 
+const ViewMoreButton = styled(OutlineButton)`
+  margin: 0px;
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  margin-right: 4px;s
+  border-color: transparent !important;
+  color: ${(props) => props.theme.textDim}!important;
+`;
+
+const ViewAmmTransactionButton = styled(OutlineButton)`
+  margin: 0px;
+  padding: 0px;
+  font-size: 1rem !important;
+  border: 0px solid ${(props) => props.theme.inputBorderColor}!important;
+  color: ${(props) => props.theme.primary}!important;
+`;
+
 const SimpleTableContainer = styled.div`
   min-height: 540px;
-  max-width: 1200px;
+  max-width: 1250px;
   width: 100%;
   margin: 0 auto;
 `;
 
 const LargeTableContainer = styled.div`
   min-height: 540px;
-  max-width: 1200px;
+  max-width: 1250px;
   width: 100%;
   display: table;
   margin: 0 auto;
@@ -202,7 +231,7 @@ const LargeTableRowFailed = styled(LargeTableRowStatus)`
 
 const LargeTableHeader = styled.div`
   font-size: 0.8rem;
-  max-width: 1200px;
+  max-width: 1250px;
   width: 100%;
   display: table;
   margin: 0 auto;
@@ -264,6 +293,8 @@ export {
   DepositOutlineButton,
   WithdrawOutlineButton,
   CancelOrderButton,
+  ViewMoreButton,
+  ViewAmmTransactionButton,
   NavButtonWrapper,
   SimpleTableContainer,
   LargeTableContainer,

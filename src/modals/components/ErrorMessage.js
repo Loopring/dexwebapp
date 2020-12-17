@@ -1,9 +1,9 @@
-import I from "components/I";
-import React from "react";
-import styled from "styled-components";
+import I from 'components/I';
+import React from 'react';
+import styled from 'styled-components';
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons/faExclamationTriangle";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons/faExclamationTriangle';
 
 const ErrorLabel = styled.div`
   font-size: 0.85rem;
@@ -15,7 +15,7 @@ const ErrorLabel = styled.div`
 
 const ErrorMessageIcon = () => (
   <FontAwesomeIcon
-    style={{ marginRight: "8px" }}
+    style={{ marginRight: '8px' }}
     size="1x"
     icon={faExclamationTriangle}
   />
@@ -24,7 +24,7 @@ const ErrorMessageIcon = () => (
 const EthEnoughDepositErrorMessage = ({ selectedToken }) => (
   <ErrorLabel>
     <ErrorMessageIcon />
-    {selectedToken.symbol === "ETH" ? (
+    {selectedToken.symbol === 'ETH' ? (
       <I s="Insufficient balance" />
     ) : (
       <I s="Not enough Ether to pay deposit fee and transaction gas." />
@@ -100,7 +100,7 @@ const ErrorMessage = ({
   errorToken,
   errorMessage2,
   validateAddress = true,
-  errorAddressMessage = "",
+  errorAddressMessage = '',
 }) => {
   let content;
   if (!validateAddress && !!errorAddressMessage) {
@@ -111,7 +111,7 @@ const ErrorMessage = ({
     } else if (isWithdrawal) {
       content = <EthEnoughWithdrawErrorMessage />;
     }
-  } else if (ethEnough && errorMessage1 === "" && !validateAmount) {
+  } else if (ethEnough && errorMessage1 === '' && !validateAmount) {
     if (parseFloat(amount) > 0) {
       content = <InsufficientBalanceErrorMessage />;
     } else {
@@ -123,7 +123,7 @@ const ErrorMessage = ({
         content = <GreatThanZeroTransferErrorMessage />;
       }
     }
-  } else if (errorMessage1 !== "" && !validateAmount) {
+  } else if (errorMessage1 !== '' && !validateAmount) {
     content = (
       <PrecisionErrorMessage
         errorMessage1={errorMessage1}

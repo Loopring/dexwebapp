@@ -7,10 +7,14 @@
   "feeToken": "ETH",
   "maxFeeBips": 50,
   "maxAmount": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-  "uatServerUrl": "api.loopring.io",
-  "uatWsUrl":"ws.loopring.io",
+  "uatServerUrl": "uat.loopring.io",
+  "uatWsUrl":"ws.uat.loopring.io",
   "prodServerUrl": "api.loopring.io",
   "prodWsUrl":"ws.loopring.io",
+  "uat2ServerUrl": "uat2.loopring.io",
+  "uat2WsUrl":"ws.uat2.loopring.io",
+  "prod36ServerUrl": "api3.loopring.io",
+  "prod36WsUrl":"ws.api3.loopring.io",
   "defaultChannelId":"hebao::subchannel::0001",
   "txs": [
     {
@@ -23,7 +27,7 @@
     },
     {
       "type": "deposit",
-      "gas": 350000
+      "gas": 150000
     },
     {
       "type": "create",
@@ -31,7 +35,7 @@
     },
     {
       "type": "depositTo",
-      "gas": 350000
+      "gas": 150000
     },
     {
       "type": "claim",
@@ -73,5 +77,7 @@
       "token":"ANT",
       "gas":350000
     }
+  ],
+  "localTokens": [
   ]
 }

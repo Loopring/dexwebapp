@@ -2,7 +2,7 @@ import {
   UPDATE_LIQUIDITY_MINING_MY_REWARD_TABLE_PAGINATION,
   UPDATE_LIQUIDITY_MINING_RANK,
   UPDATE_MY_LIQUIDITY_MINING,
-} from "redux/actions/LiquidityMining";
+} from 'redux/actions/LiquidityMining';
 
 const initialState = {
   myRewardTablePaginations: {},

@@ -1,34 +1,70 @@
-import { Redirect, Route, Switch } from "react-router";
-import React from "react";
+import { Redirect, Route, Switch } from 'react-router';
+import React from 'react';
 
 import {
+  MyAmmTransactionPage,
   MyBalancesPage,
   MyDepositsPage,
-  MyLiquidityMiningPage,
   MyReferralRewardsPage,
   MyTransferPage,
   MyWithdrawalsPage,
-} from "pages/account/AccountPages";
+} from 'pages/account/AccountPages';
 
 import {
   MyOpenOrdersPage,
   MyOrderHistoryPage,
   MyTradesPage,
-} from "pages/orders/OrderPages";
+} from 'pages/orders/OrderPages';
 
-import NotFoundPage from "pages/not-found/NotFoundPage";
-import TopNavBar from "components/top-nav-bar/TopNavBar";
-import TradePage from "pages/trade/TradePage";
+import {
+  CookiePolicyPage,
+  DisclaimerPage,
+  PrivacyPolicyPage,
+  TermsPage,
+} from 'pages/legal/LegalPages';
+
+import {
+  SupportDaiPage,
+  SupportEthPage,
+  SupportLinkPage,
+  SupportLrcPage,
+  SupportUsdtPage,
+  SystenStatusPage,
+} from 'pages/support/SupportPages';
+
+import { FeesPage } from 'pages/docs/DocumentPages';
+
+import MaintenancePage from 'pages/maintenance/MaintenancePage';
+import NotFoundPage from 'pages/not-found/NotFoundPage';
+
+import SwapPage from 'pages/swap/SwapPage';
+import SwapPoolAddLiquidityPage from 'pages/swap/SwapPoolAddLiquidityPage';
+import SwapPoolPage from 'pages/swap/SwapPoolPage';
+import SwapPoolRemoveLiquidityPage from 'pages/swap/SwapPoolRemoveLiquidityPage';
+
+import TopNavBar from 'components/top-nav-bar/TopNavBar';
+import TradePage from 'pages/trade/TradePage';
+
+import { getLastTradePage } from 'lightcone/api/localStorgeAPI';
 
 const routes = (
   <div>
     <TopNavBar />
     <Switch id="side-bar-container">
-      <Route exact path="/" render={() => <Redirect to="/trade/LRC-USDT" />} />
+      <Route
+        exact
+        path="/"
+        render={() => {
+          return <Redirect to={'/swap'} />;
+        }}
+      />
       <Route
         exact
         path="/trade"
-        render={() => <Redirect to="/trade/LRC-USDT" />}
+        render={() => {
+          let lastTradePage = getLastTradePage();
+          return <Redirect to={`/trade/${lastTradePage}`} />;
+        }}
       />
       <Route exact path="/trade/:pair" component={TradePage} />
       <Route exact path="/invite" component={TradePage} />
@@ -40,20 +76,91 @@ const routes = (
         component={MyOrderHistoryPage}
       />
       <Route exact path="/orders/trade-history" component={MyTradesPage} />
+      <Route
+        path="/orders/*"
+        render={() => {
+          return <Redirect to={'/orders/open-orders'} />;
+        }}
+      />
+
+      <Route
+        exact
+        path="/account/amm-transactions"
+        component={MyAmmTransactionPage}
+      />
       <Route exact path="/account/transfers" component={MyTransferPage} />
       <Route exact path="/account/balances" component={MyBalancesPage} />
       <Route exact path="/account/deposits" component={MyDepositsPage} />
       <Route exact path="/account/withdrawals" component={MyWithdrawalsPage} />
       <Route
         exact
-        path="/account/liquidity-mining"
-        component={MyLiquidityMiningPage}
-      />
-      <Route
-        exact
         path="/account/referral-rewards"
         component={MyReferralRewardsPage}
       />
+      <Route
+        exact
+        path="/account/liquidity-mining"
+        render={() => {
+          return <Redirect to={'/account/balances'} />;
+        }}
+      />
+      <Route
+        path="/account/*"
+        render={() => {
+          return <Redirect to={'/account/balances'} />;
+        }}
+      />
+      <Route
+        exact
+        path="/liquidity-mining/rewards"
+        // component={MyLiquidityMiningRewardsPage}
+        render={() => {
+          return <Redirect to={'/swap'} />;
+        }}
+      />
+      <Route
+        exact
+        path="/liquidity-mining/ranking"
+        // component={MyLiquidityMiningRankingsPage}
+        render={() => {
+          return <Redirect to={'/swap'} />;
+        }}
+      />
+
+      <Route exact path="/swap" component={SwapPage} />
+      <Route
+        exact
+        path="/swap/"
+        render={() => {
+          return <Redirect to={'/swap'} />;
+        }}
+      />
+      <Route exact path="/swap/:pair" component={SwapPage} />
+
+      <Route exact path="/pool" component={SwapPoolPage} />
+      <Route
+        exact
+        path="/pool/add/:pair"
+        component={SwapPoolAddLiquidityPage}
+      />
+      <Route
+        exact
+        path="/pool/remove/:pair"
+        component={SwapPoolRemoveLiquidityPage}
+      />
+
+      <Route exact path="/support/system-status" component={SystenStatusPage} />
+      <Route exact path="/support/eth" component={SupportEthPage} />
+      <Route exact path="/support/lrc" component={SupportLrcPage} />
+      <Route exact path="/support/usdt" component={SupportUsdtPage} />
+      <Route exact path="/support/dai" component={SupportDaiPage} />
+      <Route exact path="/support/link" component={SupportLinkPage} />
+      <Route exact path="/legal/terms" component={TermsPage} />
+      <Route exact path="/legal/disclaimer" component={DisclaimerPage} />
+      <Route exact path="/legal/privacy-policy" component={PrivacyPolicyPage} />
+      <Route exact path="/legal/cookie-policy" component={CookiePolicyPage} />
+      <Route exact path="/document/fees" component={FeesPage} />
+      <Route exact path="/maintenance" component={MaintenancePage} />
       <Route exact path="/404" component={NotFoundPage} />
       <Route path="/*" render={() => <Redirect to="/404" />} />
     </Switch>

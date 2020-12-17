@@ -1,16 +1,16 @@
-import { Button } from "antd";
+import { Button } from 'antd';
 
-import "./AggregationWidget.less";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { connect } from "react-redux";
-import { faMinusCircle } from "@fortawesome/free-solid-svg-icons/faMinusCircle";
-import { faPlusCircle } from "@fortawesome/free-solid-svg-icons/faPlusCircle";
-import I from "components/I";
-import React from "react";
-import config from "lightcone/config";
-import styled, { withTheme } from "styled-components";
+import './AggregationWidget.less';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { connect } from 'react-redux';
+import { faMinusCircle } from '@fortawesome/free-solid-svg-icons/faMinusCircle';
+import { faPlusCircle } from '@fortawesome/free-solid-svg-icons/faPlusCircle';
+import I from 'components/I';
+import React from 'react';
+import config from 'lightcone/config';
+import styled, { withTheme } from 'styled-components';
 
-import { updateOrderBooksLevel } from "redux/actions/market/OrderBook";
+import { updateOrderBooksLevel } from 'redux/actions/market/OrderBook';
 
 const AggregationButton = styled(Button)`
   border-style: none;
@@ -43,7 +43,7 @@ class AggregationWidget extends React.Component {
   render() {
     const theme = this.props.theme;
     const marketConfig = config.getMarketByPair(
-      this.props.market.currentMarket.current,
+      this.props.currentMarket.current,
       this.props.exchange.markets
     );
 
@@ -51,38 +51,37 @@ class AggregationWidget extends React.Component {
     let precision = 8;
     if (marketConfig) {
       maxLevel = marketConfig.orderbookAggLevels;
-      precision =
-        marketConfig.precisionForPrice - this.props.market.orderBook.level;
+      precision = marketConfig.precisionForPrice - this.props.orderBook.level;
     }
 
-    let showLevel = "1";
+    let showLevel = '1';
     if (precision > 0) {
-      showLevel = "0." + "0".repeat(precision - 1) + "1";
+      showLevel = '0.' + '0'.repeat(precision - 1) + '1';
     } else if (precision < 0) {
-      showLevel = "1" + "0".repeat(-precision);
+      showLevel = '1' + '0'.repeat(-precision);
     }
     return (
       <div
         className="order-book-level"
         style={{
           backgroundColor: theme.spreadAggregationBackground,
-          position: "absolute",
-          bottom: "0px",
-          width: "100%",
-          fontSize: "0.85rem",
-          fontWeight: "700",
-          lineHeight: "30px",
+          position: 'absolute',
+          bottom: '0px',
+          width: '100%',
+          fontSize: '0.85rem',
+          fontWeight: '700',
+          lineHeight: '30px',
         }}
       >
         <div
           style={{
             color: theme.textDim,
-            display: "inline-block",
-            width: "35%",
-            textAlign: "left",
-            padding: "1px",
-            userSelect: "none",
-            paddingLeft: "12px",
+            display: 'inline-block',
+            width: '35%',
+            textAlign: 'left',
+            padding: '1px',
+            userSelect: 'none',
+            paddingLeft: '12px',
           }}
         >
           {showLevel}
@@ -90,12 +89,12 @@ class AggregationWidget extends React.Component {
         <div
           style={{
             color: theme.textDim,
-            display: "inline-block",
-            marginLeft: "2px",
-            width: "30%",
-            textAlign: "right",
-            padding: "1px 1px 1px 12px",
-            userSelect: "none",
+            display: 'inline-block',
+            marginLeft: '2px',
+            width: '30%',
+            textAlign: 'right',
+            padding: '1px 1px 1px 12px',
+            userSelect: 'none',
           }}
         >
           <I s="Aggregation" />
@@ -103,15 +102,15 @@ class AggregationWidget extends React.Component {
 
         <AggregationButton
           style={{
-            marginRight: "2px",
+            marginRight: '2px',
           }}
-          disabled={this.props.market.orderBook.level === 0 ? true : false}
+          disabled={this.props.orderBook.level === 0 ? true : false}
           onClick={() => {
-            const nextValue = this.props.market.orderBook.level - 1;
+            const nextValue = this.props.orderBook.level - 1;
             if (nextValue >= 0) {
               this.props.updateOrderBooksLevel(
-                this.props.market.currentMarket.current,
-                this.props.market.orderBook.level - 1
+                this.props.currentMarket.current,
+                this.props.orderBook.level - 1
               );
             }
           }}
@@ -120,13 +119,13 @@ class AggregationWidget extends React.Component {
         </AggregationButton>
 
         <AggregationButton
-          disabled={this.props.market.orderBook.level === maxLevel - 1}
+          disabled={this.props.orderBook.level === maxLevel - 1}
           onClick={() => {
-            const nextValue = this.props.market.orderBook.level + 1;
+            const nextValue = this.props.orderBook.level + 1;
             if (nextValue < maxLevel) {
               this.props.updateOrderBooksLevel(
-                this.props.market.currentMarket.current,
-                this.props.market.orderBook.level + 1
+                this.props.currentMarket.current,
+                this.props.orderBook.level + 1
               );
             }
           }}
@@ -139,8 +138,8 @@ class AggregationWidget extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  const { market, exchange } = state;
-  return { market, exchange };
+  const { currentMarket, orderBook, exchange } = state;
+  return { currentMarket, orderBook, exchange };
 };
 
 const mapDispatchToProps = (dispatch) => {

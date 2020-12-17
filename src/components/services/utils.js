@@ -25,9 +25,9 @@ export function compareDexAccounts(dexAccount1, dexAccount2) {
 export function canShowLoginModal() {
   const href = window.location.href;
   if (
-    href.includes("trade") ||
-    href.includes("orders") ||
-    href.includes("account")
+    href.includes('trade') ||
+    href.includes('orders') ||
+    href.includes('account')
   ) {
     return true;
   } else {

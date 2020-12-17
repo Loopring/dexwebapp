@@ -1,6 +1,6 @@
-export const SELECT_THEME = "SELECT_THEME";
-export const SELECT_LANGUAGE = "SELECT_LANGUAGE";
-export const SELECT_CURRENCY = "SELECT_CURRENCY";
+export const SELECT_THEME = 'SELECT_THEME';
+export const SELECT_LANGUAGE = 'SELECT_LANGUAGE';
+export const SELECT_CURRENCY = 'SELECT_CURRENCY';
 
 export function selectLanguage(language) {
   return {

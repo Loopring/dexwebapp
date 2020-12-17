@@ -1,11 +1,26 @@
-import { Button } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Button } from 'antd';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import AppLayout from 'AppLayout';
+import React, { useContext } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 
-import { ThemeContext } from "styled-components";
+const BaseEntranceButtonStyled = styled(Button)`
+  cursor: pointer;
+  margin-left: 6px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
 
-import React, { useContext } from "react";
+  &:hover {
+    border-radius: 4px;
+    // border: 1px solid ${(props) =>
+      props.color || props.theme.primary} !important;
+  }
 
-import AppLayout from "AppLayout";
+  .svg-inline--fa {
+    padding-top: 1px !important;
+  }
+`;
 
 const BaseEntranceButton = ({
   icon,
@@ -14,46 +29,49 @@ const BaseEntranceButton = ({
   color,
   backgroundcolor,
   onMouseEnter,
+  onClick,
+  minWidth = '164px',
+  marginRight = '12px',
 }) => {
   const theme = useContext(ThemeContext);
   return (
     <div
       style={{
-        cursor: "default",
-        display: "flex",
-
-        alignItems: "center",
-        justifyContent: "center",
+        cursor: 'default',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         height: AppLayout.topNavBarHeight,
       }}
     >
       <div onMouseEnter={onMouseEnter}>
-        <Button
-          disabled
+        <BaseEntranceButtonStyled
+          onClick={onClick}
+          color={color || theme.textWhite}
           style={{
-            cursor: "pointer",
-            borderRadius: "4px",
-            marginRight: "12px",
-            marginLeft: "12px",
-            border: "none",
-            fontSize: "0.9rem",
-            fontWeight: "600",
-            minWidth: "164px",
+            border: `1px solid ${backgroundcolor}`,
             color: color || theme.textWhite,
             backgroundColor: backgroundcolor,
+            minWidth: minWidth,
+            marginRight: marginRight,
           }}
         >
-          <FontAwesomeIcon
-            style={{
-              width: "14px",
-              height: "14px",
-              marginRight: "12px",
-            }}
-            icon={icon}
-            spin={spin || false}
-          />
+          {icon ? (
+            <FontAwesomeIcon
+              style={{
+                width: '14px',
+                height: '14px',
+                marginRight: '8px',
+              }}
+              icon={icon}
+              spin={spin || false}
+            />
+          ) : (
+            <div />
+          )}
+
           <span>{title}</span>
-        </Button>
+        </BaseEntranceButtonStyled>
       </div>
     </div>
   );

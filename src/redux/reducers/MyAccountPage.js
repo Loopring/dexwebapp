@@ -1,28 +1,30 @@
 import {
+  EMPTY_AMM_TRANSACTIONS,
   EMPTY_BALANCES,
   EMPTY_DEPOSITS,
   EMPTY_TRANSFERS,
   EMPTY_WITHDRAWALS,
   HIDE_LOW_BALANCE_ASSETS,
+  UPDATE_AMM_TRANSACTIONS,
   UPDATE_BALANCE,
   UPDATE_DEPOSITS,
   UPDATE_MY_BALANCES,
   UPDATE_TOKEN_FILTER,
   UPDATE_TRANSFERS,
   UPDATE_WITHDRAWALS,
-} from "redux/actions/MyAccountPage";
+} from 'redux/actions/MyAccountPage';
 
 import {
   getHideLowBalanceAssets,
   removeHideLowBalanceAssets,
   saveHideLowBalanceAssets,
-} from "lightcone/api/localStorgeAPI";
+} from 'lightcone/api/localStorgeAPI';
 
 const initialState = {
   balances: [],
-  hideLowBalanceAssets: getHideLowBalanceAssets() ? true : false,
+  hideLowBalanceAssets: getHideLowBalanceAssets(),
 
-  tokenFilter: "All",
+  tokenFilter: 'All',
 
   depositOffset: 0,
   depositLimit: 20,
@@ -41,6 +43,12 @@ const initialState = {
   transferTotalNum: 0,
   transfers: [],
   isTransfersLoading: true,
+
+  ammTransactionOffset: 0,
+  ammTransactionLimit: 20,
+  ammTransactionTotalNum: 0,
+  ammTransactions: [],
+  isAmmTransactionsLoading: true,
 };
 
 export const MyAccountPageReducer = (state = initialState, action) => {
@@ -97,7 +105,7 @@ export const MyAccountPageReducer = (state = initialState, action) => {
         depositLimit: 20,
         depositTotalNum: 0,
         deposits: [],
-        isDepositsLoading: false,
+        isDepositsLoading: true,
       };
     }
 
@@ -119,7 +127,7 @@ export const MyAccountPageReducer = (state = initialState, action) => {
         withdrawalLimit: 20,
         withdrawalTotalNum: 0,
         withdrawals: [],
-        isWithdrawalsLoading: false,
+        isWithdrawalsLoading: true,
       };
     }
 
@@ -141,7 +149,29 @@ export const MyAccountPageReducer = (state = initialState, action) => {
         transferLimit: 20,
         transferTotalNum: 0,
         transfers: [],
-        isTransfersLoading: false,
+        isTransfersLoading: true,
+      };
+    }
+
+    case UPDATE_AMM_TRANSACTIONS: {
+      return {
+        ...state,
+        ammTransactionOffset: action.payload.offset,
+        ammTransactionLimit: action.payload.limit,
+        ammTransactionTotalNum: action.payload.totalNum,
+        ammTransactions: action.payload.transactions,
+        isAmmTransactionsLoading: false,
+      };
+    }
+
+    case EMPTY_AMM_TRANSACTIONS: {
+      return {
+        ...state,
+        ammTransactionOffset: 0,
+        ammTransactionLimit: 20,
+        ammTransactionTotalNum: 0,
+        ammTransactions: [],
+        isAmmTransactionsLoading: true,
       };
     }
 

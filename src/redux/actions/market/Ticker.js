@@ -1,7 +1,7 @@
-import { getTicker } from "lightcone/api/LightconeAPI";
+import { getTicker } from 'lightcone/api/LightconeAPI';
 
-export const UPDATE_TICKER = "UPDATE_TICKER";
-export const REST_TICKER = "REST_TICKER";
+export const UPDATE_TICKER = 'UPDATE_TICKER';
+export const REST_TICKER = 'REST_TICKER';
 
 export function restTicker() {
   return {

@@ -1,20 +1,20 @@
-import { getOrders } from "lightcone/api/v1/orders";
+import { getOrders } from 'lightcone/api/v1/orders';
 
 // Open orders
-export const UPDATE_MY_OPEN_ORDERS = "UPDATE_MY_OPEN_ORDERS";
-export const FETCH_MY_OPEN_ORDERS = "FETCH_MY_OPEN_ORDERS";
-export const UPDATE_SHOW_ALL_OPEN_ORDERS = "UPDATE_SHOW_ALL_OPEN_ORDERS";
-export const UPDATE_OPEN_ORDERS_OFFSET = "UPDATE_OPEN_ORDERS_OFFSET";
-export const EMPTY_MY_OPEN_ORDERS = "EMPTY_MY_OPEN_ORDERS";
+export const UPDATE_MY_OPEN_ORDERS = 'UPDATE_MY_OPEN_ORDERS';
+export const FETCH_MY_OPEN_ORDERS = 'FETCH_MY_OPEN_ORDERS';
+export const UPDATE_SHOW_ALL_OPEN_ORDERS = 'UPDATE_SHOW_ALL_OPEN_ORDERS';
+export const UPDATE_OPEN_ORDERS_OFFSET = 'UPDATE_OPEN_ORDERS_OFFSET';
+export const EMPTY_MY_OPEN_ORDERS = 'EMPTY_MY_OPEN_ORDERS';
 
 // History orders
-export const UPDATE_MY_HISTORY_ORDERS = "UPDATE_MY_HISTORY_ORDERS";
-export const FETCH_MY_HISTORY_ORDERS = "FETCH_MY_HISTORY_ORDERS";
-export const UPDATE_HISTORY_ORDERS_OFFSET = "UPDATE_HISTORY_ORDERS_OFFSET";
-export const EMPTY_MY_HISTORY_ORDERS = "EMPTY_MY_HISTORY_ORDERS";
+export const UPDATE_MY_HISTORY_ORDERS = 'UPDATE_MY_HISTORY_ORDERS';
+export const FETCH_MY_HISTORY_ORDERS = 'FETCH_MY_HISTORY_ORDERS';
+export const UPDATE_HISTORY_ORDERS_OFFSET = 'UPDATE_HISTORY_ORDERS_OFFSET';
+export const EMPTY_MY_HISTORY_ORDERS = 'EMPTY_MY_HISTORY_ORDERS';
 
 //Socket
-export const UPDATE_SOCKET_ORDER = "UPDATE_SOCKET_ORDER";
+export const UPDATE_SOCKET_ORDER = 'UPDATE_SOCKET_ORDER';
 
 export function updateSocketOrder(order) {
   return {
@@ -68,7 +68,7 @@ export function fetchMyOpenOrders(
           limit,
           offset,
           market,
-          statuses: ["waiting", "processing"],
+          statuses: ['waiting', 'processing'],
           apiKey,
           tokens,
         });
@@ -119,7 +119,7 @@ export function fetchMyHistoryOrders(
           limit,
           offset,
           market,
-          statuses: ["processed", "failed", "cancelled", "expired"],
+          statuses: ['processed', 'failed', 'cancelled', 'expired'],
           apiKey,
           tokens,
         });

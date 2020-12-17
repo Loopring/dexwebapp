@@ -11,22 +11,59 @@
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#242539">
     <meta name="google" content="notranslate">
-    <meta http-equiv="Cache-Control" content="max-age=86400">
+    <meta http-equiv="Cache-Control" content="no-cache">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@loopringorg">
     <meta name="twitter:creator" content="@loopringorg">
-    <meta name="twitter:title" content="Loopring">
-    <meta name="twitter:description" content="Ethereum zkRollup Exchange and Payment Protocol">
-    <meta name="twitter:image" content="https://loopring.io/assets/images/LRC.png">
+    <meta name="twitter:title" content="Loopring Exchange">
+    <meta name="twitter:description" content="Ethereum's first zkRollup decentralized exchange.">
+    <meta name="twitter:image" content="https://exchange.loopring.io/assets/images/twitter-card.png">
 
     <title>Loopring Exchange (DEX)</title>
+    <script>
+        var _czc = _czc || [];
+        if (
+            window.location.hostname === 'beta.loopring.io' ||
+            window.location.hostname === 'exchange.loopring.io' ||
+            window.location.hostname === 'www.exchange.loopring.io' ||
+            window.location.hostname === 'loopring.io' ||
+            window.location.hostname === 'www.loopring.io') {
+            _czc.push(["_setAccount", "1278630968"]);
+            var link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+            link.rel = "icon";
+            link.type="image/png";
+            link.sizes="32x32";
+            link.href="/favicon.png";
+            document.getElementsByTagName('head')[0].appendChild(link);
+        } else {
+            _czc.push(["_setAccount", "1278613012"]);
+        }
+    </script>
+    <style>
+        span#cnzz_stat_icon_1278630968 {
+            display: none!important;
+        }
+        span#cnzz_stat_icon_1278613012 {
+            display: none!important;
+        }
+    </style>
+    <!-- <script src="https://chatwee-api.com/v2/script/5e4ddb13bd616d2c161711d6.js"></script> -->
 </head>
 
 <body class="notranslate">
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+
+     <script type="text/javascript">
+    var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+    if (window.location.hostname === 'beta.loopring.io' || window.location.hostname === 'loopring.io' || window.location.hostname === 'www.loopring.io') {
+        document.write(unescape("%3Cspan id='cnzz_stat_icon_1278630968'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s9.cnzz.com/z_stat.php%3Fid%3D1278630968' type='text/javascript'%3E%3C/script%3E"));
+    } else {
+        document.write(unescape("%3Cspan id='cnzz_stat_icon_1278613012'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1278613012' type='text/javascript'%3E%3C/script%3E"));
+    }
+    </script>
 </body>
 
 </html>

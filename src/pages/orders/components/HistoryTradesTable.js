@@ -1,26 +1,27 @@
-import { connect } from "react-redux";
-import I from "components/I";
-import React from "react";
+import { connect } from 'react-redux';
+import { history } from 'redux/configureStore';
+import I from 'components/I';
+import React from 'react';
 
-import { withTheme } from "styled-components";
+import { withTheme } from 'styled-components';
 
-import { ConfigProvider, Pagination, Table } from "antd";
-import Header from "./Header";
-import TableLoadingSpin from "components/TableLoadingSpin";
+import { ConfigProvider, Pagination, Table } from 'antd';
+import Header from './Header';
+import TableLoadingSpin from 'components/TableLoadingSpin';
 
-import Moment from "moment";
+import Moment from 'moment';
 
 import {
   LargeTableContainer,
   LargeTableRow,
   TextCompactTableHeader,
-} from "styles/Styles";
-import EmptyTableIndicator from "components/EmptyTableIndicator";
+} from 'styles/Styles';
+import EmptyTableIndicator from 'components/EmptyTableIndicator';
 
-import { compareDexAccounts } from "components/services/utils";
-import { fetchUserTransactions } from "redux/actions/MyOrderPage";
+import { compareDexAccounts } from 'components/services/utils';
+import { fetchUserTransactions } from 'redux/actions/MyOrderPage';
 
-import { LOGGED_IN } from "redux/actions/DexAccount";
+import { LOGGED_IN } from 'redux/actions/DexAccount';
 
 class HistoryTradesTable extends React.Component {
   componentDidMount() {
@@ -64,7 +65,7 @@ class HistoryTradesTable extends React.Component {
     ) {
       // If All, tokenSymbol is undefined.
       let market;
-      if (myOrderPage.marketFilter !== "All") {
+      if (myOrderPage.marketFilter !== 'All') {
         market = myOrderPage.marketFilter;
       }
 
@@ -94,7 +95,7 @@ class HistoryTradesTable extends React.Component {
 
     const customizeRenderEmpty = () => (
       <EmptyTableIndicator
-        text={"NoHistoryOrders"}
+        text={'NoHistoryOrders'}
         loading={this.props.myOrderPage.isTransactionsLoading}
       />
     );
@@ -104,27 +105,27 @@ class HistoryTradesTable extends React.Component {
         title: (
           <TextCompactTableHeader
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
             }}
           >
             <I s="Filled At" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "date",
-        width: "15%",
+        dataIndex: 'date',
+        width: '15%',
       },
       {
         title: (
           <TextCompactTableHeader
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
             }}
           >
             <I s="Market" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "market",
-        width: "10%",
+        dataIndex: 'market',
+        width: '10%',
       },
       {
         title: (
@@ -132,8 +133,8 @@ class HistoryTradesTable extends React.Component {
             <I s="Side" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "side",
-        width: "8%",
+        dataIndex: 'side',
+        width: '8%',
       },
 
       {
@@ -142,8 +143,8 @@ class HistoryTradesTable extends React.Component {
             <I s="Fill Amount" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "size",
-        width: "15%",
+        dataIndex: 'size',
+        width: '15%',
       },
       {
         title: (
@@ -151,8 +152,8 @@ class HistoryTradesTable extends React.Component {
             <I s="Price" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "price",
-        width: "15%",
+        dataIndex: 'price',
+        width: '15%',
       },
       {
         title: (
@@ -160,7 +161,7 @@ class HistoryTradesTable extends React.Component {
             <I s="Order Total" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "total",
+        dataIndex: 'total',
       },
       {
         title: (
@@ -168,8 +169,8 @@ class HistoryTradesTable extends React.Component {
             <I s="Fee" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "fee",
-        width: "15%",
+        dataIndex: 'fee',
+        width: '15%',
       },
     ];
 
@@ -183,34 +184,40 @@ class HistoryTradesTable extends React.Component {
           <LargeTableRow
             style={{
               color:
-                order.side === "BUY" ? theme.buyPrimary : theme.sellPrimary,
+                order.side === 'BUY' ? theme.buyPrimary : theme.sellPrimary,
             }}
           >
-            {order.side === "BUY" ? <I s="Buy" /> : <I s="Sell" />}
+            {order.side === 'BUY' ? <I s="Buy" /> : <I s="Sell" />}
           </LargeTableRow>
         ),
         market: (
           <LargeTableRow
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
             }}
           >
-            <a href={`../trade/${order.market}`}>{order.market} </a>
+            <a
+              onClick={() => {
+                history.push(`/trade/${order.market}`);
+              }}
+            >
+              {order.market}{' '}
+            </a>
           </LargeTableRow>
         ),
         size: (
           <LargeTableRow>
-            {order.sizeInString} {order.market.split("-")[0]}
+            {order.sizeInString} {order.baseToken}
           </LargeTableRow>
         ),
         price: (
           <LargeTableRow
             style={{
               color:
-                order.side === "BUY" ? theme.buyPrimary : theme.sellPrimary,
+                order.side === 'BUY' ? theme.buyPrimary : theme.sellPrimary,
             }}
           >
-            {Number(order.price)} {order.market.split("-")[1]}
+            {Number(order.price)} {order.quoteToken}
           </LargeTableRow>
         ),
         total: (
@@ -224,18 +231,16 @@ class HistoryTradesTable extends React.Component {
               color: theme.textDim,
             }}
           >
-            {order.feeInString}{" "}
-            {order.side === "BUY"
-              ? order.market.split("-")[0]
-              : order.market.split("-")[1]}
+            {order.feeInString}{' '}
+            {order.side === 'BUY' ? order.baseToken : order.quoteToken}
           </LargeTableRow>
         ),
         date: (
           <LargeTableRow
             style={{
               color: theme.textDim,
-              textAlign: "left",
-              paddingLeft: "14px",
+              textAlign: 'left',
+              paddingLeft: '14px',
             }}
           >
             {Moment(order.timestamp).format(theme.timeFormat)}
@@ -260,12 +265,12 @@ class HistoryTradesTable extends React.Component {
             >
               <Table
                 style={{
-                  borderStyle: "none",
-                  borderWidth: "0px",
+                  borderStyle: 'none',
+                  borderWidth: '0px',
                   height: `${
                     this.props.myOrderPage.transactions.length * 34 + 35
                   }px`,
-                  minHeight: "500px",
+                  minHeight: '500px',
                 }}
                 columns={columns}
                 dataSource={data}
@@ -278,9 +283,9 @@ class HistoryTradesTable extends React.Component {
             {hasPagination ? (
               <Pagination
                 style={{
-                  padding: "30px 0px 30px 0px",
+                  padding: '30px 0px 30px 0px',
                   background: theme.background,
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
                 size=""
                 total={this.props.myOrderPage.transactionsTotalNum}

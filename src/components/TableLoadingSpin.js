@@ -1,7 +1,7 @@
-import { Spin } from "antd";
-import { ThemeContext } from "styled-components";
+import { Spin } from 'antd';
+import { ThemeContext } from 'styled-components';
 
-import React, { useContext } from "react";
+import React, { useContext } from 'react';
 
 const TableLoadingSpin = ({ children, loading }) => {
   const theme = useContext(ThemeContext);
@@ -14,9 +14,9 @@ const TableLoadingSpin = ({ children, loading }) => {
           alt="loading..."
           src={`/assets/images/${theme.imgDir}/bars.svg`}
           style={{
-            marginTop: "100px",
-            height: "40px",
-            opacity: "1",
+            marginTop: '100px',
+            height: '40px',
+            opacity: '1',
           }}
         />
       }

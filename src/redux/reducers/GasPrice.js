@@ -1,4 +1,4 @@
-import { UPDATE_GAS_PRICE } from "redux/actions/GasPrice";
+import { UPDATE_GAS_PRICE } from 'redux/actions/GasPrice';
 
 const initialState = {
   gasPrice: [],

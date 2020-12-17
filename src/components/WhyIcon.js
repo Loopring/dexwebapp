@@ -1,9 +1,9 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ThemeContext } from "styled-components";
-import { Tooltip } from "antd";
-import { faQuestionCircle } from "@fortawesome/free-solid-svg-icons/faQuestionCircle";
-import I from "components/I";
-import React, { useContext } from "react";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ThemeContext } from 'styled-components';
+import { Tooltip } from 'antd';
+import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons/faQuestionCircle';
+import I from 'components/I';
+import React, { useContext } from 'react';
 
 const WhyIcon = ({ text, color, description }) => {
   const theme = useContext(ThemeContext);
@@ -15,7 +15,7 @@ const WhyIcon = ({ text, color, description }) => {
       {description && (
         <div
           style={{
-            paddingTop: "8px",
+            paddingTop: '8px',
           }}
         >
           <I s={description} />
@@ -29,9 +29,9 @@ const WhyIcon = ({ text, color, description }) => {
       <FontAwesomeIcon
         style={{
           color: color ? color : theme.primary,
-          marginLeft: "8px",
-          height: "11px",
-          width: "11px",
+          marginLeft: '8px',
+          height: '11px',
+          width: '11px',
         }}
         icon={faQuestionCircle}
       />

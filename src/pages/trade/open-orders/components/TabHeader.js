@@ -1,21 +1,22 @@
-import { Button, Checkbox, Popconfirm } from "antd";
+import { Button, Checkbox, Popconfirm } from 'antd';
 
-import { cancelAllOrders } from "lightcone/api/v1/orders";
-import { connect } from "react-redux";
+import { cancelAllOrders } from 'lightcone/api/v1/orders';
+import { connect } from 'react-redux';
+import { history } from 'redux/configureStore';
 
-import I from "components/I";
-import React from "react";
-import styled, { withTheme } from "styled-components";
+import I from 'components/I';
+import React from 'react';
+import styled, { withTheme } from 'styled-components';
 
-import { CancelOrderButton, OutlineButton } from "styles/Styles";
-import { LOGGED_IN } from "redux/actions/DexAccount";
+import { CancelOrderButton, ViewMoreButton } from 'styles/Styles';
+import { LOGGED_IN } from 'redux/actions/DexAccount';
 import {
   emptyMyOpenOrders,
   fetchMyOpenOrders,
   updateShowAllOpenOrders,
-} from "redux/actions/MyOrders";
-import { notifyError, notifySuccess } from "redux/actions/Notification";
-import { updateMyOrdersAndMyTradesType } from "redux/actions/Tabs";
+} from 'redux/actions/MyOrders';
+import { notifyError, notifySuccess } from 'redux/actions/Notification';
+import { updateMyOrdersAndMyTradesType } from 'redux/actions/Tabs';
 
 const TabRow = styled.div`
   padding-top: 7px;
@@ -39,24 +40,13 @@ const CancelAllPopconfirm = styled(Popconfirm)`
   }
 `;
 
-const ViewMoreButton = styled(OutlineButton)`
-  margin: 0px;
-  padding-top: 0px !important;
-  padding-bottom: 0px !important;
-  padding-left: 4px !important;
-  padding-right: 4px !important;
-  margin-right: 4px;
-  border-color: transparent !important;
-  color: ${(props) => props.theme.textDim}!important;
-`;
-
 class TabHeader extends React.Component {
   clickedOpenOrdersButton = () => {
-    this.props.updateMyOrdersAndMyTradesType("open-orders");
+    this.props.updateMyOrdersAndMyTradesType('open-orders');
   };
 
   clickedOrderHistory = () => {
-    this.props.updateMyOrdersAndMyTradesType("history-orders");
+    this.props.updateMyOrdersAndMyTradesType('history-orders');
   };
 
   clickedShowAll = (e) => {
@@ -85,11 +75,12 @@ class TabHeader extends React.Component {
           this.props.dexAccount.account.accountId,
           20,
           0,
-          this.props.market.currentMarket.current,
+          this.props.currentMarket.current,
           this.props.dexAccount.account.apiKey,
           this.props.tokens
         );
       } catch (err) {
+        console.log('error', err);
         notifyError(<I s="Failed to cancel your order." />, this.props.theme);
       }
     })();
@@ -98,30 +89,30 @@ class TabHeader extends React.Component {
   render() {
     const theme = this.props.theme;
     const openOrdersShown =
-      this.props.tabs.type2 === "open-orders" ? true : false;
+      this.props.tabs.type2 === 'open-orders' ? true : false;
     const historyOrdersShown =
-      this.props.tabs.type2 === "history-orders" ? true : false;
+      this.props.tabs.type2 === 'history-orders' ? true : false;
 
     const { account } = this.props.dexAccount;
     const viewMoreLink = () => {
-      if (openOrdersShown) return "/orders/open-orders";
-      else if (historyOrdersShown) return "/orders/order-history";
-      else return "";
+      if (openOrdersShown) return '/orders/open-orders';
+      else if (historyOrdersShown) return '/orders/order-history';
+      else return '';
     };
 
     const buttonStyle = {
       color: theme.textWhite,
       backgroundColor: theme.background,
-      borderStyle: "none",
-      height: "30px",
-      borderRadius: "0px",
-      fontWeight: "600",
-      fontSize: "0.9rem",
-      padding: "0px 2px",
-      margin: "0px 15px 0px 0px",
-      borderBottomWidth: "2px",
-      borderBottomStyle: "solid",
-      borderBottomColor: "transparent",
+      borderStyle: 'none',
+      height: '30px',
+      borderRadius: '0px',
+      fontWeight: '600',
+      fontSize: '0.9rem',
+      padding: '0px 2px',
+      margin: '0px 15px 0px 0px',
+      borderBottomWidth: '2px',
+      borderBottomStyle: 'solid',
+      borderBottomColor: 'transparent',
     };
 
     const buyButtonActiveStyle = {
@@ -153,8 +144,8 @@ class TabHeader extends React.Component {
         </Button>
         <div
           style={{
-            float: "right",
-            marginTop: "4px",
+            float: 'right',
+            marginTop: '4px',
           }}
         >
           {account.state === LOGGED_IN && (
@@ -173,7 +164,7 @@ class TabHeader extends React.Component {
                 overlayClassName="defaultPopover"
                 icon={<span />}
                 title={<I s="CancelAllConfirm" />}
-                placement={"bottom"}
+                placement={'bottom'}
                 okText={<I s="Yes" />}
                 cancelText={<I s="No" />}
                 onConfirm={this.clickedCancelAllOrders}
@@ -184,7 +175,12 @@ class TabHeader extends React.Component {
               </CancelAllPopconfirm>
             )}
           {account.state === LOGGED_IN && (
-            <ViewMoreButton type="link" href={viewMoreLink()}>
+            <ViewMoreButton
+              type="link"
+              onClick={() => {
+                history.push(viewMoreLink());
+              }}
+            >
               <I s="View More" />
             </ViewMoreButton>
           )}
@@ -195,10 +191,10 @@ class TabHeader extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  const { dexAccount, market, myOrders, tabs, exchange } = state;
+  const { dexAccount, currentMarket, myOrders, tabs, exchange } = state;
   return {
     dexAccount,
-    market,
+    currentMarket,
     myOrders,
     tabs,
     tokens: exchange.tokens,

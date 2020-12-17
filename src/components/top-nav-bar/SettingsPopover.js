@@ -1,26 +1,33 @@
-import { connect } from "react-redux";
-import I from "components/I";
-import React from "react";
-import styled, { withTheme } from "styled-components";
+import { connect } from 'react-redux';
+import I from 'components/I';
+import React from 'react';
+import styled, { withTheme } from 'styled-components';
 
-import { Button, Col, Popover, Row } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAdjust } from "@fortawesome/free-solid-svg-icons/faAdjust";
-import { faBrush } from "@fortawesome/free-solid-svg-icons/faBrush";
-import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
-import { faCoins } from "@fortawesome/free-solid-svg-icons/faCoins";
-import { faGlobeAsia } from "@fortawesome/free-solid-svg-icons/faGlobeAsia";
+import { Button, Col, Popover, Row } from 'antd';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAdjust } from '@fortawesome/free-solid-svg-icons/faAdjust';
+import { faBrush } from '@fortawesome/free-solid-svg-icons/faBrush';
+import { faCog } from '@fortawesome/free-solid-svg-icons/faCog';
+import { faCoins } from '@fortawesome/free-solid-svg-icons/faCoins';
+import { faGlobeAsia } from '@fortawesome/free-solid-svg-icons/faGlobeAsia';
+import { faSlidersH } from '@fortawesome/free-solid-svg-icons/faSlidersH';
 
-import { faMoon } from "@fortawesome/free-solid-svg-icons/faMoon";
-import { faSun } from "@fortawesome/free-solid-svg-icons/faSun";
+import { faMoon } from '@fortawesome/free-solid-svg-icons/faMoon';
+import { faSun } from '@fortawesome/free-solid-svg-icons/faSun';
+
+import { tracker } from 'components/DefaultTracker';
 
 import {
   selectCurrency,
   selectLanguage,
   selectTheme,
-} from "redux/actions/UserPreferenceManager";
-import { updateCmcLegal } from "redux/actions/CmcPrice";
-import { withUserPreferences } from "components/UserPreferenceContext";
+} from 'redux/actions/UserPreferenceManager';
+import { setSwapSlippageTolerance } from 'redux/actions/swap/CurrentSwapForm';
+import { updateLegal } from 'redux/actions/LegalPrice';
+import { withUserPreferences } from 'components/UserPreferenceContext';
+import NumericInput from 'components/NumericInput';
+
+import { dropTrailingZeroes } from 'pages/trade/components/defaults/util';
 
 const OptionButton = styled(Button)`
   font-size: 0.8rem !important;
@@ -44,18 +51,130 @@ const OptionButton = styled(Button)`
   }
 `;
 
+const SettingFontAwesomeIcon = styled.div`
+  border-radius: 4px;
+  border: 1px solid ${(props) => props.theme.sidePanelBackground};
+
+  &:hover {
+    border-radius: 4px;
+    border: 1px solid ${(props) => props.theme.buttonBackground} !important;
+    background-color: ${(props) => props.theme.buttonBackground} !important;
+
+    // Change svg color
+    // svg path {
+    //   fill: ${(props) => props.theme.sidePanelBackground} !important;
+    // }
+  }
+`;
+
+const NumericInputStyled = styled.div`
+  border: 1px solid
+    ${(props) => {
+      if (props.selected) {
+        return props.theme.primary;
+      } else {
+        return props.theme.buttonBackground;
+      }
+    }} !important;
+  margin: 0px 8px;
+  pardding: 0;
+  border-radius: 4px;
+
+  &:hover {
+    border: 1px solid
+      ${(props) => {
+        return props.theme.primary;
+      }} !important;
+  }
+
+  input.ant-input {
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    height: 25px;
+    text-align: right;
+    color: ${(props) => props.theme.textBigButton} !important;
+  }
+
+  .ant-input-affix-wrapper {
+    height: 25px;
+    max-height: 25px;
+    padding: 0px 0px 0px 2px;
+    background-color: ${(props) => {
+      return props.theme.buttonBackground;
+    }} !important;
+    border-radius: 2px;
+
+    border: none !important;
+    &:hover,
+    &:focus {
+      border: none !important;
+    }
+  }
+
+  .ant-input-group-addon {
+    height: 25pxs;
+    padding: 3px 8px 0px 0px;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    background-color: ${(props) => {
+      return props.theme.buttonBackground;
+    }} !important;
+    color: ${(props) => props.theme.textBigButton} !important;
+
+    border: none !important;
+    &:hover,
+    &:focus {
+      border: none !important;
+    }
+  }
+`;
+
 var autoThemeJob = null;
 
 class SettingsPopover extends React.Component {
+  state = {
+    isCustomizedSlippageTolerance: false,
+    customizedSlippageTolerance: null,
+  };
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.visible !== prevProps.visible) {
+      if (this.props.visible) {
+        if (
+          [0.001, 0.005, 0.01].includes(this.props.swapForm.slippageTolerance)
+        ) {
+          this.setState({
+            isCustomizedSlippageTolerance: false,
+            customizedSlippageTolerance: null,
+          });
+        } else {
+          this.setState({
+            isCustomizedSlippageTolerance: true,
+            customizedSlippageTolerance:
+              this.props.swapForm.slippageTolerance * 100,
+          });
+        }
+      } else {
+        if (this.state.customizedSlippageTolerance > 0) {
+          this.props.setSwapSlippageTolerance(
+            dropTrailingZeroes(
+              (this.state.customizedSlippageTolerance / 100).toFixed(6)
+            )
+          );
+        }
+      }
+    }
+  }
+
   changeLanguage = (value) => {
-    if (value === "en" || value === "zh") {
+    if (value === 'en' || value === 'zh') {
       this.props.selectLanguage(value);
     }
   };
 
   changeCurrency = (value) => {
-    if (value === "CNY" || value === "USD") {
-      this.props.updateCmcLegal(value);
+    if (value === 'CNY' || value === 'USD') {
+      this.props.updateLegal(value, 'BAND');
       this.props.selectCurrency(value);
     }
   };
@@ -68,11 +187,20 @@ class SettingsPopover extends React.Component {
 
     this.props.selectTheme(themeName);
 
-    if (themeName === "auto") {
+    if (themeName === 'auto') {
       autoThemeJob = setTimeout(() => {
-        this.selectTheme("auto");
+        this.selectTheme('auto');
       }, 30 * 60 * 1000); // 30 minutes
     }
+  };
+
+  onCustomizedSlippageToleranceChange = (value) => {
+    console.log(value);
+    // this.props.setSwapSlippageTolerance(value/100);
+    this.setState({
+      isCustomizedSlippageTolerance: true,
+      customizedSlippageTolerance: value,
+    });
   };
 
   render() {
@@ -81,15 +209,16 @@ class SettingsPopover extends React.Component {
     const themeName = userPreferences.themeName;
     const language = userPreferences.language;
     const currency = userPreferences.currency;
+
     const content = (
-      <div style={{ minWidth: "360px" }}>
+      <div style={{ minWidth: '360px' }}>
         <Row type="flex" justify="space-between">
           <Col span={4}>
             <FontAwesomeIcon
               icon={faGlobeAsia}
               style={{
-                width: "24px",
-                height: "24px",
+                width: '24px',
+                height: '24px',
                 color: theme.textWhite,
               }}
             />
@@ -97,7 +226,7 @@ class SettingsPopover extends React.Component {
           <Col span={14}>
             <div
               style={{
-                fontSize: "1rem",
+                fontSize: '1rem',
                 color: theme.textWhite,
               }}
             >
@@ -105,9 +234,9 @@ class SettingsPopover extends React.Component {
             </div>
             <div
               style={{
-                fontSize: "0.85rem",
+                fontSize: '0.85rem',
                 color: theme.textDim,
-                margin: "8px 0px",
+                margin: '8px 0px',
               }}
             >
               <I s="Change the default interface language" />
@@ -115,10 +244,17 @@ class SettingsPopover extends React.Component {
           </Col>
           <Col span={2}>
             <OptionButton
-              disabled={language === "en"}
+              disabled={language === 'en'}
               size="small"
               onClick={() => {
-                this.changeLanguage("en");
+                this.changeLanguage('en');
+
+                tracker.trackEvent({
+                  type: 'CHANGE_LANGUAGE',
+                  data: {
+                    lang: 'en',
+                  },
+                });
               }}
             >
               En
@@ -127,10 +263,17 @@ class SettingsPopover extends React.Component {
           <Col span={2}></Col>
           <Col span={2}>
             <OptionButton
-              disabled={language === "zh"}
+              disabled={language === 'zh'}
               size="small"
               onClick={() => {
-                this.changeLanguage("zh");
+                this.changeLanguage('zh');
+
+                tracker.trackEvent({
+                  type: 'CHANGE_LANGUAGE',
+                  data: {
+                    lang: 'zh',
+                  },
+                });
               }}
             >
               中
@@ -140,8 +283,8 @@ class SettingsPopover extends React.Component {
         <Row
           type="flex"
           style={{
-            borderTop: "1px solid " + theme.seperator,
-            paddingTop: "12px",
+            borderTop: '1px solid ' + theme.seperator,
+            paddingTop: '12px',
           }}
           justify="space-between"
         >
@@ -149,8 +292,8 @@ class SettingsPopover extends React.Component {
             <FontAwesomeIcon
               icon={faCoins}
               style={{
-                width: "24px",
-                height: "24px",
+                width: '24px',
+                height: '24px',
                 color: theme.textWhite,
               }}
             />
@@ -158,7 +301,7 @@ class SettingsPopover extends React.Component {
           <Col span={14}>
             <div
               style={{
-                fontSize: "1rem",
+                fontSize: '1rem',
                 color: theme.textWhite,
               }}
             >
@@ -166,9 +309,9 @@ class SettingsPopover extends React.Component {
             </div>
             <div
               style={{
-                fontSize: "0.85rem",
+                fontSize: '0.85rem',
                 color: theme.textDim,
-                margin: "8px 0px",
+                margin: '8px 0px',
               }}
             >
               <I s="Change the default currency" />
@@ -177,12 +320,18 @@ class SettingsPopover extends React.Component {
           <Col span={2}>
             <OptionButton
               style={{
-                width: "36px",
+                width: '36px',
               }}
-              disabled={currency === "USD"}
+              disabled={currency === 'USD'}
               size="small"
               onClick={() => {
-                this.changeCurrency("USD");
+                this.changeCurrency('USD');
+                tracker.trackEvent({
+                  type: 'CHANGE_CURRENCY',
+                  data: {
+                    currency: 'usd',
+                  },
+                });
               }}
             >
               <I s="USD" />
@@ -191,18 +340,25 @@ class SettingsPopover extends React.Component {
           <Col
             span={4}
             style={{
-              textAlign: "right",
+              textAlign: 'right',
             }}
           >
             <OptionButton
               style={{
-                width: "36px",
-                marginRight: "-2px",
+                width: '36px',
+                marginRight: '-2px',
               }}
-              disabled={currency === "CNY"}
+              disabled={currency === 'CNY'}
               size="small"
               onClick={() => {
-                this.changeCurrency("CNY");
+                this.changeCurrency('CNY');
+
+                tracker.trackEvent({
+                  type: 'CHANGE_CURRENCY',
+                  data: {
+                    currency: 'cny',
+                  },
+                });
               }}
             >
               <I s="CNY" />
@@ -212,8 +368,8 @@ class SettingsPopover extends React.Component {
         <Row
           type="flex"
           style={{
-            borderTop: "1px solid " + theme.seperator,
-            paddingTop: "12px",
+            borderTop: '1px solid ' + theme.seperator,
+            paddingTop: '12px',
           }}
           justify="space-between"
         >
@@ -221,8 +377,8 @@ class SettingsPopover extends React.Component {
             <FontAwesomeIcon
               icon={faBrush}
               style={{
-                width: "24px",
-                height: "24px",
+                width: '24px',
+                height: '24px',
                 color: theme.textWhite,
               }}
             />
@@ -230,7 +386,7 @@ class SettingsPopover extends React.Component {
           <Col span={14}>
             <div
               style={{
-                fontSize: "1rem",
+                fontSize: '1rem',
                 color: theme.textWhite,
               }}
             >
@@ -238,9 +394,9 @@ class SettingsPopover extends React.Component {
             </div>
             <div
               style={{
-                fontSize: "0.85rem",
+                fontSize: '0.85rem',
                 color: theme.textDim,
-                margin: "8px 0px",
+                margin: '8px 0px',
               }}
             >
               <I s="Choose between dark and light theme" />
@@ -248,65 +404,214 @@ class SettingsPopover extends React.Component {
           </Col>
           <Col span={2}>
             <OptionButton
-              disabled={themeName === "light"}
+              disabled={themeName === 'light'}
               size="small"
               icon={<FontAwesomeIcon icon={faSun} />}
               style={{
-                borderRadius: "50%",
+                borderRadius: '50%',
               }}
               onClick={() => {
-                this.selectTheme("light");
+                this.selectTheme('light');
+
+                tracker.trackEvent({
+                  type: 'CHANGE_THEME',
+                  data: {
+                    themeName: 'light',
+                  },
+                });
               }}
             />
           </Col>
           <Col span={2} align="center">
             <OptionButton
-              disabled={themeName === "dark"}
+              disabled={themeName === 'dark'}
               size="small"
               icon={<FontAwesomeIcon icon={faMoon} />}
               style={{
-                borderRadius: "50%",
+                borderRadius: '50%',
               }}
               onClick={() => {
-                this.selectTheme("dark");
+                this.selectTheme('dark');
+
+                tracker.trackEvent({
+                  type: 'CHANGE_THEME',
+                  data: {
+                    themeName: 'dark',
+                  },
+                });
               }}
             />
           </Col>
           <Col span={2}>
             <OptionButton
-              disabled={themeName === "auto"}
+              disabled={themeName === 'auto'}
               size="small"
               icon={<FontAwesomeIcon icon={faAdjust} />}
               style={{
-                borderRadius: "50%",
+                borderRadius: '50%',
               }}
               onClick={() => {
-                this.selectTheme("auto");
+                this.selectTheme('auto');
+
+                tracker.trackEvent({
+                  type: 'CHANGE_THEME',
+                  data: {
+                    themeName: 'auto',
+                  },
+                });
               }}
             />
+          </Col>
+        </Row>
+        <Row
+          type="flex"
+          style={{
+            borderTop: '1px solid ' + theme.seperator,
+            paddingTop: '12px',
+          }}
+          justify="space-between"
+        >
+          <Col span={4}>
+            <FontAwesomeIcon
+              icon={faSlidersH}
+              style={{
+                width: '24px',
+                height: '24px',
+                color: theme.textWhite,
+              }}
+            />
+          </Col>
+          <Col span={20}>
+            <div
+              style={{
+                fontSize: '1rem',
+                color: theme.textWhite,
+              }}
+            >
+              <I s="Slippage Tolerance" />
+            </div>
+            <div
+              style={{
+                fontSize: '0.85rem',
+                color: theme.textDim,
+                margin: '8px 0px 8px -8px',
+              }}
+            >
+              <Row gutter={20}>
+                <Col span={5}>
+                  <OptionButton
+                    disabled={this.props.swapForm.slippageTolerance === 0.001}
+                    size="small"
+                    style={{
+                      borderRadius: '4px',
+                      width: '100%',
+                      margin: '2px 8px',
+                    }}
+                    onClick={() => {
+                      this.props.setSwapSlippageTolerance(0.001);
+                      this.setState({
+                        isCustomizedSlippageTolerance: false,
+                        customizedSlippageTolerance: null,
+                      });
+                    }}
+                  >
+                    {'0.1%'}
+                  </OptionButton>
+                </Col>
+                <Col span={5}>
+                  <OptionButton
+                    disabled={this.props.swapForm.slippageTolerance === 0.005}
+                    size="small"
+                    style={{
+                      borderRadius: '4px',
+                      width: '100%',
+                      margin: '2px 8px',
+                    }}
+                    onClick={() => {
+                      this.props.setSwapSlippageTolerance(0.005);
+                      this.setState({
+                        isCustomizedSlippageTolerance: false,
+                        customizedSlippageTolerance: null,
+                      });
+                    }}
+                  >
+                    {'0.5%'}
+                  </OptionButton>
+                </Col>
+                <Col span={5}>
+                  <OptionButton
+                    disabled={this.props.swapForm.slippageTolerance === 0.01}
+                    size="small"
+                    style={{
+                      borderRadius: '4px',
+                      width: '100%',
+                      margin: '2px 8px',
+                    }}
+                    onClick={() => {
+                      this.props.setSwapSlippageTolerance(0.01);
+                      this.setState({
+                        isCustomizedSlippageTolerance: false,
+                        customizedSlippageTolerance: null,
+                      });
+                    }}
+                  >
+                    {'1%'}
+                  </OptionButton>
+                </Col>
+                <Col
+                  span={9}
+                  style={{
+                    paddingRight: '0px',
+                  }}
+                >
+                  <NumericInputStyled
+                    selected={this.state.isCustomizedSlippageTolerance}
+                  >
+                    <NumericInput
+                      addonAfter={'%'}
+                      value={this.state.customizedSlippageTolerance}
+                      onChange={this.onCustomizedSlippageToleranceChange}
+                    />
+                  </NumericInputStyled>
+                </Col>
+              </Row>
+            </div>
           </Col>
         </Row>
       </div>
     );
     return (
       <Popover
-        placement={"bottomLeft"}
+        placement={'bottomLeft'}
         mouseLeaveDelay={0.2}
         content={content}
         title={<I s="Settings" />}
-        trigger="hover"
+        trigger="click"
         visible={this.props.visible}
         onVisibleChange={this.props.onVisibleChange}
       >
-        <FontAwesomeIcon
-          icon={faCog}
+        <SettingFontAwesomeIcon
           style={{
-            width: "14px",
-            height: "14px",
-            marginLeft: "32px",
-            marginBottom: "-6px",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '32px',
+            marginTop: '12px',
+            marginBottom: '12px',
+            backgroundColor: this.props.theme.sidePanelBackground,
           }}
-        />
+        >
+          <FontAwesomeIcon
+            icon={faCog}
+            style={{
+              width: '32px',
+              height: '14px',
+              paddingRight: '8px',
+              paddingLeft: '8px',
+              color: this.props.theme.textDim,
+            }}
+          />
+        </SettingFontAwesomeIcon>
       </Popover>
     );
   }
@@ -314,8 +619,10 @@ class SettingsPopover extends React.Component {
 
 const mapStateToProps = (state) => {
   const { pathname } = state.router.location;
+  const { swapForm } = state;
   return {
     pathname,
+    swapForm,
   };
 };
 
@@ -324,7 +631,9 @@ const mapDispatchToProps = (dispatch) => {
     selectLanguage: (language) => dispatch(selectLanguage(language)),
     selectCurrency: (currency) => dispatch(selectCurrency(currency)),
     selectTheme: (themeName) => dispatch(selectTheme(themeName)),
-    updateCmcLegal: (legal) => dispatch(updateCmcLegal(legal)),
+    updateLegal: (legal, source) => dispatch(updateLegal(legal, source)),
+    setSwapSlippageTolerance: (slippageTolerance) =>
+      dispatch(setSwapSlippageTolerance(slippageTolerance)),
   };
 };
 

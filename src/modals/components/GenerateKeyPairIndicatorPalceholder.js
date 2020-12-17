@@ -1,15 +1,15 @@
-import React from "react";
+import React from 'react';
 
-import { getWalletType } from "lightcone/api/localStorgeAPI";
-import WalletConnectIndicatorPlaceholder from "modals/components/WalletConnectIndicatorPlaceholder";
+import { getWalletType } from 'lightcone/api/localStorgeAPI';
+import WalletConnectIndicatorPlaceholder from 'modals/components/WalletConnectIndicatorPlaceholder';
 
 const GenerateKeyPairIndicatorPlaceholder = () => {
-  if (getWalletType() === "MetaMask") {
+  if (getWalletType() === 'MetaMask') {
     return (
       <div
         style={{
-          height: "460px",
-          display: "block",
+          height: '460px',
+          display: 'block',
         }}
       />
     );

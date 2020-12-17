@@ -1,4 +1,4 @@
-import { UPDATE_BLOCK_NUM } from "../actions/NotifyCenter";
+import { UPDATE_BLOCK_NUM } from '../actions/NotifyCenter';
 
 const initialState = {
   blockNum: 0,

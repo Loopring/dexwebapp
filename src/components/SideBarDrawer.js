@@ -1,9 +1,9 @@
-import { Button, Drawer, Layout } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import AppLayout from "AppLayout";
-import React, { useContext } from "react";
+import { Button, Drawer, Layout } from 'antd';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import AppLayout from 'AppLayout';
+import React, { useContext } from 'react';
 
-import styled, { ThemeContext } from "styled-components";
+import styled, { ThemeContext } from 'styled-components';
 
 const { Content } = Layout;
 
@@ -70,11 +70,11 @@ const SideBarDrawer = ({ header, body, footer, onClose, visible }) => {
       onClose={onClose}
       visible={visible}
       drawerStyle={{
-        fontSize: "0.85rem",
+        fontSize: '0.85rem',
         background: theme.sidePanelBackground,
       }}
       bodyStyle={{
-        padding: "0",
+        padding: '0',
       }}
       headerStyle={{
         height: 0,
@@ -83,15 +83,15 @@ const SideBarDrawer = ({ header, body, footer, onClose, visible }) => {
       <Layout
         onMouseLeave={onClose}
         style={{
-          background: "transparent",
-          height: "100vh",
+          background: 'transparent',
+          height: '100vh',
         }}
       >
         <div
           style={{
             background: theme.popupHeaderBackground,
-            textAlign: "center",
-            width: "100%",
+            textAlign: 'center',
+            width: '100%',
             height: AppLayout.topNavBarHeight,
             lineHeight: AppLayout.topNavBarHeight,
           }}

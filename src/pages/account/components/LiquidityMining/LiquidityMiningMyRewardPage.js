@@ -1,21 +1,15 @@
-import { connect } from "react-redux";
-import styled, { withTheme } from "styled-components";
+import { connect } from 'react-redux';
+import { withTheme } from 'styled-components';
 
-import { debounce } from "lodash";
-import I from "components/I";
-import React from "react";
+import { debounce } from 'lodash';
 
-import { compareDexAccounts } from "components/services/utils";
-import { getLiquidityMining } from "lightcone/api/LiquidityMiningAPI";
-import { updateLiquidityMiningMyRewardTablePagination } from "redux/actions/LiquidityMining";
-import LiquidityMiningMyRewardTable from "./LiquidityMiningMyRewardTable";
+import React from 'react';
 
-const MarketLabel = styled.div`
-  color: ${(props) => props.theme.textBright};
-  font-size: 0.9rem;
-  font-weight: 600;
-  padding-bottom: 10px;
-`;
+import { compareDexAccounts } from 'components/services/utils';
+import { getLiquidityMining } from 'lightcone/api/LiquidityMiningAPI';
+import { updateLiquidityMiningMyRewardTablePagination } from 'redux/actions/LiquidityMining';
+import LiquidityMiningMyRewardTable from './LiquidityMiningMyRewardTable';
+import config from 'lightcone/config';
 
 class LiquidityMiningMyRewardPage extends React.Component {
   state = {
@@ -100,18 +94,21 @@ class LiquidityMiningMyRewardPage extends React.Component {
     const endIndex = current * limit;
     const data = this.state.rewards.slice(startIndex, endIndex);
 
+    const tokens = this.props.exchange.tokens;
+    const tokenId = this.props.config.tokenId;
+    const token = config.getTokenByTokenId(tokenId, tokens);
+    const quoteToken = token ? token.symbol : 'USDT';
+
     return (
       <div>
-        <MarketLabel>
-          <I s="Rewards" />: {this.props.market}
-        </MarketLabel>
         <LiquidityMiningMyRewardTable
           total={this.state.rewards.length}
           limit={limit}
           current={current}
           market={this.props.market}
+          quoteToken={quoteToken}
           data={data}
-          placeHolder={"No rewards yet"}
+          placeHolder={'No rewards yet'}
           onChange={this.onChange}
         />
       </div>

@@ -1,7 +1,7 @@
-import Moment from "moment";
-import PropTypes from "prop-types";
-import React from "react";
-import styled from "styled-components";
+import Moment from 'moment';
+import PropTypes from 'prop-types';
+import React from 'react';
+import styled from 'styled-components';
 
 const ThinLowContrast = styled.span`
   color: ${(props) => props.theme.textDim};

@@ -1,8 +1,8 @@
-import { formatter } from "lightcone/common";
-import { getRecommendedGasPrice } from "lightcone/api/v1/recommendedGasPrice";
+import { formatter } from 'lightcone/common';
+import { getRecommendedGasPrice } from 'lightcone/api/v1/recommendedGasPrice';
 
-export const UPDATE_GAS_PRICE = "UPDATE_GAS_PRICE";
-export const FETCH_GAS_PRICE = "FETCH_GAS_PRICE";
+export const UPDATE_GAS_PRICE = 'UPDATE_GAS_PRICE';
+export const FETCH_GAS_PRICE = 'FETCH_GAS_PRICE';
 
 export function updateGasPrice(gasPrice) {
   return {

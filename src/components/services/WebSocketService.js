@@ -1,34 +1,38 @@
-import { connect } from "react-redux";
-import React, { Component } from "react";
-import config from "lightcone/config";
+import { connect } from 'react-redux';
+import React, { Component } from 'react';
+import config from 'lightcone/config';
 
 import {
   emptyOrderBooks,
   fetchOrderBooks,
   updateSocketOrderBooks,
-} from "redux/actions/market/OrderBook";
+} from 'redux/actions/market/OrderBook';
 import {
   emptyTrades,
   extendTrades,
   fetchTradeHistory,
-} from "redux/actions/market/TradeHistory";
+} from 'redux/actions/market/TradeHistory';
 
-import { LOGGED_IN } from "redux/actions/DexAccount";
-import { fetchMyAccountPage, updateBalance } from "redux/actions/MyAccountPage";
+import { LOGGED_IN } from 'redux/actions/DexAccount';
+import { fetchMyAccountPage, updateBalance } from 'redux/actions/MyAccountPage';
 import {
   fetchMyHistoryOrders,
   fetchMyOpenOrders,
   updateSocketOrder,
-} from "redux/actions/MyOrders";
+} from 'redux/actions/MyOrders';
 
-import { updateSocketAllOrder } from "redux/actions/MyOrderPage";
-import { updateTicker } from "redux/actions/market/Ticker";
+import { updateSocketAllOrder } from 'redux/actions/MyOrderPage';
+import { updateTicker } from 'redux/actions/market/Ticker';
 
-import { arrToDepth } from "lightcone/api/v1/depth";
-import { arrToTicker, arrToTrade } from "lightcone/api/LightconeAPI";
+import { arrToDepth } from 'lightcone/api/v1/depth';
+import {
+  arrToTicker,
+  arrToTrade,
+  getWsApiKey,
+} from 'lightcone/api/LightconeAPI';
 
-import { map as balanceMap } from "lightcone/api/v1/balances";
-import { map as orderMap } from "lightcone/api/v1/orders";
+import { map as balanceMap } from 'lightcone/api/v1/balances';
+import { map as orderMap } from 'lightcone/api/v1/orders';
 
 const WESOCKET_URL = config.getWsServer();
 
@@ -37,9 +41,14 @@ let tickerBuffer = null;
 let tradeBuffer = [];
 
 let timer = 0;
-let initialied = false;
+
+let retry = 0;
 
 class WebSocketService extends Component {
+  state = {
+    initialied: false,
+  };
+
   // Use setupAfterExchangeInitialized rather than componentDidMount
   setupAfterExchangeInitialized() {
     this.setSubscription();
@@ -50,8 +59,7 @@ class WebSocketService extends Component {
       tradeBuffer = tradeBuffer
         .filter(
           (trade) =>
-            trade.market ===
-            this.props.market.currentMarket.current.toUpperCase()
+            trade.market === this.props.currentMarket.current.toUpperCase()
         )
         .map((trade) => {
           delete trade.market;
@@ -64,8 +72,7 @@ class WebSocketService extends Component {
 
       if (
         tickerBuffer &&
-        tickerBuffer.market ===
-          this.props.market.currentMarket.current.toUpperCase()
+        tickerBuffer.market === this.props.currentMarket.current.toUpperCase()
       ) {
         delete tickerBuffer.market;
         this.props.updateTicker(tickerBuffer);
@@ -82,11 +89,10 @@ class WebSocketService extends Component {
     }
 
     if (this.props.exchange.isInitialized) {
-      const market = this.props.market.currentMarket.current;
-      const orderbook = this.props.market.orderBook;
+      const market = this.props.currentMarket.current;
+      const orderbook = this.props.orderBook;
       if (
-        prevProps.market.currentMarket.current !==
-        this.props.market.currentMarket.current
+        prevProps.currentMarket.current !== this.props.currentMarket.current
       ) {
         this.props.emptyTrades();
         this.props.emptyOrderBooks(0);
@@ -103,33 +109,30 @@ class WebSocketService extends Component {
         tickerBuffer = null;
         tradeBuffer = [];
         this.sub(marketArgs);
-      } else if (
-        prevProps.market.orderBook.level !== this.props.market.orderBook.level
-      ) {
-        this.props.emptyOrderBooks(this.props.market.orderBook.level);
+      } else if (prevProps.orderBook.level !== this.props.orderBook.level) {
+        this.props.emptyOrderBooks(this.props.orderBook.level);
         this.props.fetchOrderBooks(
           market,
           orderbook.level,
           this.props.exchange.tokens
         );
         const depthArg = this.getDepthArg(
-          this.props.market.currentMarket.current,
-          this.props.market.orderBook.level
+          this.props.currentMarket.current,
+          this.props.orderBook.level
         );
         this.sub([depthArg]);
       }
 
       if (
-        (prevProps.market.currentMarket.current !==
-          this.props.market.currentMarket.current ||
+        (prevProps.currentMarket.current !== this.props.currentMarket.current ||
           prevProps.myOrders.showAllOpenOrders !==
             this.props.myOrders.showAllOpenOrders) &&
         this.props.account.state === LOGGED_IN &&
         !!this.props.account.apiKey
       ) {
         const orderArg = this.props.myOrders.showAllOpenOrders
-          ? this.getOrderArg(this.props.market.currentMarket.current)
-          : this.getOrderArg(this.props.market.currentMarket.current);
+          ? this.getOrderArg(this.props.currentMarket.current)
+          : this.getOrderArg(this.props.currentMarket.current);
 
         this.sub([orderArg], this.props.account.apiKey);
       }
@@ -151,8 +154,8 @@ class WebSocketService extends Component {
        */
       if (prevProps.pathname !== this.props.pathname) {
         try {
-          let prevPropsFirst = prevProps.pathname.split("/")[1];
-          let propsFirst = this.props.pathname.split("/")[1];
+          let prevPropsFirst = prevProps.pathname.split('/')[1];
+          let propsFirst = this.props.pathname.split('/')[1];
           if (prevPropsFirst !== propsFirst) {
             this.setSubscription();
           }
@@ -174,9 +177,9 @@ class WebSocketService extends Component {
     const accountArgs = [];
 
     // Trade related websockets
-    if (this.props.pathname.includes("trade")) {
-      const market = this.props.market.currentMarket.current;
-      const orderbook = this.props.market.orderBook;
+    if (this.props.pathname.includes('trade')) {
+      const market = this.props.currentMarket.current;
+      const orderbook = this.props.orderBook;
       this.props.fetchTradeHistory(market);
       this.props.fetchOrderBooks(
         market,
@@ -191,10 +194,10 @@ class WebSocketService extends Component {
     }
 
     if (
-      this.props.pathname.includes("trade") ||
-      this.props.pathname.includes("orders")
+      this.props.pathname.includes('trade') ||
+      this.props.pathname.includes('orders')
     ) {
-      const market = this.props.market.currentMarket.current;
+      const market = this.props.currentMarket.current;
 
       if (
         this.props.account.state === LOGGED_IN &&
@@ -223,6 +226,8 @@ class WebSocketService extends Component {
     }
 
     if (this.props.account.state === LOGGED_IN && !!this.props.account.apiKey) {
+      // However, it's required to avoid a race condition.
+      // fetchMyAccountPage is called in DexAccountBalanceService.
       this.props.fetchMyAccountPage(
         this.props.account.accountId,
         this.props.account.apiKey,
@@ -231,11 +236,13 @@ class WebSocketService extends Component {
 
       const accountArg = this.getAccountArg();
       accountArgs.push(accountArg);
+
+      // No websocket connection until a user login.
+      tickerBuffer = null;
+      tradeBuffer = [];
     }
 
-    tickerBuffer = null;
-    tradeBuffer = [];
-    if (initialied) {
+    if (this.state.initialied === false) {
       this.setup([...marketArgs, ...accountArgs], this.props.account.apiKey);
     } else {
       this.sub([...marketArgs, ...accountArgs], this.props.account.apiKey);
@@ -261,67 +268,85 @@ class WebSocketService extends Component {
     return new Promise((resolve) => setTimeout(resolve, milliseconds));
   };
 
-  setup(topics = [], apiKey = "") {
+  setup(topics = [], apiKey = '') {
     if (this.ws) {
       try {
         this.ws.close();
       } catch (e) {}
     }
-    this.ws = new WebSocket(WESOCKET_URL);
 
-    this.ws.onopen = () => {
-      if (topics.length > 0) {
-        const data = {
-          op: "sub",
-          topics: topics,
+    (async () => {
+      try {
+        // ws api key is only valid one time.
+        const wsApiKey = await getWsApiKey();
+        this.ws = new WebSocket(`${WESOCKET_URL}?wsApiKey=${wsApiKey}`);
+
+        this.ws.onopen = () => {
+          if (topics.length > 0) {
+            const data = {
+              op: 'sub',
+              topics: topics,
+            };
+            if (apiKey) {
+              data.apiKey = apiKey;
+              this.setState({
+                initialied: true,
+              });
+            }
+            this.setupSocketConnectionListener();
+            try {
+              this.ws.send(JSON.stringify(data));
+            } catch (e) {
+              console.log(e);
+            }
+          }
         };
-        if (apiKey) {
-          data.apiKey = apiKey;
-          initialied = true;
-        }
-        this.setupSocketConnectionListener();
-        try {
-          this.ws.send(JSON.stringify(data));
-        } catch (e) {
-          console.log(e);
+
+        this.ws.onerror = (error) => {
+          // Wait for 10 seconds
+          (async () => {
+            await this.sleep(10 * 1000);
+            this.setup(topics, apiKey);
+          })();
+        };
+
+        // listen to onmessage event
+        this.ws.onmessage = (evt) => {
+          // add the new message to state
+          if (evt.data === 'ping') {
+            try {
+              timer = 0;
+              this.ws.send('pong');
+            } catch {}
+          } else {
+            this.parseData(evt);
+          }
+        };
+        this.ws.onclose = () => {};
+      } catch (err) {
+        console.log('failed to connect ws', err);
+        // TODO: a race condition
+        if (retry === 0) {
+          retry = 1;
+          (async () => {
+            await this.sleep(1 * 1000);
+            this.setup(topics, apiKey);
+          })();
         }
       }
-    };
-
-    this.ws.onerror = (error) => {
-      // Wait for 10 seconds
-      (async () => {
-        await this.sleep(10 * 1000);
-        this.setup(topics, apiKey);
-      })();
-    };
-
-    // listen to onmessage event
-    this.ws.onmessage = (evt) => {
-      // add the new message to state
-      if (evt.data === "ping") {
-        try {
-          timer = 0;
-          this.ws.send("pong");
-        } catch {}
-      } else {
-        this.parseData(evt);
-      }
-    };
-
-    this.ws.onclose = () => {};
+    })();
   }
 
   getTradeArg(market) {
     return {
-      topic: "trade",
+      topic: 'trade',
       market: market,
     };
   }
 
   getDepthArg(market, level) {
     return {
-      topic: "orderbook",
+      topic: 'orderbook',
       market: market,
       level: level,
     };
@@ -329,20 +354,20 @@ class WebSocketService extends Component {
 
   getTickerArg(market) {
     return {
-      topic: "ticker",
+      topic: 'ticker',
       market,
     };
   }
 
   getAccountArg() {
     return {
-      topic: "account",
+      topic: 'account',
     };
   }
 
   getOrderArg(market) {
     return {
-      topic: "order",
+      topic: 'order',
       market,
     };
   }
@@ -357,12 +382,12 @@ class WebSocketService extends Component {
   parseData(evt) {
     // console.log(evt);
     const parsedData = JSON.parse(evt.data);
-    const parsedTopic = parsedData["topic"];
+    const parsedTopic = parsedData['topic'];
     if (parsedTopic) {
       const topic = parsedTopic.topic.toLowerCase();
-      const data = parsedData["data"];
+      const data = parsedData['data'];
       switch (topic) {
-        case "account":
+        case 'account':
           if (
             this.props.account.state === LOGGED_IN &&
             this.props.account.accountId === data.accountId
@@ -371,7 +396,7 @@ class WebSocketService extends Component {
             this.props.updateBalance(balances[0]);
           }
           break;
-        case "trade":
+        case 'trade':
           const newTrades = data.map((arr) => {
             const trade = arrToTrade(arr);
             return {
@@ -387,19 +412,19 @@ class WebSocketService extends Component {
           tradeBuffer = newTrades.concat(tradeBuffer).slice(0, 80);
 
           break;
-        case "ticker":
+        case 'ticker':
           const ticker = arrToTicker(data);
           tickerBuffer = {
             market: parsedTopic.market.toUpperCase(),
             high: ticker.high,
             low: ticker.low,
             size: config.fromWEI(
-              this.props.market.currentMarket.baseTokenSymbol,
+              this.props.currentMarket.baseTokenSymbol,
               ticker.size,
               this.props.exchange.tokens
             ),
             volume: config.fromWEI(
-              this.props.market.currentMarket.quoteTokenSymbol,
+              this.props.currentMarket.quoteTokenSymbol,
               ticker.volume,
               this.props.exchange.tokens
             ),
@@ -408,20 +433,18 @@ class WebSocketService extends Component {
           };
 
           break;
-        case "orderbook":
+        case 'orderbook':
           const market = parsedTopic.market.toUpperCase();
-          if (
-            market === this.props.market.currentMarket.current.toUpperCase()
-          ) {
-            const startVersion = parsedData["startVersion"];
-            if (startVersion <= this.props.market.orderBook.version + 1) {
-              const endVersion = parsedData["endVersion"];
+          if (market === this.props.currentMarket.current.toUpperCase()) {
+            const startVersion = parsedData['startVersion'];
+            if (startVersion <= this.props.orderBook.version + 1) {
+              const endVersion = parsedData['endVersion'];
               const asks = data.asks.map((arr) => {
                 const slot = arrToDepth(arr);
                 return {
                   ...slot,
                   sizeInNumber: config.fromWEI(
-                    this.props.market.currentMarket.baseTokenSymbol,
+                    this.props.currentMarket.baseTokenSymbol,
                     slot.size,
                     this.props.exchange.tokens
                   ),
@@ -432,7 +455,7 @@ class WebSocketService extends Component {
                 return {
                   ...slot,
                   sizeInNumber: config.fromWEI(
-                    this.props.market.currentMarket.baseTokenSymbol,
+                    this.props.currentMarket.baseTokenSymbol,
                     slot.size,
                     this.props.exchange.tokens
                   ),
@@ -449,21 +472,19 @@ class WebSocketService extends Component {
               );
             } else {
               this.props.fetchOrderBooks(
-                this.props.market.currentMarket.current,
-                this.props.market.orderBook.level,
+                this.props.currentMarket.current,
+                this.props.orderBook.level,
                 this.props.exchange.tokens
               );
             }
           }
           break;
 
-        case "order":
+        case 'order':
           if (this.props.account.state === LOGGED_IN) {
             const order = orderMap([data], this.props.exchange.tokens)[0];
             const market = parsedTopic.market.toUpperCase();
-            if (
-              market === this.props.market.currentMarket.current.toUpperCase()
-            ) {
+            if (market === this.props.currentMarket.current.toUpperCase()) {
               this.props.updateSocketOrder(order);
             }
             this.props.updateSocketAllOrder(order);
@@ -475,12 +496,12 @@ class WebSocketService extends Component {
     }
   }
 
-  sub(topics, apiKey = "") {
+  sub(topics, apiKey = '') {
     if (!this.ws) {
       this.setup(topics, apiKey);
     } else {
       const unsub = {
-        op: "unsub",
+        op: 'unsub',
         topics: topics.map((topic) => {
           return {
             topic: topic.topic,
@@ -489,13 +510,15 @@ class WebSocketService extends Component {
         }),
       };
       const sub = {
-        op: "sub",
+        op: 'sub',
         topics: topics,
       };
       if (apiKey) {
         unsub.apiKey = apiKey;
         sub.apiKey = apiKey;
-        initialied = true;
+        this.setState({
+          initialied: true,
+        });
       }
 
       if (this.ws.readyState === 1) {
@@ -514,8 +537,15 @@ class WebSocketService extends Component {
 
 const mapStateToProps = (state) => {
   const { pathname } = state.router.location;
-  const { market, dexAccount, exchange, myOrders } = state;
-  return { market, account: dexAccount.account, exchange, myOrders, pathname };
+  const { currentMarket, orderBook, dexAccount, exchange, myOrders } = state;
+  return {
+    currentMarket,
+    orderBook,
+    account: dexAccount.account,
+    exchange,
+    myOrders,
+    pathname,
+  };
 };
 
 const mapDispatchToProps = (dispatch) => {

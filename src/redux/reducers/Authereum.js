@@ -1,7 +1,7 @@
 import {
   CONNECT_TO_AUTHEREUM,
   CONNECT_TO_AUTHEREUM_COMPLETE,
-} from "redux/actions/Authereum";
+} from 'redux/actions/Authereum';
 
 const initialState = {
   startConnecting: false,

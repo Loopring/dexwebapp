@@ -1,19 +1,19 @@
-import { WalletConnectEN, WalletConnectZH } from "./WalletConnectI18n";
+import { WalletConnectEN, WalletConnectZH } from './WalletConnectI18n';
 
-const green = "#33cc00";
-const red = "#FF3333";
-const orange = "#FFA333";
-const blue = "#1c60ff";
-const lightblue = "#447CFF";
+const green = '#33cc00';
+const red = '#FF3333';
+const orange = '#FFA333';
+const blue = '#1c60ff';
+const lightblue = '#447CFF';
 
-const yankeesBlueDarker = "#151618";
-const yankeesBlue = "#1c1d24";
-const russianViolet = "#282a32";
-const gunmetal = "#282a32";
-const arsenic = "#403f4c";
+const yankeesBlueDarker = '#151618';
+const yankeesBlue = '#1c1d24';
+const russianViolet = '#282a32';
+const gunmetal = '#282a32';
+const arsenic = '#403f4c';
 
 const DarkTheme = {
-  imgDir: "dark",
+  imgDir: 'dark',
   green: green,
   red: red,
   orange: orange,
@@ -25,20 +25,24 @@ const DarkTheme = {
 
   background: yankeesBlueDarker,
   foreground: yankeesBlue,
+  foreground2: '#1c1d24',
   lightForeground: russianViolet,
 
+  formDivFilter: 'drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2))',
+
   sidePanelBackground: gunmetal,
-  buttonBackground: "#616774",
+  buttonBackground: '#616774',
 
-  textBright: "#EEEEEE",
-  textWhite: "#E0E0E0",
+  textBright: '#EEEEEE',
+  textWhite: '#E0E0E0',
 
-  textWhiteBulk: "#9FA0BF",
-  textDim: "#E0E0E080",
-  textSidebarMenu: "#E0E0E0",
-  textLowContrast: "#424242",
-  textBigButton: "rgba(255,255,255,.8)",
-  textSelection: "#eeeeee",
+  textWhiteBulk: '#9FA0BF',
+  textDim: '#E0E0E080',
+  textDim2: '#A0A0A0',
+  textSidebarMenu: '#E0E0E0',
+  textLowContrast: '#424242',
+  textBigButton: 'rgba(255,255,255,.8)',
+  textSelection: '#eeeeee',
 
   popupBackground: gunmetal,
   popupHeaderBackground: `#1c1d24`,
@@ -47,25 +51,25 @@ const DarkTheme = {
   secondaryNavbarBackground: yankeesBlue,
   marketSelectionHoverBackground: yankeesBlueDarker,
   spreadAggregationBackground: russianViolet,
-  inputPlaceHolderColor: "#E0E0E040",
+  inputPlaceHolderColor: '#E0E0E040',
 
-  inputBorderColor: "rgba(255,255,255,0.05)",
-  inputBorderActiveColor: "rgba(255,255,255,0.2)",
-  seperator: "rgba(255,255,255,0.05)",
+  inputBorderColor: 'rgba(255,255,255,0.05)',
+  inputBorderActiveColor: 'rgba(255,255,255,0.2)',
+  seperator: 'rgba(255,255,255,0.05)',
   border: yankeesBlueDarker,
 
-  tableHeaderBackground: "#282a32",
-  tableHoverBackground: "#282a32",
+  tableHeaderBackground: '#282a32',
+  tableHoverBackground: '#282a32',
 
   legalIframeBackground: yankeesBlueDarker,
 
   buyPrimary: green,
-  buySecondary: green + "BB",
-  buyBar: green + "30",
+  buySecondary: green + 'BB',
+  buyBar: green + '30',
 
   sellPrimary: red,
-  sellSecondary: red + "BB",
-  sellBar: red + "30",
+  sellSecondary: red + 'BB',
+  sellBar: red + '30',
 };
 
 const DarkThemeZH = {
@@ -73,8 +77,8 @@ const DarkThemeZH = {
   walletConnectI18n: WalletConnectZH,
   upColor: red,
   downColor: green,
-  timeFormat: "M月DD日 HH:mm:ss",
-  shortTimeFormat: "M月DD日 HH:mm",
+  timeFormat: 'M月DD日 HH:mm:ss',
+  shortTimeFormat: 'M月DD日 HH:mm',
 };
 
 const DarkThemeEN = {
@@ -82,8 +86,8 @@ const DarkThemeEN = {
   walletConnectI18n: WalletConnectEN,
   upColor: green,
   downColor: red,
-  timeFormat: "MM/DD HH:mm:ss",
-  shortTimeFormat: "MM/DD HH:mm",
+  timeFormat: 'MM/DD HH:mm:ss',
+  shortTimeFormat: 'MM/DD HH:mm',
 };
 
 export { DarkThemeZH, DarkThemeEN };

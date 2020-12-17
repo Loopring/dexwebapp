@@ -1,6 +1,6 @@
-import PropTypes from "prop-types";
-import React, { useContext } from "react";
-import styled, { ThemeContext } from "styled-components";
+import PropTypes from 'prop-types';
+import React, { useContext } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 
 const CompactOrderTableRow = styled.tr`
   font-size: 0.85rem;
@@ -49,7 +49,7 @@ const CompactOrderTablePositionColumn = styled.td`
 const EmptyOrderRow = () => {
   const theme = useContext(ThemeContext);
   return (
-    <CompactOrderTableRow style={{ userSelect: "none" }}>
+    <CompactOrderTableRow style={{ userSelect: 'none' }}>
       <CompactOrderTablePriceColumn
         style={{ color: theme.inputPlaceHolderColor }}
       >
@@ -91,7 +91,7 @@ const OrderRow = ({
   const percentSize = numUnits >= totalUnits ? 1 : numUnits / totalUnits;
   const sizeBarWidth = percentSize * 80;
   const sizeBarWidthStr = `${sizeBarWidth}%`;
-  const sizeBarColor = side === "buy" ? buyBar : sellBar;
+  const sizeBarColor = side === 'buy' ? buyBar : sellBar;
 
   return (
     <CompactOrderTableRow
@@ -99,15 +99,15 @@ const OrderRow = ({
       sizeBarWidthStr={sizeBarWidthStr}
       sizeBarColor={sizeBarColor}
     >
-      {dataConfigs.map(({ propName = "data", format, getter, renderer }, i) => {
-        if (propName === "price") {
+      {dataConfigs.map(({ propName = 'data', format, getter, renderer }, i) => {
+        if (propName === 'price') {
           return (
             <CompactOrderTablePriceColumn
               key={i}
               onClick={(e) => {
                 e.preventDefault();
                 if (onClick) {
-                  onClick(order, side, "price");
+                  onClick(order, side, 'price');
                 }
               }}
             >
@@ -120,14 +120,14 @@ const OrderRow = ({
               })}
             </CompactOrderTablePriceColumn>
           );
-        } else if (propName === "size") {
+        } else if (propName === 'size') {
           return (
             <CompactOrderTableSizeColumn
               key={i}
               onClick={(e) => {
                 e.preventDefault();
                 if (onClick) {
-                  onClick(order, side, "size");
+                  onClick(order, side, 'size');
                 }
               }}
             >
@@ -138,7 +138,7 @@ const OrderRow = ({
               })}
             </CompactOrderTableSizeColumn>
           );
-        } else if (propName === "position") {
+        } else if (propName === 'position') {
           return (
             <CompactOrderTablePositionColumn key={i}>
               {renderer({
@@ -157,12 +157,12 @@ const OrderRow = ({
 };
 
 OrderRow.propTypes = {
-  side: PropTypes.oneOf(["buy", "sell"]),
+  side: PropTypes.oneOf(['buy', 'sell']),
   dataConfigs: PropTypes.arrayOf(PropTypes.object),
 };
 
 OrderRow.defaultProps = {
-  side: "buy",
+  side: 'buy',
   dataConfigs: [],
 };
 

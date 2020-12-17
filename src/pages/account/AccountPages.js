@@ -1,53 +1,76 @@
 // React and third-partycomponents
 
-import React from "react";
+import React from 'react';
 
-import BalanceTable from "./components/Balance/BalanceTable";
-import DepositWithdrawalTable from "./components/DepositWithdrawal/DepositWithdrawalTable";
-import LiquidityMiningPage from "./components/LiquidityMining/LiquidityMiningPage";
-import ReferralRewardsPage from "./components/ReferralRewards/ReferralRewardsPage";
+import BalanceTable from './components/Balance/BalanceTable';
+import DepositWithdrawalTable from './components/DepositWithdrawal/DepositWithdrawalTable';
+import LiquidityMiningRankingsPage from './components/LiquidityMining/LiquidityMiningRankingsPage';
+import LiquidityMiningRewardsPage from './components/LiquidityMining/LiquidityMiningRewardsPage';
+import ReferralRewardsPage from './components/ReferralRewards/ReferralRewardsPage';
 
-import SimpleSecondaryPageLayout from "../components/SimpleSecondaryPageLayout";
+import SimpleSecondaryPageLayout from '../components/SimpleSecondaryPageLayout';
 
 const accountSubPages = [
   {
-    id: "balances",
-    label: "Balances",
-    url: "/account/balances",
+    id: 'balances',
+    label: 'Balances',
+    url: '/account/balances',
   },
   {
-    id: "transfers",
-    label: "Transfers",
-    url: "/account/transfers",
+    id: 'amm-transactions',
+    label: 'AMM Transactions',
+    url: '/account/amm-transactions',
   },
   {
-    id: "deposits",
-    label: "Deposits",
-    url: "/account/deposits",
+    id: 'transfers',
+    label: 'Transfers',
+    url: '/account/transfers',
   },
   {
-    id: "withdrawals",
-    label: "Withdrawals",
-    url: "/account/withdrawals",
+    id: 'deposits',
+    label: 'Deposits',
+    url: '/account/deposits',
   },
   {
-    id: "liquidity-mining",
-    label: "Liquidity Mining",
-    url: "/account/liquidity-mining",
+    id: 'withdrawals',
+    label: 'Withdrawals',
+    url: '/account/withdrawals',
   },
-  /*
   {
     id: 'referral-rewards',
-    label: 'Referral Rewards',
+    label: 'Maker & Referral Rewards',
     url: '/account/referral-rewards',
-  }
-  */
+  },
+];
+
+const liquidityMiningSubPages = [
+  {
+    id: 'liquidity-mining-rewards',
+    label: 'Rewards',
+    url: '/liquidity-mining/rewards',
+  },
+  {
+    id: 'liquidity-mining-ranking',
+    label: 'Ranking',
+    url: '/liquidity-mining/ranking',
+  },
 ];
 
 const MyBalancesPage = () => {
   return (
     <SimpleSecondaryPageLayout pageId="balances" navbarConfig={accountSubPages}>
       <BalanceTable />
+    </SimpleSecondaryPageLayout>
+  );
+};
+
+const MyAmmTransactionPage = () => {
+  return (
+    <SimpleSecondaryPageLayout
+      pageId="amm-transactions"
+      navbarConfig={accountSubPages}
+    >
+      <DepositWithdrawalTable type="amm-transaction" />
     </SimpleSecondaryPageLayout>
   );
 };
@@ -82,13 +105,24 @@ const MyWithdrawalsPage = () => {
   );
 };
 
-const MyLiquidityMiningPage = () => {
+const MyLiquidityMiningRewardsPage = () => {
   return (
     <SimpleSecondaryPageLayout
-      pageId="liquidity-mining"
-      navbarConfig={accountSubPages}
+      pageId="liquidity-mining-rewards"
+      navbarConfig={liquidityMiningSubPages}
     >
-      <LiquidityMiningPage />
+      <LiquidityMiningRewardsPage />
+    </SimpleSecondaryPageLayout>
+  );
+};
+
+const MyLiquidityMiningRankingsPage = () => {
+  return (
+    <SimpleSecondaryPageLayout
+      pageId="liquidity-mining-ranking"
+      navbarConfig={liquidityMiningSubPages}
+    >
+      <LiquidityMiningRankingsPage />
     </SimpleSecondaryPageLayout>
   );
 };
@@ -106,9 +140,11 @@ const MyReferralRewardsPage = () => {
 
 export {
   MyBalancesPage,
+  MyAmmTransactionPage,
   MyTransferPage,
   MyDepositsPage,
   MyWithdrawalsPage,
-  MyLiquidityMiningPage,
+  MyLiquidityMiningRewardsPage,
+  MyLiquidityMiningRankingsPage,
   MyReferralRewardsPage,
 };

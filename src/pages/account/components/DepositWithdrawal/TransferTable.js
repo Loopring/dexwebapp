@@ -1,13 +1,13 @@
-import { connect } from "react-redux";
-import I from "components/I";
-import React from "react";
-import styled, { withTheme } from "styled-components";
+import { connect } from 'react-redux';
+import I from 'components/I';
+import React from 'react';
+import styled, { withTheme } from 'styled-components';
 
-import { ConfigProvider, Pagination, Table, Tooltip } from "antd";
-import { getEtherscanLink } from "lightcone/api/localStorgeAPI";
-import TableLoadingSpin from "components/TableLoadingSpin";
+import { ConfigProvider, Pagination, Table, Tooltip } from 'antd';
+import { getEtherscanLink } from 'lightcone/api/localStorgeAPI';
+import TableLoadingSpin from 'components/TableLoadingSpin';
 
-import Moment from "moment";
+import Moment from 'moment';
 
 import {
   LargeTableRow,
@@ -16,15 +16,15 @@ import {
   LargeTableRowProcessing,
   SimpleTableContainer,
   TextCompactTableHeader,
-} from "styles/Styles";
-import EmptyTableIndicator from "components/EmptyTableIndicator";
+} from 'styles/Styles';
+import EmptyTableIndicator from 'components/EmptyTableIndicator';
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { faCheckCircle } from "@fortawesome/free-solid-svg-icons/faCheckCircle";
-import { faCircleNotch } from "@fortawesome/free-solid-svg-icons/faCircleNotch";
-import { faClock } from "@fortawesome/free-solid-svg-icons/faClock";
-import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons/faExclamationCircle";
+import { faCheckCircle } from '@fortawesome/free-solid-svg-icons/faCheckCircle';
+import { faCircleNotch } from '@fortawesome/free-solid-svg-icons/faCircleNotch';
+import { faClock } from '@fortawesome/free-solid-svg-icons/faClock';
+import { faExclamationCircle } from '@fortawesome/free-solid-svg-icons/faExclamationCircle';
 
 const StatusFontAwesomeIcon = styled(FontAwesomeIcon)`
   margin-right: 4px;
@@ -43,25 +43,25 @@ class TransferTable extends React.Component {
     const columns = [
       {
         title: (
-          <TextCompactTableHeader style={{ paddingLeft: "14px" }}>
+          <TextCompactTableHeader style={{ paddingLeft: '14px' }}>
             <I s="Timestamp" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "date",
-        width: "16%",
+        dataIndex: 'date',
+        width: '10%',
       },
       {
         title: (
           <TextCompactTableHeader
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
             }}
           >
             <I s="Asset" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "asset",
-        width: "16%",
+        dataIndex: 'asset',
+        width: '16%',
       },
       {
         title: (
@@ -69,8 +69,8 @@ class TransferTable extends React.Component {
             <I s="Amount" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "amount",
-        width: "12%",
+        dataIndex: 'amount',
+        width: '12%',
       },
       {
         title: (
@@ -78,8 +78,8 @@ class TransferTable extends React.Component {
             <I s="From/To" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "recipient",
-        width: "12%",
+        dataIndex: 'recipient',
+        width: '12%',
       },
       {
         title: (
@@ -87,8 +87,8 @@ class TransferTable extends React.Component {
             <I s="Fee" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "fee",
-        width: "12%",
+        dataIndex: 'fee',
+        width: '12%',
       },
       {
         title: (
@@ -108,14 +108,14 @@ class TransferTable extends React.Component {
         title: (
           <TextCompactTableHeader
             style={{
-              width: "100%",
-              textAlign: "center",
+              width: '100%',
+              textAlign: 'center',
             }}
           >
             <div
               style={{
-                textAlign: "left",
-                paddingRight: "14px",
+                textAlign: 'left',
+                paddingRight: '14px',
               }}
             >
               <I s="Status" />
@@ -130,11 +130,11 @@ class TransferTable extends React.Component {
     const data = [];
     for (let i = 0; i < this.props.data.length; i++) {
       const transaction = this.props.data[i];
-      var status = "-";
-      if (transaction.status === "processing") {
+      var status = '-';
+      if (transaction.status === 'TX_STATUS_PROCESSING') {
         status = (
           <LargeTableRowProcessing
-            style={{ color: theme.highlight, textAlign: "left" }}
+            style={{ color: theme.highlight, textAlign: 'left' }}
           >
             <StatusFontAwesomeIcon icon={faCircleNotch} spin />
             <div>
@@ -142,10 +142,10 @@ class TransferTable extends React.Component {
             </div>
           </LargeTableRowProcessing>
         );
-      } else if (transaction.status === "processed") {
+      } else if (transaction.status === 'TX_STATUS_PROCESSED') {
         status = (
           <LargeTableRowProcessed
-            style={{ color: theme.green, textAlign: "left" }}
+            style={{ color: theme.green, textAlign: 'left' }}
           >
             <StatusFontAwesomeIcon icon={faCheckCircle} />
             <div>
@@ -153,20 +153,20 @@ class TransferTable extends React.Component {
             </div>
           </LargeTableRowProcessed>
         );
-      } else if (transaction.status === "failed") {
+      } else if (transaction.status === 'TX_STATUS_FAILED') {
         status = (
-          <LargeTableRowFailed style={{ color: theme.red, textAlign: "left" }}>
+          <LargeTableRowFailed style={{ color: theme.red, textAlign: 'left' }}>
             <StatusFontAwesomeIcon icon={faExclamationCircle} />
             <div>
               <I s="Failed" />
             </div>
           </LargeTableRowFailed>
         );
-      } else if (transaction.status === "received") {
+      } else if (transaction.status === 'TX_STATUS_RECEIVED') {
         status = (
-          <Tooltip placement="bottom" title={<I s={"StatusConfirming"} />}>
+          <Tooltip placement="bottom" title={<I s={'StatusConfirming'} />}>
             <LargeTableRowProcessing
-              style={{ color: theme.orange, textAlign: "left" }}
+              style={{ color: theme.orange, textAlign: 'left' }}
             >
               <StatusFontAwesomeIcon icon={faClock} />
 
@@ -185,15 +185,28 @@ class TransferTable extends React.Component {
         memo = <I s="Reward" />;
       }
 
+      let isLpToken = false;
+      if (transaction && transaction.tokenName) {
+        isLpToken =
+          transaction.tokenName &&
+          transaction.tokenName.split('-').length - 1 >= 2;
+      }
+
       data.push({
         key: i,
         asset: (
           <LargeTableRow
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
             }}
           >
-            {transaction.symbol} - <I s={transaction.tokenName} />
+            {isLpToken ? (
+              <div>{transaction.symbol}</div>
+            ) : (
+              <div>
+                {transaction.symbol} - <I s={transaction.tokenName} />{' '}
+              </div>
+            )}
           </LargeTableRow>
         ),
         amount: (
@@ -206,7 +219,7 @@ class TransferTable extends React.Component {
             }}
           >
             <span>
-              {transaction.receiver === window.wallet.accountId ? "+" : "-"}
+              {transaction.receiver === window.wallet.accountId ? '+' : '-'}
             </span>
             {transaction.amountInUI} {transaction.symbol}
           </LargeTableRow>
@@ -240,7 +253,7 @@ class TransferTable extends React.Component {
         date: (
           <LargeTableRow
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
               color: theme.textDim,
             }}
           >
@@ -250,8 +263,8 @@ class TransferTable extends React.Component {
         status: (
           <div
             style={{
-              textAlign: "center",
-              paddingRight: "14px",
+              textAlign: 'center',
+              paddingRight: '14px',
             }}
           >
             {status}
@@ -290,9 +303,9 @@ class TransferTable extends React.Component {
           {hasPagination ? (
             <Pagination
               style={{
-                padding: "30px 0px 30px 0px",
+                padding: '30px 0px 30px 0px',
                 background: theme.background,
-                textAlign: "center",
+                textAlign: 'center',
               }}
               size=""
               total={this.props.total}

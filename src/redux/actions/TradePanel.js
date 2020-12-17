@@ -1,7 +1,7 @@
-export const UPDATE_TRADE_TYPE = "UPDATE_TRADE_TYPE";
-export const UPDATE_AMOUNT = "UPDATE_AMOUNT";
-export const UPDATE_PRICE = "UPDATE_PRICE";
-export const EMPTY_TRADE_FORM = "EMPTY_TRADE_FORM";
+export const UPDATE_TRADE_TYPE = 'UPDATE_TRADE_TYPE';
+export const UPDATE_AMOUNT = 'UPDATE_AMOUNT';
+export const UPDATE_PRICE = 'UPDATE_PRICE';
+export const EMPTY_TRADE_FORM = 'EMPTY_TRADE_FORM';
 
 export function updateTradeType(tradeType) {
   return {

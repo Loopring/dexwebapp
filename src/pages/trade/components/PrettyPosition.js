@@ -1,6 +1,6 @@
-import PrettySize from "./PrettySize";
-import React from "react";
-import styled from "styled-components";
+import PrettySize from './PrettySize';
+import React from 'react';
+import styled from 'styled-components';
 
 const MedContrast = styled.span`
   color: ${(props) => props.theme.textDim};

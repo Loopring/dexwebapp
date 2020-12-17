@@ -1,4 +1,5 @@
 import {
+  CLOSE_RISK_ALERT,
   SHOW_CONNECT_TO_WALLET_MODAL,
   SHOW_DEPOSIT,
   SHOW_ENTER_PASSWORD,
@@ -10,10 +11,16 @@ import {
   SHOW_RESET_API_KEY_MODAL,
   SHOW_RESET_PASSWORD_MODAL,
   SHOW_SIDEBAR,
+  SHOW_SWAP_SELECT_TOKEN_MODAL,
   SHOW_TRANSFER,
+  SHOW_WALLET_CONNECT_INDICATOR,
   SHOW_WECHAT_MODAL,
   SHOW_WITHDRAW,
-} from "redux/actions/ModalManager";
+} from 'redux/actions/ModalManager';
+import {
+  getRiskAlertVisible,
+  saveRiskAlertVisible,
+} from 'lightcone/api/localStorgeAPI';
 
 const initialState = {
   isRegisterAccountModalVisible: false,
@@ -23,18 +30,22 @@ const initialState = {
   isReferralModalVisible: false,
   isLoginModalVisible: false,
   isTransferModalVisible: false,
-  transferToken: "ETH",
+  transferToken: 'ETH',
   isDepositModalVisible: false,
-  depositToken: "ETH",
+  depositToken: 'ETH',
   isWithdrawModalVisible: false,
-  withdrawalToken: "ETH",
+  withdrawalToken: 'ETH',
   isLogoutModalVisible: false,
   isExportAccountModalVisible: false,
   isEnterPasswordModalVisible: false,
   isSideBarVisible: false,
   isConnectToWalletModalVisiable: false,
-  isHebaoQRCodeModalVisible: false,
-  hebaoQRCodeModalData: {},
+  isSwapSelectTokenModalVisible: false,
+  swapToken: null,
+  isSwapToken0: true,
+  isRiskAlertVisible: getRiskAlertVisible(),
+  isWalletConnectIndicatorModalVisible: false,
+  walletConnectIndicatorType: '',
 };
 
 export const ModalManagerReducer = (state = initialState, action) => {
@@ -74,13 +85,13 @@ export const ModalManagerReducer = (state = initialState, action) => {
         return {
           ...state,
           isTransferModalVisible: action.payload.show,
-          transferToken: action.payload.token || "ETH",
+          transferToken: action.payload.token || 'ETH',
         };
       } else {
         return {
           ...state,
           isTransferModalVisible: action.payload.show,
-          transferToken: "ETH",
+          transferToken: 'ETH',
         };
       }
     }
@@ -89,13 +100,13 @@ export const ModalManagerReducer = (state = initialState, action) => {
         return {
           ...state,
           isDepositModalVisible: action.payload.show,
-          depositToken: action.payload.token || "ETH",
+          depositToken: action.payload.token || 'ETH',
         };
       } else {
         return {
           ...state,
           isDepositModalVisible: action.payload.show,
-          depositToken: "ETH",
+          depositToken: 'ETH',
         };
       }
     case SHOW_WITHDRAW:
@@ -103,13 +114,13 @@ export const ModalManagerReducer = (state = initialState, action) => {
         return {
           ...state,
           isWithdrawModalVisible: action.payload.show,
-          withdrawalToken: action.payload.token || "ETH",
+          withdrawalToken: action.payload.token || 'ETH',
         };
       } else {
         return {
           ...state,
           isWithdrawModalVisible: action.payload.show,
-          withdrawalToken: "ETH",
+          withdrawalToken: 'ETH',
         };
       }
     case SHOW_LOGOUT_MODAL:
@@ -136,6 +147,25 @@ export const ModalManagerReducer = (state = initialState, action) => {
       return {
         ...state,
         isConnectToWalletModalVisiable: action.payload.show,
+      };
+    case SHOW_SWAP_SELECT_TOKEN_MODAL:
+      return {
+        ...state,
+        isSwapSelectTokenModalVisible: action.payload.show,
+        swapToken: action.payload.swapToken,
+        isSwapToken0: action.payload.isSwapToken0,
+      };
+    case SHOW_WALLET_CONNECT_INDICATOR:
+      return {
+        ...state,
+        isWalletConnectIndicatorModalVisible: action.payload.show,
+        walletConnectIndicatorType: action.payload.walletConnectIndicatorType,
+      };
+    case CLOSE_RISK_ALERT:
+      saveRiskAlertVisible();
+      return {
+        ...state,
+        isRiskAlertVisible: false,
       };
     default:
       return state;

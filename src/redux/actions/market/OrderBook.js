@@ -1,9 +1,9 @@
-import { getDepth } from "lightcone/api/v1/depth";
+import { getDepth } from 'lightcone/api/v1/depth';
 
-export const UPDATE_ORDER_BOOKS = "UPDATE_ORDER_BOOKS";
-export const UPDATE_ORDER_BOOKS_LEVEL = "UPDATE_ORDER_BOOKS_LEVEL";
-export const UPDATE_SOCKET_ORDER_BOOKS = "UPDATE_SOCKET_ORDER_BOOKS";
-export const EMPTY_ORDER_BOOKS = "EMPTY_ORDER_BOOKS";
+export const UPDATE_ORDER_BOOKS = 'UPDATE_ORDER_BOOKS';
+export const UPDATE_ORDER_BOOKS_LEVEL = 'UPDATE_ORDER_BOOKS_LEVEL';
+export const UPDATE_SOCKET_ORDER_BOOKS = 'UPDATE_SOCKET_ORDER_BOOKS';
+export const EMPTY_ORDER_BOOKS = 'EMPTY_ORDER_BOOKS';
 
 export function updateSocketOrderBooks(
   sells,
@@ -15,11 +15,11 @@ export function updateSocketOrderBooks(
 ) {
   const asks = sells.map((slot) => ({
     ...slot,
-    side: "SELL",
+    side: 'SELL',
   }));
   const bids = buys.map((slot) => ({
     ...slot,
-    side: "BUY",
+    side: 'BUY',
   }));
 
   return {
@@ -63,11 +63,11 @@ export function fetchOrderBooks(market, level, tokens) {
         const depth = await getDepth(market, level, 30, tokens);
         const asks = depth.asks.map((obj) => ({
           ...obj,
-          side: "SELL",
+          side: 'SELL',
         }));
         const bids = depth.bids.map((obj) => ({
           ...obj,
-          side: "BUY",
+          side: 'BUY',
         }));
         dispatch(updateOrderBooks(asks.reverse(), bids, depth.version, market));
       } catch (error) {

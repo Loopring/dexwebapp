@@ -1,39 +1,24 @@
-import { connect } from "react-redux";
-import I from "components/I";
-import config from "lightcone/config";
+import { connect } from 'react-redux';
+import I from 'components/I';
+import config from 'lightcone/config';
 
 import {
   ActionButton,
   AssetDropdownMenuItem,
-  DepositOutlineButton,
   LargeTableHeader,
-  WithdrawOutlineButton,
-} from "styles/Styles";
-import AssetDropdown from "modals/components/AssetDropdown";
+} from 'styles/Styles';
+import AssetDropdown from 'modals/components/AssetDropdown';
 
-import { Col, Row } from "antd";
-import { updateTokenFilter } from "redux/actions/MyAccountPage";
-import React from "react";
-import styled, { withTheme } from "styled-components";
+import { Col, Row } from 'antd';
+import { updateTokenFilter } from 'redux/actions/MyAccountPage';
+import React from 'react';
+import styled, { withTheme } from 'styled-components';
 
 import {
   showDepositModal,
   showTransferModal,
   showWithdrawModal,
-} from "redux/actions/ModalManager";
-
-const DepositOutlineLargeButton = styled(DepositOutlineButton)`
-  height: 32px !important;
-  background-color: ${(props) => props.theme.foreground} !important;
-
-  &:focus {
-    background-color: ${(props) => props.theme.foreground} !important;
-  }
-
-  &:hover {
-    background-color: ${(props) => props.theme.foreground} !important;
-  }
-`;
+} from 'redux/actions/ModalManager';
 
 const TransferOutlineLargeButton = styled(ActionButton)`
   font-size: 0.85rem !important;
@@ -42,19 +27,6 @@ const TransferOutlineLargeButton = styled(ActionButton)`
   padding-left: 18px !important;
   padding-right: 18px !important;
   border-radius: 4px !important;
-`;
-
-const WithdrawOutlineLargeButton = styled(WithdrawOutlineButton)`
-  height: 32px !important;
-  background-color: ${(props) => props.theme.foreground} !important;
-
-  &:focus {
-    background-color: ${(props) => props.theme.foreground} !important;
-  }
-
-  &:hover {
-    background-color: ${(props) => props.theme.foreground} !important;
-  }
 `;
 
 class DepositWithdrawalHeader extends React.PureComponent {
@@ -83,9 +55,9 @@ class DepositWithdrawalHeader extends React.PureComponent {
 
     const menuItem = (
       <AssetDropdownMenuItem
-        key={"all"}
+        key={'all'}
         onClick={() => {
-          this.props.updateTokenFilter("All");
+          this.props.updateTokenFilter('All');
         }}
         small={true}
       >
@@ -97,8 +69,8 @@ class DepositWithdrawalHeader extends React.PureComponent {
 
     const options = [menuItem, ...tokensOptions];
 
-    let selected = "";
-    if (this.props.balances.tokenFilter === "All") {
+    let selected = '';
+    if (this.props.balances.tokenFilter === 'All') {
       selected = <I s="All Tokens" />;
     } else {
       let token = config.getTokenBySymbol(
@@ -113,11 +85,11 @@ class DepositWithdrawalHeader extends React.PureComponent {
     }
 
     let button = <div />;
-    if (this.props.type == "transfer") {
+    if (this.props.type === 'transfer') {
       button = (
         <TransferOutlineLargeButton
           onClick={() => {
-            if (this.props.balances.tokenFilter === "All") {
+            if (this.props.balances.tokenFilter === 'All') {
               this.props.showTransferModal();
             } else {
               this.props.showTransferModal(this.props.balances.tokenFilter);
@@ -127,12 +99,12 @@ class DepositWithdrawalHeader extends React.PureComponent {
           <I s="Transfer" />
         </TransferOutlineLargeButton>
       );
-    } else if (this.props.type === "deposit") {
+    } else if (this.props.type === 'deposit') {
       button = (
         <TransferOutlineLargeButton
           buttonbackground={this.props.theme.buyPrimary}
           onClick={() => {
-            if (this.props.balances.tokenFilter === "All") {
+            if (this.props.balances.tokenFilter === 'All') {
               this.props.showDepositModal();
             } else {
               this.props.showDepositModal(this.props.balances.tokenFilter);
@@ -142,12 +114,12 @@ class DepositWithdrawalHeader extends React.PureComponent {
           <I s="Deposit" />
         </TransferOutlineLargeButton>
       );
-    } else if (this.props.type === "withdrawals") {
+    } else if (this.props.type === 'withdrawals') {
       button = (
         <TransferOutlineLargeButton
           buttonbackground={this.props.theme.sellPrimary}
           onClick={() => {
-            if (this.props.balances.tokenFilter === "All") {
+            if (this.props.balances.tokenFilter === 'All') {
               this.props.showWithdrawModal();
             } else {
               this.props.showWithdrawModal(this.props.balances.tokenFilter);
@@ -165,21 +137,21 @@ class DepositWithdrawalHeader extends React.PureComponent {
           <Col>
             <div
               style={{
-                width: "200px",
+                width: '200px',
               }}
             >
               <AssetDropdown
                 options={options}
                 selected={selected}
-                small={"true"}
+                size={'small'}
               />
             </div>
           </Col>
           <Col>
             <div
               style={{
-                textAlign: "left",
-                marginLeft: "20px",
+                textAlign: 'left',
+                marginLeft: '20px',
               }}
             >
               {button}

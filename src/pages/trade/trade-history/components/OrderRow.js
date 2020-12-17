@@ -1,6 +1,6 @@
-import PropTypes from "prop-types";
-import React from "react";
-import styled from "styled-components";
+import PropTypes from 'prop-types';
+import React from 'react';
+import styled from 'styled-components';
 
 const CompactOrderTableRow = styled.tr`
   font-size: 0.85rem;
@@ -55,8 +55,8 @@ const OrderRow = ({
         }
       }}
     >
-      {dataConfigs.map(({ propName = "data", format, getter, renderer }, i) => {
-        if (propName === "size") {
+      {dataConfigs.map(({ propName = 'data', format, getter, renderer }, i) => {
+        if (propName === 'size') {
           return (
             <CompactOrderTableSize key={i}>
               {renderer({
@@ -66,7 +66,7 @@ const OrderRow = ({
               })}
             </CompactOrderTableSize>
           );
-        } else if (propName === "price") {
+        } else if (propName === 'price') {
           const prePrice = preOrder ? getter(preOrder) : 0;
           return (
             <CompactOrderTablePrice key={i}>
@@ -97,12 +97,12 @@ const OrderRow = ({
 };
 
 OrderRow.propTypes = {
-  side: PropTypes.oneOf(["buy", "sell"]),
+  side: PropTypes.oneOf(['buy', 'sell']),
   dataConfigs: PropTypes.arrayOf(PropTypes.object),
 };
 
 OrderRow.defaultProps = {
-  side: "buy",
+  side: 'buy',
   dataConfigs: [],
 };
 

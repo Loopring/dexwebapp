@@ -1,12 +1,12 @@
-import BigNumber from "bignumber.js";
-import config from "lightcone/config";
+import BigNumber from 'bignumber.js';
+import config from 'lightcone/config';
 
 import {
   EMPTY_ORDER_BOOKS,
   UPDATE_ORDER_BOOKS,
   UPDATE_ORDER_BOOKS_LEVEL,
   UPDATE_SOCKET_ORDER_BOOKS,
-} from "redux/actions/market/OrderBook";
+} from 'redux/actions/market/OrderBook';
 
 // Hack: initial State can not be empty. Empty
 const initialState = {
@@ -58,9 +58,15 @@ export const OrderBookReducer = (state = initialState, action) => {
     case UPDATE_SOCKET_ORDER_BOOKS:
       const starVersion = action.payload.startVersion;
       const endVersion = action.payload.endVersion;
-      const market = action.payload.market;
+
+      let market = action.payload.market;
+      // TODO: replace LP-
+      if (market.startsWith('LP-')) {
+        market = market.replace('LP-', '');
+      }
+
       const configTokens = action.payload.configTokens;
-      const tokens = market.split("-");
+      const tokens = market.split('-');
       const baseToken = tokens[0];
 
       if (starVersion <= state.version + 1) {

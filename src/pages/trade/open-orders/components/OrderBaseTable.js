@@ -1,25 +1,25 @@
-import { connect } from "react-redux";
-import I from "components/I";
-import React from "react";
+import { connect } from 'react-redux';
+import I from 'components/I';
+import React from 'react';
 
-import AppLayout from "AppLayout";
+import AppLayout from 'AppLayout';
 
-import styled, { withTheme } from "styled-components";
+import styled, { withTheme } from 'styled-components';
 
-import { ConfigProvider, Pagination, Table } from "antd";
-import TableLoadingSpin from "components/TableLoadingSpin";
+import { ConfigProvider, Pagination, Table } from 'antd';
+import TableLoadingSpin from 'components/TableLoadingSpin';
 
 import {
   CancelOrderButton,
   LargeTableRow,
   TextCompactTableHeader,
-} from "styles/Styles";
+} from 'styles/Styles';
 
-import { cancelOrders } from "lightcone/api/v1/orders";
-import EmptyTableIndicator from "components/EmptyTableIndicator";
-import Moment from "moment";
+import { cancelOrders } from 'lightcone/api/v1/orders';
+import EmptyTableIndicator from 'components/EmptyTableIndicator';
+import Moment from 'moment';
 
-import { notifyError, notifySuccess } from "redux/actions/Notification";
+import { notifyError, notifySuccess } from 'redux/actions/Notification';
 
 const SmallPagination = styled(Pagination)`
   padding: 2px 8px !important;
@@ -59,7 +59,7 @@ class OrderBaseTable extends React.Component {
       isMounted: false,
     };
     this.updateColumn = this.updateColumn.bind(this);
-    this.mql = window.matchMedia("(min-width: 992px) and (max-width: 1430px)");
+    this.mql = window.matchMedia('(min-width: 992px) and (max-width: 1430px)');
     this.mql.addListener(this.updateColumn);
     this.updateColumn(this.mql);
   }
@@ -74,7 +74,7 @@ class OrderBaseTable extends React.Component {
     this.setState({
       isMounted: false,
     });
-    window.removeEventListener("resize", this.updateColumn);
+    window.removeEventListener('resize', this.updateColumn);
   }
 
   updateColumn(e) {
@@ -108,6 +108,7 @@ class OrderBaseTable extends React.Component {
           this.props.theme
         );
       } catch (err) {
+        console.error('failed to cancel order', err);
         notifyError(<I s="Failed to cancel your order." />, this.props.theme);
       }
     })();
@@ -117,16 +118,16 @@ class OrderBaseTable extends React.Component {
     let columns = [
       {
         title: (
-          <TextCompactTableHeader style={{ paddingLeft: "14px" }}>
+          <TextCompactTableHeader style={{ paddingLeft: '14px' }}>
             <I s="CreatedAt" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "date",
+        dataIndex: 'date',
         width: 110,
       },
       {
-        title: "",
-        dataIndex: "padding",
+        title: '',
+        dataIndex: 'padding',
         width: 13,
       },
       {
@@ -135,7 +136,7 @@ class OrderBaseTable extends React.Component {
             <I s="Market" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "market",
+        dataIndex: 'market',
       },
       {
         title: (
@@ -143,7 +144,7 @@ class OrderBaseTable extends React.Component {
             <I s="Side" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "side",
+        dataIndex: 'side',
         // When the width is larger than 1600px
         width: window.innerWidth >= 1600 ? null : 50,
       },
@@ -154,7 +155,7 @@ class OrderBaseTable extends React.Component {
             <I s="Amount" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "size",
+        dataIndex: 'size',
       },
       {
         title: (
@@ -162,7 +163,7 @@ class OrderBaseTable extends React.Component {
             <I s="Order Price" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "price",
+        dataIndex: 'price',
       },
 
       {
@@ -171,7 +172,7 @@ class OrderBaseTable extends React.Component {
             <I s="Order Total" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "total",
+        dataIndex: 'total',
       },
       {
         title: (
@@ -179,7 +180,7 @@ class OrderBaseTable extends React.Component {
             <I s="Status / Operations" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "status",
+        dataIndex: 'status',
       },
     ];
 
@@ -190,7 +191,7 @@ class OrderBaseTable extends React.Component {
             <I s="Fill Pctg" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "fill_pctg",
+        dataIndex: 'fill_pctg',
       };
       columns.splice(6, 0, fill_pctg);
     }
@@ -201,8 +202,8 @@ class OrderBaseTable extends React.Component {
     const theme = this.props.theme;
     const emptyTableIndicator = () => (
       <EmptyTableIndicator
-        text={"NoOpenOrders"}
-        marginTop={"4%"}
+        text={'NoOpenOrders'}
+        marginTop={'4%'}
         loading={this.props.loading}
       />
     );
@@ -211,8 +212,8 @@ class OrderBaseTable extends React.Component {
     for (let i = 0; i < this.props.data.length; i++) {
       const order = this.props.data[i];
 
-      var status = "-";
-      if (order.status === "processing" || order.status === "waiting") {
+      var status = '-';
+      if (order.status === 'processing' || order.status === 'waiting') {
         status = (
           <CancelOrderButton
             onClick={(e) => {
@@ -223,16 +224,16 @@ class OrderBaseTable extends React.Component {
             <I s="Cancel" />
           </CancelOrderButton>
         );
-      } else if (order.status === "processed") {
+      } else if (order.status === 'processed') {
         status = <I s="Filled" />;
-      } else if (order.status === "failed") {
+      } else if (order.status === 'failed') {
         status = <I s="Failed" />;
       } else if (
-        order.status === "cancelling" ||
-        order.status === "cancelled"
+        order.status === 'cancelling' ||
+        order.status === 'cancelled'
       ) {
         status = <I s="Cancelled" />;
-      } else if (order.status === "expired") {
+      } else if (order.status === 'expired') {
         status = <I s="Expired" />;
       }
       data.push({
@@ -241,16 +242,16 @@ class OrderBaseTable extends React.Component {
           <LargeTableRow
             style={{
               color:
-                order.side === "BUY" ? theme.buyPrimary : theme.sellPrimary,
+                order.side === 'BUY' ? theme.buyPrimary : theme.sellPrimary,
             }}
           >
-            {order.side === "BUY" ? <I s="Buy" /> : <I s="Sell" />}
+            {order.side === 'BUY' ? <I s="Buy" /> : <I s="Sell" />}
           </LargeTableRow>
         ),
         market: <LargeTableRow>{order.market}</LargeTableRow>,
         size: (
           <LargeTableRow>
-            {isNaN(order.sizeInString)? '--': order.sizeInString}
+            {isNaN(order.sizeInString) ? '--' : order.sizeInString}
           </LargeTableRow>
         ),
         fill_pctg: (
@@ -259,14 +260,16 @@ class OrderBaseTable extends React.Component {
               color: theme.textWhite,
             }}
           >
-            {isNaN(order.filled.substr(0, order.filled.length - 1))? '--' : order.filled}
+            {isNaN(order.filled.substr(0, order.filled.length - 1))
+              ? '--'
+              : order.filled}
           </LargeTableRow>
         ),
         price: (
           <LargeTableRow
             style={{
               color:
-                order.side === "BUY" ? theme.buyPrimary : theme.sellPrimary,
+                order.side === 'BUY' ? theme.buyPrimary : theme.sellPrimary,
             }}
           >
             {order.price}
@@ -274,13 +277,15 @@ class OrderBaseTable extends React.Component {
         ),
         total: (
           <LargeTableRow>
-            {isNaN(order.totalInString)? '--': `${order.totalInString} ${order.quoteToken}`} 
+            {isNaN(order.totalInString)
+              ? '--'
+              : `${order.totalInString} ${order.quoteToken}`}
           </LargeTableRow>
         ),
         date: (
           <LargeTableRow
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
               color: theme.textDim,
             }}
           >
@@ -291,7 +296,7 @@ class OrderBaseTable extends React.Component {
           <LargeTableRow
             style={{
               color: theme.textDim,
-              textAlign: "center",
+              textAlign: 'center',
             }}
           >
             {status}
@@ -306,15 +311,15 @@ class OrderBaseTable extends React.Component {
           <TableLoadingSpin loading={this.props.loading}>
             <Table
               style={{
-                borderStyle: "none",
-                borderWidth: "0px",
+                borderStyle: 'none',
+                borderWidth: '0px',
                 height:
                   this.props.total > this.props.limit
                     ? AppLayout.tradeOrderBaseTableHeight
                     : AppLayout.tradeOrderBaseTableHeightNoPagination,
               }}
               size="middle"
-              tableLayout={"fixed"}
+              tableLayout={'fixed'}
               columns={this.state.columns}
               dataSource={data}
               pagination={false}

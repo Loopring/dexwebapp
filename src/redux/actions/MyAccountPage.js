@@ -1,29 +1,34 @@
-import { getBalances } from "lightcone/api/v1/balances";
+import { getBalances } from 'lightcone/api/v1/balances';
 
 import {
   getDepositHistory,
   getWithdrawalHistory,
-} from "lightcone/api/LightconeAPI";
+} from 'lightcone/api/LightconeAPI';
 
-import { getTransferHistory } from "lightcone/api/v1/transfer";
+import { getTransferHistory } from 'lightcone/api/v1/transfer';
 
-export const UPDATE_MY_BALANCES = "UPDATE_MY_BALANCES";
+import { getAmmUserTransactions } from 'lightcone/api/AmmAPI';
 
-export const UPDATE_BALANCE = "UPDATE_BALANCE";
+export const UPDATE_MY_BALANCES = 'UPDATE_MY_BALANCES';
 
-export const EMPTY_BALANCES = "EMPTY_BALANCES";
+export const UPDATE_BALANCE = 'UPDATE_BALANCE';
 
-export const UPDATE_DEPOSITS = "UPDATE_DEPOSITS";
-export const EMPTY_DEPOSITS = "EMPTY_DEPOSITS";
+export const EMPTY_BALANCES = 'EMPTY_BALANCES';
 
-export const UPDATE_WITHDRAWALS = "UPDATE_WITHDRAWALS";
-export const EMPTY_WITHDRAWALS = "EMPTY_WITHDRAWALS";
+export const UPDATE_DEPOSITS = 'UPDATE_DEPOSITS';
+export const EMPTY_DEPOSITS = 'EMPTY_DEPOSITS';
 
-export const UPDATE_TOKEN_FILTER = "UPDATE_TOKEN_FILTER";
-export const HIDE_LOW_BALANCE_ASSETS = "HIDE_LOW_BALANCE_ASSETS";
+export const UPDATE_WITHDRAWALS = 'UPDATE_WITHDRAWALS';
+export const EMPTY_WITHDRAWALS = 'EMPTY_WITHDRAWALS';
 
-export const UPDATE_TRANSFERS = "UPDATE_TRANSFERS";
-export const EMPTY_TRANSFERS = "EMPTY_TRANSFERS";
+export const UPDATE_TOKEN_FILTER = 'UPDATE_TOKEN_FILTER';
+export const HIDE_LOW_BALANCE_ASSETS = 'HIDE_LOW_BALANCE_ASSETS';
+
+export const UPDATE_TRANSFERS = 'UPDATE_TRANSFERS';
+export const EMPTY_TRANSFERS = 'EMPTY_TRANSFERS';
+
+export const UPDATE_AMM_TRANSACTIONS = 'UPDATE_AMM_TRANSACTIONS';
+export const EMPTY_AMM_TRANSACTIONS = 'EMPTY_AMM_TRANSACTIONS';
 
 export function emptyBalances() {
   return {
@@ -96,7 +101,9 @@ export function fetchDeposits(
           tokens
         );
         dispatch(updateDeposits(response));
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
     })();
   };
 }
@@ -200,6 +207,39 @@ export function fetchTransfers(
         );
         dispatch(updateTransfers(response));
       } catch (error) {}
+    })();
+  };
+}
+
+export function updateAmmTransactions(payload) {
+  return {
+    type: UPDATE_AMM_TRANSACTIONS,
+    payload,
+  };
+}
+
+export function emptyAmmTransactions() {
+  return {
+    type: EMPTY_AMM_TRANSACTIONS,
+    payload: {},
+  };
+}
+
+export function fetchAmmTransactions(limit, offset, accountId, apiKey, tokens) {
+  return (dispatch) => {
+    (async () => {
+      try {
+        const response = await getAmmUserTransactions(
+          accountId,
+          limit,
+          offset,
+          apiKey,
+          tokens
+        );
+        dispatch(updateAmmTransactions(response));
+      } catch (error) {
+        console.log('error', error);
+      }
     })();
   };
 }

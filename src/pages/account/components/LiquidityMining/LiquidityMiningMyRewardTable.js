@@ -1,31 +1,28 @@
-import { connect } from "react-redux";
-import { withTheme } from "styled-components";
-import I from "components/I";
-import React from "react";
+import { connect } from 'react-redux';
+import { withTheme } from 'styled-components';
+import I from 'components/I';
+import React from 'react';
 
-import { ConfigProvider, Pagination, Table } from "antd";
+import { ConfigProvider, Pagination, Table } from 'antd';
 
-import Moment from "moment";
-import TableLoadingSpin from "components/TableLoadingSpin";
+import Moment from 'moment';
+import TableLoadingSpin from 'components/TableLoadingSpin';
 
 import {
   LargeTableRow,
   SimpleTableContainer,
   TextCompactTableHeader,
-} from "styles/Styles";
-import EmptyTableIndicator from "components/EmptyTableIndicator";
+} from 'styles/Styles';
+import EmptyTableIndicator from 'components/EmptyTableIndicator';
 
 class LiquidityMiningMyRewardTable extends React.Component {
   render() {
-    const tokens = this.props.market.split("-");
-    const quoteToken = tokens[1];
-
     const theme = this.props.theme;
     const customizeRenderEmpty = () => (
       <EmptyTableIndicator
         text={this.props.placeHolder}
         loading={this.props.loading}
-        marginTop={"100px"}
+        marginTop={'100px'}
       />
     );
 
@@ -34,30 +31,30 @@ class LiquidityMiningMyRewardTable extends React.Component {
         title: (
           <TextCompactTableHeader
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
             }}
           >
             <I s="Time" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "time",
-        width: "70%",
+        dataIndex: 'time',
+        width: '40%',
       },
       {
         title: (
           <TextCompactTableHeader>
             <div
               style={{
-                textAlign: "right",
-                paddingRight: "14px",
-                width: "100%",
+                textAlign: 'right',
+                paddingRight: '14px',
+                width: '100%',
               }}
             >
-              <I s="Amount" /> ({quoteToken})
+              <I s="My Amount" /> ({this.props.quoteToken})
             </div>
           </TextCompactTableHeader>
         ),
-        dataIndex: "amount",
+        dataIndex: 'amount',
       },
     ];
 
@@ -69,22 +66,22 @@ class LiquidityMiningMyRewardTable extends React.Component {
         time: (
           <LargeTableRow
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
             }}
           >
-            {Moment(reward["startAt"] - 3600000).format(theme.shortTimeFormat)}{" "}
-            - {Moment(reward["startAt"]).format("HH:mm")}
+            {Moment(reward['startAt']).format(theme.shortTimeFormat)} -{' '}
+            {Moment(reward['startAt'] + 3600000).format('HH:mm')}
           </LargeTableRow>
         ),
-        market: <LargeTableRow>{reward["market"]}</LargeTableRow>,
+        market: <LargeTableRow>{reward['market']}</LargeTableRow>,
         amount: (
           <LargeTableRow
             style={{
-              textAlign: "right",
-              paddingRight: "14px",
+              textAlign: 'right',
+              paddingRight: '14px',
             }}
           >
-            {reward["amount"]}
+            {reward['amount']}
           </LargeTableRow>
         ),
       });
@@ -96,7 +93,7 @@ class LiquidityMiningMyRewardTable extends React.Component {
       <div>
         <SimpleTableContainer
           style={{
-            minHeight: "300px",
+            minHeight: '300px',
             background: theme.foreground,
           }}
         >
@@ -119,9 +116,9 @@ class LiquidityMiningMyRewardTable extends React.Component {
             {hasPagination ? (
               <Pagination
                 style={{
-                  padding: "10px 0px 30px 0px",
+                  padding: '10px 0px 30px 0px',
                   background: theme.background,
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
                 size=""
                 total={this.props.total}

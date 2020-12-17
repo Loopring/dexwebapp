@@ -1,35 +1,45 @@
-import { Col, Row } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ThemeContext } from "styled-components";
-import I from "components/I";
-import React, { useContext } from "react";
+import { Col, Row } from 'antd';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ThemeContext } from 'styled-components';
+import { getWalletType } from 'lightcone/api/localStorgeAPI';
+import I from 'components/I';
+import React, { useContext } from 'react';
 
-import { faCircleNotch } from "@fortawesome/free-solid-svg-icons/faCircleNotch";
+import { faCircleNotch } from '@fortawesome/free-solid-svg-icons/faCircleNotch';
 
 const WalletConnectIndicator = () => {
   const theme = useContext(ThemeContext);
+  const walletType = getWalletType();
+
+  var icon = '';
+  if (walletType === 'WalletConnect') {
+    icon = '/assets/images/WalletConnect.svg';
+  } else if (walletType === 'WalletLink') {
+    icon = '/assets/images/wallet-link.png';
+  }
+
   return (
     <Row
       style={{
-        marginTop: "10px",
+        marginTop: '10px',
       }}
     >
       <Col span={4}>
         <div
           style={{
-            textAlign: "right",
-            marginRight: "4px",
+            textAlign: 'right',
+            marginRight: '4px',
           }}
         >
           <img
             alt="check walletconnect plugin icon"
             style={{
-              userSelect: "none",
-              height: "45px",
-              marginTop: "16px",
-              filter: "drop-shadow(0 10px 10px rgba(0, 0, 0, 0.2)",
+              userSelect: 'none',
+              height: '45px',
+              marginTop: '16px',
+              filter: 'drop-shadow(0 10px 10px rgba(0, 0, 0, 0.2)',
             }}
-            src="/assets/images/WalletConnect.svg"
+            src={icon}
           />
         </div>
       </Col>
@@ -37,9 +47,9 @@ const WalletConnectIndicator = () => {
         <div>
           <div
             style={{
-              textAlign: "left",
-              margin: "20px 0px 0px 16px",
-              fontSize: "1rem",
+              textAlign: 'left',
+              margin: '20px 0px 0px 16px',
+              fontSize: '1rem',
               color: theme.textWhite,
             }}
           >
@@ -48,22 +58,22 @@ const WalletConnectIndicator = () => {
 
           <div
             style={{
-              fontSize: "1rem",
+              fontSize: '1rem',
               color: theme.primary,
             }}
           >
             <div
               style={{
-                textAlign: "left",
-                margin: "4px 0px 0px 16px",
+                textAlign: 'left',
+                margin: '4px 0px 0px 16px',
               }}
             >
-              <I s={"walletConnectPendingTxTip"} />
+              <I s={'walletConnectPendingTxTip'} />
               <FontAwesomeIcon
                 icon={faCircleNotch}
                 size="1x"
                 spin
-                style={{ color: theme.primary, marginLeft: "8px" }}
+                style={{ color: theme.primary, marginLeft: '8px' }}
               />
             </div>
           </div>

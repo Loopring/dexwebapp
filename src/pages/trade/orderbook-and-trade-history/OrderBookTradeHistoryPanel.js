@@ -1,43 +1,43 @@
-import { connect } from "react-redux";
-import { formatter } from "lightcone/common";
-import { toBig } from "lightcone/common/formatter";
+import { connect } from 'react-redux';
+import { formatter } from 'lightcone/common';
+import { toBig } from 'lightcone/common/formatter';
 import {
   updateAmount,
   updatePrice,
   updateTradeType,
-} from "redux/actions/TradePanel";
-import { withTheme } from "styled-components";
-import AggregationWidget from "./components/AggregationWidget";
-import OrderBook from "pages/trade/orderbook/OrderBook";
-import React from "react";
-import TabHeader from "./components/TabHeader";
-import TradeHistory from "pages/trade/trade-history/TradeHistory";
-import config from "lightcone/config";
+} from 'redux/actions/TradePanel';
+import { withTheme } from 'styled-components';
+import AggregationWidget from './components/AggregationWidget';
+import OrderBook from 'pages/trade/orderbook/OrderBook';
+import React from 'react';
+import TabHeader from './components/TabHeader';
+import TradeHistory from 'pages/trade/trade-history/TradeHistory';
+import config from 'lightcone/config';
 
-import "./OrderBookTradeHistoryPanel.less";
+import './OrderBookTradeHistoryPanel.less';
 
 class OrderBookTradeHistoryPanel extends React.Component {
   render() {
     const theme = this.props.theme;
 
-    const { market, exchange } = this.props;
-    const baseTokenSymbol = this.props.market.currentMarket.baseTokenSymbol;
-    const quoteTokenSymbol = this.props.market.currentMarket.quoteTokenSymbol;
+    const { currentMarket, exchange } = this.props;
+    const baseTokenSymbol = currentMarket.baseTokenSymbol;
+    const quoteTokenSymbol = currentMarket.quoteTokenSymbol;
     const baseToken = config.getTokenBySymbol(baseTokenSymbol, exchange.tokens);
     const marketConfig = config.getMarketByPair(
-      market.currentMarket.current,
+      currentMarket.current,
       exchange.markets
     ) || {
       precisionForPrice: 6,
     };
 
     const sizeFormat = baseToken.precision
-      ? "0." + "0".repeat(baseToken.precision)
-      : "1" + "0".repeat(-baseToken.precision);
+      ? '0.' + '0'.repeat(baseToken.precision)
+      : '1' + '0'.repeat(-baseToken.precision);
     const priceFormat =
       marketConfig.precisionForPrice > 0
-        ? " 0." + "0".repeat(marketConfig.precisionForPrice)
-        : "1" + "0".repeat(-marketConfig.precisionForPrice);
+        ? ' 0.' + '0'.repeat(marketConfig.precisionForPrice)
+        : '1' + '0'.repeat(-marketConfig.precisionForPrice);
 
     const orderbookSide = (
       <div className="orderbook-side">
@@ -46,9 +46,9 @@ class OrderBookTradeHistoryPanel extends React.Component {
           depth={30}
           baseTokenSymbol={baseTokenSymbol}
           quoteTokenSymbol={quoteTokenSymbol}
-          asks={this.props.market.orderBook.sells}
-          bids={this.props.market.orderBook.buys}
-          latestTrade={this.props.market.tradeHistory.latestTrade}
+          asks={this.props.orderBook.sells}
+          bids={this.props.orderBook.buys}
+          latestTrade={this.props.tradeHistory.latestTrade}
           getPrice={(entry) => {
             // Have to check if entry is null or not
             if (entry) {
@@ -69,17 +69,17 @@ class OrderBookTradeHistoryPanel extends React.Component {
           }}
           onClickOrder={(order, side, position) => {
             this.props.updatePrice(toBig(order.price).toFixed(), true);
-            if (this.props.tradeType !== side || position === "size") {
+            if (this.props.tradeType !== side || position === 'size') {
               let size = 0;
-              if (side.toLowerCase() === "buy") {
-                const slots = this.props.market.orderBook.buys.filter(
+              if (side.toLowerCase() === 'buy') {
+                const slots = this.props.orderBook.buys.filter(
                   (slot) => parseFloat(slot.price) >= parseFloat(order.price)
                 );
                 size = slots
                   .map((slot) =>
                     formatter.toBig(
                       config.fromWEI(
-                        this.props.market.currentMarket.baseTokenSymbol,
+                        currentMarket.baseTokenSymbol,
                         slot.size,
                         exchange.tokens
                       )
@@ -87,14 +87,14 @@ class OrderBookTradeHistoryPanel extends React.Component {
                   )
                   .reduce((sum, size) => sum.plus(size));
               } else {
-                const slots = this.props.market.orderBook.sells.filter(
+                const slots = this.props.orderBook.sells.filter(
                   (slot) => parseFloat(slot.price) <= parseFloat(order.price)
                 );
                 size = slots
                   .map((slot) =>
                     formatter.toBig(
                       config.fromWEI(
-                        this.props.market.currentMarket.baseTokenSymbol,
+                        currentMarket.baseTokenSymbol,
                         slot.size,
                         exchange.tokens
                       )
@@ -114,20 +114,20 @@ class OrderBookTradeHistoryPanel extends React.Component {
     let content = (
       <div
         style={{
-          display: this.props.tabs.type1 === "orderBook" ? "initial" : "none",
+          display: this.props.tabs.type1 === 'orderBook' ? 'initial' : 'none',
         }}
       >
         <OrderBook
           style={{
-            height: "calc(100vh - 64px - 45px - 45.59px + 8px)",
+            height: 'calc(100vh - 64px - 45px - 45.59px + 8px)',
           }}
           hideHeader={true}
           baseTokenSymbol={baseTokenSymbol}
           quoteTokenSymbol={quoteTokenSymbol}
           depth={1000}
-          asks={this.props.market.orderBook.sells}
-          bids={this.props.market.orderBook.buys}
-          latestTrade={this.props.market.tradeHistory.latestTrade}
+          asks={this.props.orderBook.sells}
+          bids={this.props.orderBook.buys}
+          latestTrade={this.props.tradeHistory.latestTrade}
           getPrice={(entry) => {
             // Have to check if entry is null or not
             if (entry) {
@@ -152,17 +152,17 @@ class OrderBookTradeHistoryPanel extends React.Component {
           }}
           onClickOrder={(order, side, position) => {
             this.props.updatePrice(toBig(order.price).toFixed(), true);
-            if (this.props.tradeType !== side || position === "size") {
+            if (this.props.tradeType !== side || position === 'size') {
               let size = 0;
-              if (side.toLowerCase() === "buy") {
-                const slots = this.props.market.orderBook.buys.filter(
+              if (side.toLowerCase() === 'buy') {
+                const slots = this.props.orderBook.buys.filter(
                   (slot) => parseFloat(slot.price) >= parseFloat(order.price)
                 );
                 size = slots
                   .map((slot) =>
                     formatter.toBig(
                       config.fromWEI(
-                        this.props.market.currentMarket.baseTokenSymbol,
+                        currentMarket.baseTokenSymbol,
                         slot.size,
                         exchange.tokens
                       )
@@ -170,14 +170,14 @@ class OrderBookTradeHistoryPanel extends React.Component {
                   )
                   .reduce((sum, size) => sum.plus(size));
               } else {
-                const slots = this.props.market.orderBook.sells.filter(
+                const slots = this.props.orderBook.sells.filter(
                   (slot) => parseFloat(slot.price) <= parseFloat(order.price)
                 );
                 size = slots
                   .map((slot) =>
                     formatter.toBig(
                       config.fromWEI(
-                        this.props.market.currentMarket.baseTokenSymbol,
+                        currentMarket.baseTokenSymbol,
                         slot.size,
                         exchange.tokens
                       )
@@ -197,7 +197,7 @@ class OrderBookTradeHistoryPanel extends React.Component {
       <div className="orderbook-side-and-trade-history">
         <div
           style={{
-            height: "44px",
+            height: '44px',
             backgroundColor: theme.background,
           }}
         >
@@ -206,8 +206,8 @@ class OrderBookTradeHistoryPanel extends React.Component {
         {content}
         <TradeHistory
           style={{
-            display: this.props.tabs.type1 === "orderBook" ? "none" : "initial",
-            height: "calc(100vh - 64px - 45px - 45.59px + 8px)",
+            display: this.props.tabs.type1 === 'orderBook' ? 'none' : 'initial',
+            height: 'calc(100vh - 64px - 45px - 45.59px + 8px)',
           }}
           hideHeader={true}
           getTimeStamp={(order) => order.timestamp}
@@ -230,10 +230,21 @@ class OrderBookTradeHistoryPanel extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  const { layoutManager, market, tabs, myOrders, exchange, tradePanel } = state;
+  const {
+    layoutManager,
+    currentMarket,
+    orderBook,
+    tradeHistory,
+    tabs,
+    myOrders,
+    exchange,
+    tradePanel,
+  } = state;
   return {
     layoutManager,
-    market,
+    currentMarket,
+    orderBook,
+    tradeHistory,
     tabs,
     myOrders,
     exchange,

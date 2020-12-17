@@ -1,12 +1,12 @@
-import { connect } from "react-redux";
-import React from "react";
+import { connect } from 'react-redux';
+import React from 'react';
 
-import OrderBaseTable from "./OrderBaseTable";
+import OrderBaseTable from './OrderBaseTable';
 
-import { LOGGED_IN } from "redux/actions/DexAccount";
-import { compareDexAccounts } from "components/services/utils";
-import { fetchMyHistoryOrders } from "redux/actions/MyOrderPage";
-import Header from "./Header";
+import { LOGGED_IN } from 'redux/actions/DexAccount';
+import { compareDexAccounts } from 'components/services/utils';
+import { fetchMyHistoryOrders } from 'redux/actions/MyOrderPage';
+import Header from './Header';
 
 class HistoryOrdersTable extends React.Component {
   componentDidMount() {
@@ -48,7 +48,7 @@ class HistoryOrdersTable extends React.Component {
     ) {
       // If All, tokenSymbol is undefined.
       let market;
-      if (myOrderPage.marketFilter !== "All") {
+      if (myOrderPage.marketFilter !== 'All') {
         market = myOrderPage.marketFilter;
       }
 

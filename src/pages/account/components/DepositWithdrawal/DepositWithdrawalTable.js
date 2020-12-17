@@ -1,17 +1,26 @@
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
 import {
+  fetchAmmTransactions,
   fetchDeposits,
   fetchTransfers,
   fetchWithdrawals,
-} from "redux/actions/MyAccountPage";
-import React from "react";
+} from 'redux/actions/MyAccountPage';
+import React from 'react';
 
-import { compareDexAccounts } from "components/services/utils";
-import { debounce } from "lodash";
-import DepositBaseTable from "pages/account/components/DepositWithdrawal/DepositTable";
-import DepositWithdrawalHeader from "pages/account/components/DepositWithdrawalHeader";
-import TransferTable from "pages/account/components/DepositWithdrawal/TransferTable";
-import WithdrawalTable from "pages/account/components/DepositWithdrawal/WithdrawalTable";
+import { compareDexAccounts } from 'components/services/utils';
+import { debounce } from 'lodash';
+import {
+  getDistributeInfo,
+  updateDistributeHash,
+} from 'lightcone/api/v1/onchainwithdrawal';
+import { notifyError, notifySuccess } from 'redux/actions/Notification';
+import { withTheme } from 'styled-components';
+import AmmTransactionTable from 'pages/account/components/DepositWithdrawal/AmmTransactionTable';
+import DepositBaseTable from 'pages/account/components/DepositWithdrawal/DepositTable';
+import DepositWithdrawalHeader from 'pages/account/components/DepositWithdrawalHeader';
+import I from 'components/I';
+import TransferTable from 'pages/account/components/DepositWithdrawal/TransferTable';
+import WithdrawalTable from 'pages/account/components/DepositWithdrawal/WithdrawalTable';
 
 class DepositWithdrawalTable extends React.Component {
   componentDidMount() {
@@ -22,7 +31,7 @@ class DepositWithdrawalTable extends React.Component {
     if (
       prevProps.exchange.isInitialized !== this.props.exchange.isInitialized
     ) {
-      console.log("trigger by exchange.isInitialized");
+      console.log('trigger by exchange.isInitialized');
       this.loadDataWithDebounce();
     }
 
@@ -36,7 +45,7 @@ class DepositWithdrawalTable extends React.Component {
           prevProps.dexAccount.account.apiKey !==
             this.props.dexAccount.account.apiKey))
     ) {
-      console.log("trigger by account");
+      console.log('trigger by account');
       this.loadDataWithDebounce();
     }
 
@@ -50,10 +59,11 @@ class DepositWithdrawalTable extends React.Component {
 
     // Load data if needed
     if (
-      this.props.type === "deposit" &&
+      this.props.type === 'deposit' &&
       this.props.balances.deposits.find(
         (deposit) =>
-          deposit.status === "received" || deposit.status === "processing"
+          deposit.status === 'TX_STATUS_RECEIVED' ||
+          deposit.status === 'TX_STATUS_PROCESSING'
       )
     ) {
       if (this.timeout) {
@@ -63,9 +73,11 @@ class DepositWithdrawalTable extends React.Component {
     }
 
     if (
-      this.props.type === "withdrawals" &&
+      this.props.type === 'withdrawals' &&
       this.props.balances.withdrawals.find(
-        (w) => w.status === "received" || w.status === "processing"
+        (w) =>
+          w.status === 'TX_STATUS_RECEIVED' ||
+          w.status === 'TX_STATUS_PROCESSING'
       )
     ) {
       if (this.timeout) {
@@ -90,6 +102,7 @@ class DepositWithdrawalTable extends React.Component {
         fetchDeposits,
         fetchWithdrawals,
         fetchTransfers,
+        fetchAmmTransactions,
       } = this.props;
       if (
         !!dexAccount.account.accountId &&
@@ -98,11 +111,19 @@ class DepositWithdrawalTable extends React.Component {
       ) {
         // If All, tokenSymbol is undefined.
         let tokenSymbol;
-        if (balances.tokenFilter !== "All") {
+        if (balances.tokenFilter !== 'All') {
           tokenSymbol = balances.tokenFilter;
         }
 
-        if (this.props.type === "transfer") {
+        if (this.props.type === 'amm-transaction') {
+          fetchAmmTransactions(
+            balances.ammTransactionLimit,
+            offset !== -1 ? offset : balances.ammTransactionOffset,
+            dexAccount.account.accountId,
+            dexAccount.account.apiKey,
+            exchange.tokens
+          );
+        } else if (this.props.type === 'transfer') {
           fetchTransfers(
             balances.transferLimit,
             offset !== -1 ? offset : balances.transferOffset,
@@ -111,7 +132,7 @@ class DepositWithdrawalTable extends React.Component {
             dexAccount.account.apiKey,
             exchange.tokens
           );
-        } else if (this.props.type === "deposit") {
+        } else if (this.props.type === 'deposit') {
           fetchDeposits(
             balances.depositLimit,
             offset !== -1 ? offset : balances.depositOffset,
@@ -120,7 +141,7 @@ class DepositWithdrawalTable extends React.Component {
             dexAccount.account.apiKey,
             exchange.tokens
           );
-        } else if (this.props.type === "withdrawals") {
+        } else if (this.props.type === 'withdrawals') {
           fetchWithdrawals(
             balances.withdrawalLimit,
             offset !== -1 ? offset : balances.withdrawalOffset,
@@ -142,11 +163,14 @@ class DepositWithdrawalTable extends React.Component {
 
   onChange = (page) => {
     let offset = 0;
-    if (this.props.type === "transfer") {
+
+    if (this.props.type === 'amm-transaction') {
+      offset = this.props.balances.ammTransactionLimit * (page - 1);
+    } else if (this.props.type === 'transfer') {
       offset = this.props.balances.transferLimit * (page - 1);
-    } else if (this.props.type === "deposit") {
+    } else if (this.props.type === 'deposit') {
       offset = this.props.balances.depositLimit * (page - 1);
-    } else if (this.props.type === "withdrawals") {
+    } else if (this.props.type === 'withdrawals') {
       offset = this.props.balances.withdrawalLimit * (page - 1);
     }
 
@@ -157,6 +181,47 @@ class DepositWithdrawalTable extends React.Component {
     }
   };
 
+  claim = (id) => {
+    const { exchangeAddress, nonce, account, gasPrice, chainId } = this.props;
+    (async () => {
+      try {
+        const info = await getDistributeInfo(id, account.apiKey);
+        const result = await window.wallet.claimWithdrawal(
+          exchangeAddress,
+          chainId,
+          nonce,
+          gasPrice,
+          info.blockIndex,
+          info.slotIndex,
+          true
+        );
+        const signed = window.wallet.signUpdateDistributeHash({
+          requestId: id,
+          txHash: result,
+        });
+        await updateDistributeHash(
+          id,
+          result,
+          account.publicKeyX,
+          account.publicKeyY,
+          signed
+        );
+
+        notifySuccess(
+          <I s="ClaimInstructionNotification" />,
+          this.props.theme,
+          15
+        );
+      } catch (e) {
+        console.error(e);
+        notifyError(
+          <I s="ClaimInstructionNotificationFailed" />,
+          this.props.theme
+        );
+      }
+    })();
+  };
+
   render() {
     const { type, balances, exchange } = this.props;
     let data;
@@ -165,7 +230,26 @@ class DepositWithdrawalTable extends React.Component {
     let current;
     let loading;
 
-    if (type === "transfer") {
+    if (type === 'amm-transaction') {
+      data = balances.ammTransactions;
+      total = balances.ammTransactionTotalNum;
+      limit = balances.ammTransactionLimit;
+      current = Math.floor(balances.ammTransactionOffset / limit) + 1;
+      loading = balances.isAmmTransactionsLoading;
+      return (
+        <div>
+          <AmmTransactionTable
+            placeHolder="NoAmmTransactions"
+            data={data}
+            total={total}
+            limit={limit}
+            current={current}
+            onChange={this.onChange}
+            loading={!exchange.isInitialized || loading}
+          />
+        </div>
+      );
+    } else if (type === 'transfer') {
       data = balances.transfers;
       total = balances.transferTotalNum;
       limit = balances.transferLimit;
@@ -185,7 +269,7 @@ class DepositWithdrawalTable extends React.Component {
           />
         </div>
       );
-    } else if (type === "deposit") {
+    } else if (type === 'deposit') {
       data = balances.deposits;
       total = balances.depositTotalNum;
       limit = balances.depositLimit;
@@ -205,7 +289,7 @@ class DepositWithdrawalTable extends React.Component {
           />
         </div>
       );
-    } else if (this.props.type === "withdrawals") {
+    } else if (this.props.type === 'withdrawals') {
       data = balances.withdrawals;
       total = balances.withdrawalTotalNum;
       limit = balances.withdrawalLimit;
@@ -222,6 +306,7 @@ class DepositWithdrawalTable extends React.Component {
             current={current}
             onChange={this.onChange}
             loading={!exchange.isInitialized || loading}
+            claim={this.claim}
           />
         </div>
       );
@@ -230,8 +315,18 @@ class DepositWithdrawalTable extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  const { dexAccount, balances, tabs, exchange } = state;
-  return { dexAccount, balances, tabs, exchange };
+  const { dexAccount, balances, tabs, exchange, nonce, gasPrice } = state;
+  return {
+    dexAccount,
+    balances,
+    tabs,
+    chainId: exchange.chainId,
+    exchange,
+    exchangeAddress: exchange.exchangeAddress,
+    account: dexAccount.account,
+    nonce: nonce.nonce,
+    gasPrice: gasPrice.gasPrice,
+  };
 };
 
 const mapDispatchToProps = (dispatch) => {
@@ -248,10 +343,11 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(
         fetchTransfers(limit, offset, accountId, tokenSymbol, apiKey, tokens)
       ),
+    fetchAmmTransactions: (limit, offset, accountId, apiKey, tokens) =>
+      dispatch(fetchAmmTransactions(limit, offset, accountId, apiKey, tokens)),
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(DepositWithdrawalTable);
+export default withTheme(
+  connect(mapStateToProps, mapDispatchToProps)(DepositWithdrawalTable)
+);

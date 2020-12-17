@@ -1,34 +1,37 @@
-import { Button, Carousel, Menu, Popover } from "antd";
-import { HighlightTextSpan, RegularTextSpan } from "styles/Styles";
-import { connect } from "react-redux";
-import { withUserPreferences } from "components/UserPreferenceContext";
-import AppLayout from "AppLayout";
-import I from "components/I";
-import MarketSelector from "modals/market-selector/MarketSelector";
-import React from "react";
-import styled, { withTheme } from "styled-components";
+import { Button, Carousel, Menu, Popover } from 'antd';
+import { HighlightTextSpan, RegularTextSpan } from 'styles/Styles';
+import { connect } from 'react-redux';
+import { withUserPreferences } from 'components/UserPreferenceContext';
+import AppLayout from 'AppLayout';
+import I from 'components/I';
+import MarketSelector from 'modals/market-selector/MarketSelector';
+import React from 'react';
+import ReactToolTip from 'react-tooltip';
+import styled, { withTheme } from 'styled-components';
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { faDotCircle } from "@fortawesome/free-solid-svg-icons/faDotCircle";
-import { fetchTicker, restTicker } from "redux/actions/market/Ticker";
+import { faDotCircle } from '@fortawesome/free-solid-svg-icons/faDotCircle';
+import { fetchTicker, restTicker } from 'redux/actions/market/Ticker';
 
-import TickerBarStatusIcon from "pages/trade/ticker-bar/TickerBarStatusIcon";
-import config from "lightcone/config";
+import { tracker } from 'components/DefaultTracker';
+import TickerBarStatusIcon from 'pages/trade/ticker-bar/TickerBarStatusIcon';
+import config from 'lightcone/config';
 
 const SelectMarketButton = styled(Button)`
   background: ${(props) => props.theme.foreground};
   color: ${(props) => props.theme.textWhite};
-  height: 53px !important;
+  margin-top: 6px;
+  height: 40px !important;
   font-size: 0.9rem !important;
   font-weight: 600 !important;
   border-radius: 4px;
-  border: 1px solid ${(props) => props.theme.inputBorderColor}  !important;
+  border: 1px solid ${(props) => props.theme.inputBorderColor} !important;
 
   &:hover, &:focus  {
     background: ${(props) => props.theme.background} !important;
     border 1px solid  ${(props) =>
-      props.theme.inputBorderActiveColor}  !important;
+      props.theme.inputBorderActiveColor} !important;
     color: ${(props) => props.theme.textBright};
   }
 
@@ -37,6 +40,18 @@ const SelectMarketButton = styled(Button)`
   }
 `;
 
+const StyledReactTooltip = styled(ReactToolTip)`
+  padding: 0;
+  padding-left: 6px;
+  padding-right: 6px;
+  height: auto;
+  height: 18px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+`;
+
+// TODO Keyframe
 // const BlinkFontAwesomeIcon = styled(FontAwesomeIcon)`
 //   // @keyframes blinker {
 //   //   50% {
@@ -51,10 +66,11 @@ const SelectMarketButton = styled(Button)`
 // `;
 
 const MenuItem = styled(Menu.Item)`
-  cursor: "default";
+  cursor: 'default';
   padding-left: 0px;
   padding-right: 20px;
   line-height: ${AppLayout.tickerBarHeight};
+  pointer-events: none;
 `;
 
 const MenuHighlightTextSpan = styled(HighlightTextSpan)`
@@ -105,6 +121,13 @@ class TickerBar extends React.Component {
     this.setState({
       modalVisible: visible,
     });
+    tracker.trackEvent({
+      type: 'LOCATION_CHANGE',
+      data: {
+        location: 'market-selection',
+        visible: visible,
+      },
+    });
   }
 
   render() {
@@ -112,11 +135,12 @@ class TickerBar extends React.Component {
     const { ticker, currentMarket, exchange } = this.props;
 
     // Find base price
-    const { prices } = this.props.cmcPrice;
-    let price = "-";
-    let priceUnit = this.props.cmcPrice.legal;
+    const { prices } = this.props.legalPrice;
+    let price = '-';
+    let priceUnit = this.props.legalPrice.legal;
     let priceLabel = <I s="Last Price" />;
     let priceLabelValue = `${ticker.close} ${currentMarket.quoteTokenSymbol}`;
+    let usdPriceLabelValue = ``; // USD Price
 
     const marketConfig = config.getMarketByPair(
       currentMarket.current,
@@ -131,11 +155,12 @@ class TickerBar extends React.Component {
         (x) => x.symbol === currentMarket.quoteTokenSymbol
       );
       if (result) {
-        price = (result[0]["price"] * ticker.close).toFixed(
+        price = (result[0]['price'] * ticker.close).toFixed(
           marketConfig.precisionForPrice
         );
         if (!isNaN(price)) {
-          priceLabelValue = `${ticker.close} ${currentMarket.quoteTokenSymbol} (${price} ${priceUnit})`;
+          priceLabelValue = `${ticker.close} ${currentMarket.quoteTokenSymbol}`; // USDT Price
+          usdPriceLabelValue = `(${price} ${priceUnit})`;
         }
       }
     } catch (error) {}
@@ -143,7 +168,7 @@ class TickerBar extends React.Component {
     return (
       <div
         style={{
-          borderBottomStyle: "none",
+          borderBottomStyle: 'none',
         }}
       >
         <Menu
@@ -158,7 +183,7 @@ class TickerBar extends React.Component {
             key="current-market"
             style={{
               width: AppLayout.tradePanelWidth,
-              height: "53px",
+              height: '53px',
               background: theme.sidePanelBackground,
               paddingLeft: AppLayout.sidePadding,
               paddingRight: AppLayout.sidePadding,
@@ -186,8 +211,8 @@ class TickerBar extends React.Component {
               >
                 <span
                   style={{
-                    width: "94%",
-                    textAlign: "left",
+                    width: '94%',
+                    textAlign: 'left',
                   }}
                 >
                   {currentMarket.current}
@@ -200,11 +225,20 @@ class TickerBar extends React.Component {
             key="current-market-trade-price"
             selectable={false}
             style={{
-              paddingLeft: "12px",
+              paddingLeft: '12px',
             }}
           >
             <RegularTextSpan>{priceLabel}</RegularTextSpan>
             <MenuHighlightTextSpan>{priceLabelValue}</MenuHighlightTextSpan>
+            <MenuHighlightTextSpan
+              style={{
+                pointerEvents: 'stroke',
+              }}
+              data-tip="Price Oracle Powered by Band Protocol"
+            >
+              {usdPriceLabelValue}
+            </MenuHighlightTextSpan>
+            <StyledReactTooltip backgroundColor="#4a4f59" />
           </MenuItem>
           <MenuItem key="current-market-trade-change" selectable={false}>
             <RegularTextSpan>
@@ -212,7 +246,7 @@ class TickerBar extends React.Component {
             </RegularTextSpan>
             <MenuHighlightTextSpan
               style={{
-                color: ticker.percentChange24h.startsWith("-")
+                color: ticker.percentChange24h.startsWith('-')
                   ? theme.downColor
                   : theme.upColor,
               }}
@@ -249,11 +283,11 @@ class TickerBar extends React.Component {
           <Menu.Item
             key="market-available"
             style={{
-              float: "right",
-              paddingLeft: "0px",
-              paddingRight: "24px",
-              cursor: "default",
-              display: "none",
+              float: 'right',
+              paddingLeft: '0px',
+              paddingRight: '24px',
+              cursor: 'default',
+              display: 'none',
             }}
           >
             <Carousel
@@ -261,25 +295,24 @@ class TickerBar extends React.Component {
               dots={false}
               speed={5000}
               style={{
-                width: "225px",
-                fontSize: "0.85rem",
-                fontWeight: "600",
-
-                userSelect: "none",
+                width: '225px',
+                fontSize: '0.85rem',
+                fontWeight: '600',
+                userSelect: 'none',
                 height: AppLayout.tickerBarHeight,
               }}
             >
               <div>
                 <div
                   style={{
-                    float: "right",
+                    float: 'right',
                     height: AppLayout.tickerBarHeight,
                     lineHeight: AppLayout.tickerBarHeight,
                     color: theme.green,
                   }}
                 >
                   <span style={{ color: theme.green }}>
-                    <FontAwesomeIcon icon={faDotCircle} />{" "}
+                    <FontAwesomeIcon icon={faDotCircle} />{' '}
                     <I s="Market Available" />
                   </span>
                 </div>
@@ -293,11 +326,11 @@ class TickerBar extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  const { ticker, currentMarket, cmcPrice, exchange } = state;
+  const { ticker, currentMarket, legalPrice, exchange } = state;
   return {
     ticker,
     currentMarket,
-    cmcPrice,
+    legalPrice,
     exchange,
   };
 };

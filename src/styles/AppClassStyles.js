@@ -1,4 +1,4 @@
-import { createGlobalStyle } from "styled-components";
+import { createGlobalStyle } from 'styled-components';
 
 const AppClassStyles = createGlobalStyle`
 .marketSelection.ant-popover.ant-popover-placement-bottomLeft > .ant-popover-content {

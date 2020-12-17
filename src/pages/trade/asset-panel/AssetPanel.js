@@ -1,13 +1,14 @@
-import { connect } from "react-redux";
-import I from "components/I";
-import React from "react";
+import { connect } from 'react-redux';
+import I from 'components/I';
+import React from 'react';
 
-import { withTheme } from "styled-components";
-import config from "lightcone/config";
+import * as fm from 'lightcone/common/formatter';
+import { withTheme } from 'styled-components';
+import config from 'lightcone/config';
 
-import { Col, Row } from "antd";
+import { Col, Row } from 'antd';
 
-import AssetPanelButtons from "./components/AssetPanelButtons";
+import AssetPanelButtons from './components/AssetPanelButtons';
 
 class AssetPanel extends React.Component {
   state = {
@@ -22,8 +23,8 @@ class AssetPanel extends React.Component {
       prevProps.balances !== this.props.balances ||
       prevProps.exchange.tokens !== this.props.exchange.tokens ||
       prevProps.currentMarket.current !== this.props.currentMarket.current ||
-      (this.props.cmcPrice &&
-        prevProps.cmcPrice.prices !== this.props.cmcPrice.prices) ||
+      // (this.props.legalPrice &&
+      //   prevProps.legalPrice.prices !== this.props.legalPrice.prices) ||
       prevProps.dexAccount.account.address !==
         this.props.dexAccount.account.address
     ) {
@@ -32,8 +33,9 @@ class AssetPanel extends React.Component {
   }
 
   updateLabels = () => {
-    const { balances, market, exchange } = this.props;
-    const { prices } = this.props.cmcPrice;
+    // console.log('updateLabels', this.props.legalPrice);
+    const { balances, currentMarket, exchange } = this.props;
+    const { prices } = this.props.legalPrice;
 
     let baseTokenAvailableAmount;
     let baseTokenAvailableTotal;
@@ -43,12 +45,12 @@ class AssetPanel extends React.Component {
     if (
       balances &&
       balances.length &&
-      prices &&
-      prices.length &&
+      // prices &&
+      // prices.length &&
       exchange.tokens
     ) {
       const baseToken = config.getTokenBySymbol(
-        market.currentMarket.baseTokenSymbol,
+        currentMarket.baseTokenSymbol,
         exchange.tokens
       );
       baseTokenAvailableAmount = this.getAvailableAmount(baseToken, balances);
@@ -60,7 +62,7 @@ class AssetPanel extends React.Component {
       );
 
       const quoteToken = config.getTokenBySymbol(
-        market.currentMarket.quoteTokenSymbol,
+        currentMarket.quoteTokenSymbol,
         exchange.tokens
       );
       quoteTokenAvailableAmount = this.getAvailableAmount(quoteToken, balances);
@@ -92,12 +94,12 @@ class AssetPanel extends React.Component {
       try {
         const baseTokenPrice = prices.filter(
           (x) => x.symbol === token.symbol
-        )[0]["price"];
+        )[0]['price'];
         let availableTotal = (
           parseFloat(baseTokenPrice) * parseFloat(availableAmount)
         ).toFixed(token.precision);
         return (
-          <div>{`${this.props.cmcPrice.legalPrefix}${availableTotal}`}</div>
+          <div>{`${this.props.legalPrice.legalPrefix}${availableTotal}`}</div>
         );
       } catch (error) {}
     }
@@ -114,11 +116,11 @@ class AssetPanel extends React.Component {
             <div
               className="columnLeft"
               style={{
-                userSelect: "none",
+                userSelect: 'none',
                 color: theme.textDim,
 
-                fontSize: "0.8rem",
-                textTransform: "uppercase",
+                fontSize: '0.8rem',
+                textTransform: 'uppercase',
               }}
             >
               <I s="Asset" />
@@ -128,11 +130,11 @@ class AssetPanel extends React.Component {
             <div
               className="columnRight"
               style={{
-                userSelect: "none",
+                userSelect: 'none',
                 color: theme.textDim,
 
-                fontSize: "0.8rem",
-                textTransform: "uppercase",
+                fontSize: '0.8rem',
+                textTransform: 'uppercase',
               }}
             >
               <I s="Available Balance" />
@@ -151,24 +153,24 @@ class AssetPanel extends React.Component {
             gutter={16}
             style={{
               color: theme.textWhite,
-              fontSize: "0.9rem",
-              paddingTop: "16px",
-              paddingBottom: "0px",
+              fontSize: '0.9rem',
+              paddingTop: '16px',
+              paddingBottom: '0px',
             }}
           >
             <Col className="columnLeft" span={12} style={{}}>
-              {this.props.market.currentMarket.baseTokenSymbol}
+              {this.props.currentMarket.baseTokenSymbol}
             </Col>
             <Col
               className="columnRight"
               span={12}
               style={{
-                fontWeight: "600",
-                fontSize: "0.9rem",
+                fontWeight: '600',
+                fontSize: '0.9rem',
                 color: theme.textWhite,
               }}
             >
-              {this.state.baseTokenAvailableAmount}
+              {fm.numberWithCommas(this.state.baseTokenAvailableAmount)}
             </Col>
           </Row>
           <Row
@@ -176,8 +178,8 @@ class AssetPanel extends React.Component {
             gutter={16}
             style={{
               color: theme.textWhite,
-              paddingTop: "0px",
-              paddingBottom: "0px",
+              paddingTop: '0px',
+              paddingBottom: '0px',
             }}
           >
             <Col className="columnLeft" span={12}></Col>
@@ -185,8 +187,8 @@ class AssetPanel extends React.Component {
               className="columnRight"
               span={12}
               style={{
-                fontWeight: "600",
-                fontSize: "0.9rem",
+                fontWeight: '600',
+                fontSize: '0.9rem',
                 color: theme.textDim,
               }}
             >
@@ -198,24 +200,24 @@ class AssetPanel extends React.Component {
             gutter={16}
             style={{
               color: theme.textWhite,
-              fontSize: "0.9rem",
-              paddingTop: "16px",
-              paddingBottom: "0px",
+              fontSize: '0.9rem',
+              paddingTop: '16px',
+              paddingBottom: '0px',
             }}
           >
             <Col className="columnLeft" span={12} style={{}}>
-              {this.props.market.currentMarket.quoteTokenSymbol}
+              {this.props.currentMarket.quoteTokenSymbol}
             </Col>
             <Col
               className="columnRight"
               span={12}
               style={{
-                fontSize: "0.9rem",
-                fontWeight: "600",
+                fontSize: '0.9rem',
+                fontWeight: '600',
                 color: theme.textWhite,
               }}
             >
-              {this.state.quoteTokenAvailableAmount}
+              {fm.numberWithCommas(this.state.quoteTokenAvailableAmount)}
             </Col>
           </Row>
           <Row
@@ -223,9 +225,9 @@ class AssetPanel extends React.Component {
             gutter={16}
             style={{
               color: theme.textWhite,
-              fontSize: "0.9rem",
-              paddingTop: "0px",
-              paddingBottom: "16px",
+              fontSize: '0.9rem',
+              paddingTop: '0px',
+              paddingBottom: '16px',
             }}
           >
             <Col className="columnLeft" span={12}></Col>
@@ -233,8 +235,8 @@ class AssetPanel extends React.Component {
               className="columnRight"
               span={12}
               style={{
-                fontWeight: "600",
-                fontSize: "0.9rem",
+                fontWeight: '600',
+                fontSize: '0.9rem',
                 color: theme.textDim,
               }}
             >
@@ -249,20 +251,12 @@ class AssetPanel extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  const {
-    currentMarket,
-    balances,
-    dexAccount,
-    market,
-    cmcPrice,
-    exchange,
-  } = state;
+  const { currentMarket, balances, dexAccount, legalPrice, exchange } = state;
   return {
     currentMarket,
     balances: balances.balances,
     dexAccount,
-    market,
-    cmcPrice,
+    legalPrice,
     exchange,
   };
 };

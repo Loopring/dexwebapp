@@ -1,10 +1,10 @@
-import { AppContainer } from "react-hot-loader";
-import { Provider } from "react-redux";
-import React from "react";
-import ReactDOM from "react-dom";
-import configureStore from "redux/configureStore";
+import { AppContainer } from 'react-hot-loader';
+import { Provider } from 'react-redux';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import configureStore from 'redux/configureStore';
 
-import App from "./App";
+import App from './App';
 
 const render = () => {
   ReactDOM.render(
@@ -13,7 +13,7 @@ const render = () => {
         <App />
       </Provider>
     </AppContainer>,
-    document.getElementById("root")
+    document.getElementById('root')
   );
 };
 
@@ -22,7 +22,7 @@ render();
 // Hot reloading
 if (module.hot) {
   // Reload components
-  module.hot.accept("./App", () => {
+  module.hot.accept('./App', () => {
     render();
   });
 }

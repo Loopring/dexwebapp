@@ -1,52 +1,52 @@
-import * as R from "ramda";
-import { connect } from "react-redux";
-import { withTheme } from "styled-components";
-import I from "components/I";
-import PropTypes from "prop-types";
-import React from "react";
-import ReactDOM from "react-dom";
+import * as R from 'ramda';
+import { connect } from 'react-redux';
+import { withTheme } from 'styled-components';
+import I from 'components/I';
+import PropTypes from 'prop-types';
+import React from 'react';
+import ReactDOM from 'react-dom';
 // Defaults
-import * as getters from "../components/defaults/getters";
-import * as util from "../components/defaults/util";
+import * as getters from '../components/defaults/getters';
+import * as util from '../components/defaults/util';
 
 // Components
-import { EmptyOrderRow, OrderRow } from "./components/OrderRow";
+import { EmptyOrderRow, OrderRow } from './components/OrderRow';
 import {
   OrderBookHeaderPosition,
   OrderBookHeaderPrice,
   OrderBookHeaderSize,
-} from "./styles/Styles";
-import { getLanguage } from "lightcone/api/localStorgeAPI";
-import AbsoluteContainer from "../components/AbsoluteContainer";
-import CompactOrderTable from "../components/CompactOrderTable";
-import CompactTableHead from "../components/CompactTableHead";
-import Panel from "../components/Panel";
-import PanelHeader from "../components/PanelHeader";
-import PrettyPosition from "../components/PrettyPosition";
-import PrettyPrice from "../components/PrettyPrice";
-import PrettySize from "../components/PrettySize";
-import ScrollContainer from "../components/ScrollContainer";
-import Spread from "./components/Spread";
-import StickyContainer from "../components/StickyContainer";
+} from './styles/Styles';
+import { getLanguage } from 'lightcone/api/localStorgeAPI';
+import AbsoluteContainer from '../components/AbsoluteContainer';
+import CompactOrderTable from '../components/CompactOrderTable';
+import CompactTableHead from '../components/CompactTableHead';
+import Panel from '../components/Panel';
+import PanelHeader from '../components/PanelHeader';
+import PrettyPosition from '../components/PrettyPosition';
+import PrettyPrice from '../components/PrettyPrice';
+import PrettySize from '../components/PrettySize';
+import ScrollContainer from '../components/ScrollContainer';
+import Spread from './components/Spread';
+import StickyContainer from '../components/StickyContainer';
 
-import config from "lightcone/config";
+import config from 'lightcone/config';
 
 const unsafePropNames = [
-  "asks",
-  "bids",
-  "depth",
-  "spreadText",
-  "onClickOrder",
-  "sizeBarMaxWidth",
-  "sizeBarUnitSize",
-  "getSize",
-  "getPrice",
-  "getPosition",
-  "sizeFormat",
-  "priceFormat",
-  "renderSize",
-  "renderPrice",
-  "renderPosition",
+  'asks',
+  'bids',
+  'depth',
+  'spreadText',
+  'onClickOrder',
+  'sizeBarMaxWidth',
+  'sizeBarUnitSize',
+  'getSize',
+  'getPrice',
+  'getPosition',
+  'sizeFormat',
+  'priceFormat',
+  'renderSize',
+  'renderPrice',
+  'renderPosition',
 ];
 
 class OrderBook extends React.Component {
@@ -57,8 +57,8 @@ class OrderBook extends React.Component {
     this.scroller = null;
     this.centerSpread = this.centerSpread.bind(this);
     this.centerSpreadOnResize = this.centerSpreadOnResize.bind(this);
-    window.addEventListener("resize", this.centerSpreadOnResize);
-    const mql = window.matchMedia("(max-width: 1240px)");
+    window.addEventListener('resize', this.centerSpreadOnResize);
+    const mql = window.matchMedia('(max-width: 1240px)');
     mql.addListener(this.centerSpread);
   }
 
@@ -69,16 +69,13 @@ class OrderBook extends React.Component {
     if (this.scroller && this.state.hasOrders && !this.state.hasCentered) {
       return this.setState({ hasCentered: true }, this.centerSpread);
     }
-    if (
-      prevProps.market.currentMarket.current !==
-      this.props.market.currentMarket.current
-    ) {
+    if (prevProps.currentMarket.current !== this.props.currentMarket.current) {
       this.centerSpread();
     }
   }
 
   componentWillUnmount() {
-    window.removeEventListener("resize", this.centerSpreadOnResize);
+    window.removeEventListener('resize', this.centerSpreadOnResize);
   }
 
   centerSpread() {
@@ -152,9 +149,9 @@ class OrderBook extends React.Component {
     }
 
     // https://github.com/Loopring/dexwebapp/issues/946
-    let spread = "-";
-    if (getLanguage() === "zh") {
-      spread = this.props.latestTrade ? this.props.latestTrade.price : "-";
+    let spread = '-';
+    if (getLanguage() === 'zh') {
+      spread = this.props.latestTrade ? this.props.latestTrade.price : '-';
     } else {
       if (visibleAsks.length > 0 && visibleBids.length > 0) {
         spread =
@@ -164,40 +161,40 @@ class OrderBook extends React.Component {
     }
 
     // Get priceFormat from orderBook.level
-    let market = this.props.market.currentMarket.current;
-    const baseTokenSymbol = this.props.market.currentMarket.baseTokenSymbol;
+    let market = this.props.currentMarket.current;
+    const baseTokenSymbol = this.props.currentMarket.baseTokenSymbol;
     const baseToken = config.getTokenBySymbol(baseTokenSymbol, exchange.tokens);
     const marketConfig = config.getMarketByPair(market, exchange.markets);
     const precisionForPrice = marketConfig ? marketConfig.precisionForPrice : 8;
-    const precision = precisionForPrice - this.props.market.orderBook.level;
+    const precision = precisionForPrice - this.props.orderBook.level;
     let priceFormat;
     if (precision > 0) {
-      priceFormat = "0." + "0".repeat(precision);
+      priceFormat = '0.' + '0'.repeat(precision);
     } else if (precision < 0) {
-      priceFormat = "1" + "0".repeat(-precision);
+      priceFormat = '1' + '0'.repeat(-precision);
     }
     let sizeFormat;
     if (baseToken.precision > 0) {
-      sizeFormat = "0." + "0".repeat(baseToken.precision);
+      sizeFormat = '0.' + '0'.repeat(baseToken.precision);
     } else {
-      sizeFormat = "1" + "0".repeat(-baseToken.precision);
+      sizeFormat = '1' + '0'.repeat(-baseToken.precision);
     }
 
     const dataConfigs = [
       {
-        propName: "price",
+        propName: 'price',
         format: priceFormat,
         getter: getPrice,
         renderer: renderPrice,
       },
       {
-        propName: "size",
+        propName: 'size',
         format: sizeFormat,
         getter: getSize,
         renderer: renderSize,
       },
       {
-        propName: "position",
+        propName: 'position',
         format: sizeFormat,
         getter: getPosition,
         renderer: renderPosition,
@@ -216,7 +213,7 @@ class OrderBook extends React.Component {
         </StickyContainer>
         <ScrollContainer
           style={{
-            visibility: this.state.hasOrders ? "visible" : "hidden",
+            visibility: this.state.hasOrders ? 'visible' : 'hidden',
           }}
           scrollerRef={(c) => {
             this.scroller = ReactDOM.findDOMNode(c);
@@ -253,10 +250,11 @@ class OrderBook extends React.Component {
                 <Spread
                   spread={spread}
                   label={
-                    getLanguage() === "zh" ? (
+                    getLanguage() === 'zh' ? (
                       <I s="Last Price" />
                     ) : (
-                      <I s="Spread" />
+                      <div />
+                      // <I s="Spread" />
                     )
                   }
                   format={priceFormat}
@@ -301,8 +299,8 @@ class OrderBook extends React.Component {
       headerContent = (
         <div
           style={{
-            paddingTop: "0px",
-            paddingLeft: "0px",
+            paddingTop: '0px',
+            paddingLeft: '0px',
             backgroundColor: theme.background,
           }}
         >
@@ -347,22 +345,16 @@ OrderBook.defaultProps = {
   getSize: getters.getSize,
   getPrice: getters.getPrice,
   getPosition: getters.getPosition,
-  sizeFormat: "0.0000",
-  priceFormat: "0.000000",
+  sizeFormat: '0.0000',
+  priceFormat: '0.000000',
   renderSize: PrettySize,
   renderPrice: PrettyPrice,
   renderPosition: PrettyPosition,
 };
 
 const mapStateToProps = (state) => {
-  const { layoutManager, market, exchange } = state;
-  return { layoutManager, market, exchange };
+  const { layoutManager, currentMarket, orderBook, exchange } = state;
+  return { layoutManager, currentMarket, orderBook, exchange };
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {};
-};
-
-export default withTheme(
-  connect(mapStateToProps, mapDispatchToProps)(OrderBook)
-);
+export default withTheme(connect(mapStateToProps, null)(OrderBook));

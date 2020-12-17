@@ -1,12 +1,12 @@
-import { ConfigProvider, Pagination, Table } from "antd";
-import { connect } from "react-redux";
-import I from "components/I";
-import React from "react";
-import TableLoadingSpin from "components/TableLoadingSpin";
-import WhyIcon from "components/WhyIcon";
-import styled, { withTheme } from "styled-components";
+import { ConfigProvider, Pagination, Table } from 'antd';
+import { connect } from 'react-redux';
+import I from 'components/I';
+import React from 'react';
+import TableLoadingSpin from 'components/TableLoadingSpin';
+import WhyIcon from 'components/WhyIcon';
+import styled, { withTheme } from 'styled-components';
 
-import Moment from "moment";
+import Moment from 'moment';
 
 import {
   LargeTableRow,
@@ -15,17 +15,17 @@ import {
   LargeTableRowProcessing,
   SimpleTableContainer,
   TextCompactTableHeader,
-} from "styles/Styles";
-import EmptyTableIndicator from "components/EmptyTableIndicator";
+} from 'styles/Styles';
+import EmptyTableIndicator from 'components/EmptyTableIndicator';
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { faCheckCircle } from "@fortawesome/free-solid-svg-icons/faCheckCircle";
-import { faCircleNotch } from "@fortawesome/free-solid-svg-icons/faCircleNotch";
-import { faClock } from "@fortawesome/free-solid-svg-icons/faClock";
-import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons/faExclamationCircle";
+import { faCheckCircle } from '@fortawesome/free-solid-svg-icons/faCheckCircle';
+import { faCircleNotch } from '@fortawesome/free-solid-svg-icons/faCircleNotch';
+import { faClock } from '@fortawesome/free-solid-svg-icons/faClock';
+import { faExclamationCircle } from '@fortawesome/free-solid-svg-icons/faExclamationCircle';
 
-import { getEtherscanLink } from "lightcone/api/localStorgeAPI";
+import { getEtherscanLink } from 'lightcone/api/localStorgeAPI';
 
 const StatusFontAwesomeIcon = styled(FontAwesomeIcon)`
   margin-right: 4px;
@@ -44,25 +44,25 @@ class DepositTable extends React.Component {
     const columns = [
       {
         title: (
-          <TextCompactTableHeader style={{ paddingLeft: "14px" }}>
+          <TextCompactTableHeader style={{ paddingLeft: '14px' }}>
             <I s="Timestamp" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "date",
-        width: "16%",
+        dataIndex: 'date',
+        width: '14%',
       },
       {
         title: (
           <TextCompactTableHeader
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
             }}
           >
             <I s="Asset" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "asset",
-        width: "12%",
+        dataIndex: 'asset',
+        width: '18%',
       },
       {
         title: (
@@ -70,68 +70,71 @@ class DepositTable extends React.Component {
             <I s="Amount" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "amount",
-        width: "12%",
+        dataIndex: 'amount',
+        width: '20%',
       },
+      /*
       {
         title: (
           <TextCompactTableHeader>
             <I s="Fee" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "fee",
-        width: "12%",
+        dataIndex: 'fee',
+        width: '14%',
       },
+      */
       {
         title: (
           <TextCompactTableHeader>
             <I s="Tx Hash" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "txHash",
-        width: "18%",
+        dataIndex: 'txHash',
+        width: '20%',
       },
-
+      /*
       {
         title: (
           <TextCompactTableHeader>
             <I s="Type" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "depositType",
-        width: "10%",
+        dataIndex: 'depositType',
+        width: '10%',
       },
+      */
       {
         title: (
           <TextCompactTableHeader
             style={{
-              width: "100%",
-              textAlign: "center",
+              width: '100%',
+              textAlign: 'center',
             }}
           >
             <div
               style={{
-                textAlign: "left",
-                paddingRight: "14px",
+                textAlign: 'left',
+                paddingRight: '14px',
               }}
             >
               <I s="Status" />
             </div>
           </TextCompactTableHeader>
         ),
-        dataIndex: "status",
-        width: "14%",
+        dataIndex: 'status',
+        width: '20%',
       },
     ];
 
     const data = [];
     for (let i = 0; i < this.props.data.length; i++) {
       const transaction = this.props.data[i];
-      var status = "-";
-      if (transaction.status === "processing") {
+      var status = '-';
+      if (transaction.status === 'TX_STATUS_PROCESSING') {
         status = (
           <LargeTableRowProcessing
-            style={{ color: theme.highlight, textAlign: "left" }}
+            style={{ color: theme.highlight, textAlign: 'left' }}
           >
             <StatusFontAwesomeIcon icon={faCircleNotch} spin />
             <div>
@@ -139,10 +142,10 @@ class DepositTable extends React.Component {
             </div>
           </LargeTableRowProcessing>
         );
-      } else if (transaction.status === "processed") {
+      } else if (transaction.status === 'TX_STATUS_PROCESSED') {
         status = (
           <LargeTableRowProcessed
-            style={{ color: theme.green, textAlign: "left" }}
+            style={{ color: theme.green, textAlign: 'left' }}
           >
             <StatusFontAwesomeIcon icon={faCheckCircle} />
             <div>
@@ -150,58 +153,69 @@ class DepositTable extends React.Component {
             </div>
           </LargeTableRowProcessed>
         );
-      } else if (transaction.status === "failed") {
+      } else if (transaction.status === 'TX_STATUS_FAILED') {
         status = (
-          <LargeTableRowFailed style={{ color: theme.red, textAlign: "left" }}>
+          <LargeTableRowFailed style={{ color: theme.red, textAlign: 'left' }}>
             <StatusFontAwesomeIcon icon={faExclamationCircle} />
             <div>
               <I s="Failed" />
             </div>
           </LargeTableRowFailed>
         );
-      } else if (transaction.status === "received") {
-        status = (
-          <LargeTableRowProcessing
-            style={{ color: theme.orange, textAlign: "left" }}
-          >
-            <StatusFontAwesomeIcon icon={faClock} />
-
-            <div>
-              {this.props.blockNum - transaction.blockNum <= 30 ? (
-                <div>
-                  <I s="Confirming" /> <WhyIcon text="StatusConfirming" />(
-                  {Math.max(this.props.blockNum - transaction.blockNum, 0)} /
-                  30)
-                </div>
-              ) : (
-                <div>
-                  <I s="Processing" /> <WhyIcon text="StatusProcessing" />
-                </div>
-              )}
-            </div>
-          </LargeTableRowProcessing>
-        );
+      } else if (transaction.status === 'TX_STATUS_RECEIVED') {
+        status =
+          this.props.blockNum - transaction.blockNum <= 30 ? (
+            <LargeTableRowProcessing
+              style={{ color: theme.orange, textAlign: 'left' }}
+            >
+              <StatusFontAwesomeIcon icon={faClock} />
+              <div>
+                <I s="Confirming" />
+                {/* (
+                {Math.max(this.props.blockNum - transaction.blockNum, 0)} / 18) */}
+                <WhyIcon text="StatusConfirmingDeposit" />
+              </div>
+            </LargeTableRowProcessing>
+          ) : (
+            <LargeTableRowProcessing
+              style={{ color: theme.highlight, textAlign: 'left' }}
+            >
+              <StatusFontAwesomeIcon icon={faCircleNotch} spin />
+              <div>
+                <I s="Processing" /> <WhyIcon text="StatusProcessing" />
+              </div>
+            </LargeTableRowProcessing>
+          );
       }
 
-      let type = "-";
-
-      if (transaction.depositType === "deposit") {
+      // No deposit type in 3.6
+      /*
+      if (transaction.depositType === 'deposit') {
         type = <I s="Deposit" />;
-      } else if (transaction.depositType === "update_account") {
-        type = <I s="Key Reset" />;
+      } else if (transaction.depositType === 'update_account') {
+        type = <I s="Reset Layer-2 Keypair" />;
       } else {
-        type = <I s="Registration" />;
+        type = <I s="Activate Layer-2" />;
       }
+      */
 
       data.push({
         key: i,
         asset: (
           <LargeTableRow
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
             }}
           >
-            {transaction.symbol} - <I s={transaction.tokenName} />
+            {' '}
+            {transaction.tokenName &&
+            transaction.tokenName.split('-').length - 1 >= 2 ? (
+              <div>{transaction.symbol}</div>
+            ) : (
+              <div>
+                {transaction.symbol} - <I s={transaction.tokenName} />{' '}
+              </div>
+            )}
           </LargeTableRow>
         ),
         amount: (
@@ -209,6 +223,7 @@ class DepositTable extends React.Component {
             {transaction.amountInUI} {transaction.symbol}
           </LargeTableRow>
         ),
+        /*
         fee: (
           <LargeTableRow
             style={{
@@ -218,10 +233,11 @@ class DepositTable extends React.Component {
             {transaction.feeInUI} ETH
           </LargeTableRow>
         ),
+        */
         date: (
           <LargeTableRow
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
               color: theme.textDim,
             }}
           >
@@ -244,14 +260,14 @@ class DepositTable extends React.Component {
         status: (
           <div
             style={{
-              textAlign: "center",
-              paddingRight: "14px",
+              textAlign: 'center',
+              paddingRight: '14px',
             }}
           >
             {status}
           </div>
         ),
-        depositType: <LargeTableRow>{type}</LargeTableRow>,
+        // depositType: <LargeTableRow>{type}</LargeTableRow>,
       });
     }
 
@@ -276,9 +292,9 @@ class DepositTable extends React.Component {
           {hasPagination ? (
             <Pagination
               style={{
-                padding: "30px 0px 30px 0px",
+                padding: '30px 0px 30px 0px',
                 background: theme.background,
-                textAlign: "center",
+                textAlign: 'center',
               }}
               size=""
               total={this.props.total}

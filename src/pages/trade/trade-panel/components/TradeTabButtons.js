@@ -1,36 +1,36 @@
-import { Button, Col, Row } from "antd";
-import { connect } from "react-redux";
-import { updateTradeType } from "redux/actions/TradePanel";
-import { withTheme } from "styled-components";
-import I from "components/I";
-import React from "react";
+import { Button, Col, Row } from 'antd';
+import { connect } from 'react-redux';
+import { updateTradeType } from 'redux/actions/TradePanel';
+import { withTheme } from 'styled-components';
+import I from 'components/I';
+import React from 'react';
 
 class TradeTabButtons extends React.Component {
   clickedBuyButton = () => {
-    this.props.updateTradeType("buy");
+    this.props.updateTradeType('buy');
   };
 
   clickedSellButton = () => {
-    this.props.updateTradeType("sell");
+    this.props.updateTradeType('sell');
   };
 
   render() {
     const theme = this.props.theme;
-    const isBuy = this.props.tradeType === "buy";
-    const isSell = this.props.tradeType === "sell";
+    const isBuy = this.props.tradeType === 'buy';
+    const isSell = this.props.tradeType === 'sell';
 
     const buttonStyle = {
       color: theme.textBigButton,
-      borderStyle: "none",
-      height: "32px",
-      borderRadius: "0px",
-      fontWeight: "600",
-      fontSize: "0.85rem",
-      textTransform: "uppercase",
-      borderBottomWidth: "2px",
-      borderBottomStyle: "solid",
-      borderBottomColor: "transparent",
-      background: "transparent",
+      borderStyle: 'none',
+      height: '32px',
+      borderRadius: '0px',
+      fontWeight: '600',
+      fontSize: '0.85rem',
+      textTransform: 'uppercase',
+      borderBottomWidth: '2px',
+      borderBottomStyle: 'solid',
+      borderBottomColor: 'transparent',
+      background: 'transparent',
     };
 
     const buyButtonActiveStyle = {
@@ -55,11 +55,11 @@ class TradeTabButtons extends React.Component {
         <Row
           gutter={0}
           style={{
-            paddingTop: "0px",
-            paddingBottom: "0px",
+            paddingTop: '0px',
+            paddingBottom: '0px',
             color: theme.textWhite,
-            backgroundColor: "transparent",
-            borderRadius: "4px",
+            backgroundColor: 'transparent',
+            borderRadius: '4px',
           }}
         >
           <Col className="columnLeft" span={12}>

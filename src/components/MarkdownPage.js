@@ -1,12 +1,12 @@
-import { Layout } from "antd";
-import { Scroller } from "styles/Styles";
-import { connect } from "react-redux";
-import AppLayout from "AppLayout";
+import { Layout } from 'antd';
+import { Scroller } from 'styles/Styles';
+import { connect } from 'react-redux';
+import AppLayout from 'AppLayout';
 
-import { withUserPreferences } from "components/UserPreferenceContext";
-import React from "react";
-import ReactMarkdown from "react-markdown/with-html";
-import styled, { withTheme } from "styled-components";
+import { withUserPreferences } from 'components/UserPreferenceContext';
+import React from 'react';
+import ReactMarkdown from 'react-markdown/with-html';
+import styled, { withTheme } from 'styled-components';
 
 const { Content, Sider } = Layout;
 
@@ -120,7 +120,7 @@ const MarkdownWrapper = styled.div`
 
 class MakrdownPage extends React.Component {
   state = {
-    markdown: "",
+    markdown: '',
     loading: true,
   };
 
@@ -151,7 +151,7 @@ class MakrdownPage extends React.Component {
   getContainerBackground() {
     return this.state.loading
       ? `url(/assets/images/${this.props.theme.imgDir}/bars.svg) center center no-repeat`
-      : "none";
+      : 'none';
   }
 
   render() {
@@ -167,9 +167,9 @@ class MakrdownPage extends React.Component {
           <Sider
             width={AppLayout.tradePanelWidth}
             style={{
-              padding: "0px",
+              padding: '0px',
               background: theme.sidePanelBackground,
-              borderStyle: "none",
+              borderStyle: 'none',
             }}
             trigger={null}
             breakpoint="sm"
@@ -177,7 +177,7 @@ class MakrdownPage extends React.Component {
           >
             <Scroller
               style={{
-                borderTop: "1px solid " + theme.seperator,
+                borderTop: '1px solid ' + theme.seperator,
               }}
             >
               {this.props.navigation}
@@ -187,17 +187,17 @@ class MakrdownPage extends React.Component {
             width="100%"
             style={{
               backgroundColor: theme.background,
-              borderLeftStyle: "none",
+              borderLeftStyle: 'none',
             }}
           >
             <div
               style={{
-                marginLeft: "auto",
-                marginRight: "auto",
-                width: "740px",
-                height: "100%",
+                marginLeft: 'auto',
+                marginRight: 'auto',
+                width: '740px',
+                height: '100%',
                 background: this.getContainerBackground(),
-                backgroundSize: "40px 40px",
+                backgroundSize: '40px 40px',
               }}
             >
               <MarkdownWrapper>

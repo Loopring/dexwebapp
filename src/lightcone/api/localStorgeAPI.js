@@ -1,3 +1,9 @@
+// TODO: move this two dependencies out of localStorgeAPI
+import { getAutoThemeName } from 'redux/reducers/UserPreferenceManager';
+import { notifyInfo } from 'redux/actions/Notification';
+import I from 'components/I';
+import React from 'react';
+
 function getAccounts() {
   const accountStr = localStorage.getItem('accounts');
   return accountStr ? new Map(JSON.parse(accountStr)) : new Map();
@@ -119,11 +125,15 @@ export function saveHideLowBalanceAssets() {
 }
 
 export function getHideLowBalanceAssets() {
-  return localStorage.getItem('hideLowBalanceAssets');
+  const hideLowBalanceAssets = localStorage.getItem('hideLowBalanceAssets');
+  if (hideLowBalanceAssets && hideLowBalanceAssets === 'false') {
+    return false;
+  }
+  return true;
 }
 
 export function removeHideLowBalanceAssets() {
-  localStorage.removeItem('hideLowBalanceAssets');
+  localStorage.setItem('hideLowBalanceAssets', 'false');
 }
 
 export function saveWalletType(walletType) {
@@ -172,6 +182,48 @@ export function removeUpdateRecord(address) {
   localStorage.setItem('updateRecords', JSON.stringify([...records]));
 }
 
+export function saveHardwareAddress(address) {
+  let current = localStorage.getItem('hardwareAddresses');
+  if (current) {
+    if (current.includes(address.toLowerCase()) !== true) {
+      let newValue = current + ',' + address.toLowerCase();
+      localStorage.setItem('hardwareAddresses', newValue);
+    }
+  } else {
+    localStorage.setItem('hardwareAddresses', address.toLowerCase());
+  }
+
+  // TODO: refactor
+  let themeName = getThemeName();
+  if (themeName === 'auto') {
+    themeName = getAutoThemeName();
+  }
+  let theme = {};
+
+  if (themeName === 'dark') {
+    theme = {
+      notificationBackground: '#282a32',
+      textDim: '#E0E0E080',
+    };
+  } else {
+    theme = {
+      notificationBackground: '#F0F5F9',
+      textDim: '#05050590',
+    };
+  }
+  notifyInfo(<I s="HardwareWalletSignAgain" />, theme, 60);
+}
+
+export function isHardwareAddress(address) {
+  let current = localStorage.getItem('hardwareAddresses');
+  if (current) {
+    if (current.includes(address.toLowerCase())) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export function saveLanguage(value) {
   if (value === 'en' || value === 'zh') {
     localStorage.setItem('language', value);
@@ -210,11 +262,71 @@ export function saveLastTradePage(lastTradePage) {
 }
 
 export function getLastTradePage() {
+  /*
   const lastTradePage = localStorage.getItem('lastTradePage');
   if (lastTradePage) {
     return lastTradePage;
   } else {
-    return 'LRC-USDT';
+    return 'DAI-USDT';
+  }
+  */
+  return 'DAI-USDT';
+}
+
+export function getLastSwapPair() {
+  const lastSwapPair = localStorage.getItem('lastSwapPair');
+  if (lastSwapPair) {
+    return lastSwapPair;
+  } else {
+    return 'LRC-ETH';
+  }
+}
+
+export function saveLastSwapPair(lastSwapPair) {
+  localStorage.setItem('lastSwapPair', lastSwapPair);
+}
+
+export function getSlippageTolerance() {
+  const slippageTolerance = localStorage.getItem('slippageTolerance');
+  if (slippageTolerance) {
+    const updatedSlippageTolerance = Number(slippageTolerance);
+    if (isNaN(updatedSlippageTolerance) === false) {
+      return updatedSlippageTolerance;
+    }
+  }
+  return 0.01;
+}
+
+export function saveSlippageTolerance(slippageTolerance) {
+  localStorage.setItem('slippageTolerance', slippageTolerance);
+}
+
+export function getSwapPoolRemoveFormType() {
+  const swapPoolRemoveFormType = localStorage.getItem('swapPoolRemoveFormType');
+  if (swapPoolRemoveFormType) {
+    return swapPoolRemoveFormType;
+  } else {
+    return 'simple';
+  }
+}
+
+export function saveSwapPoolRemoveFormType(swapPoolRemoveFormType) {
+  localStorage.setItem('swapPoolRemoveFormType', swapPoolRemoveFormType);
+}
+
+export function saveLastPoolPage(lastPoolPage) {
+  localStorage.setItem('lastPoolPage', lastPoolPage);
+}
+
+export function getLastPoolPage() {
+  const lastPoolPage = localStorage.getItem('lastPoolPage');
+  if (lastPoolPage) {
+    // return lastPoolPage;
+    // 如果进入增加流动性和移除流动性时
+    // 再点击资金池，应该回到这个页面
+    return '';
+  } else {
+    return '';
   }
 }
 
@@ -244,8 +356,28 @@ export function getLastAccountPage() {
   }
 }
 
+export function saveTradeType(tradeType) {
+  localStorage.setItem('tradeType', tradeType);
+}
+
+export function getTradeType() {
+  const tradeType = localStorage.getItem('tradeType');
+  if (tradeType) {
+    return tradeType;
+  } else {
+    return 'buy';
+  }
+}
+
 export function saveThemeName(themeName) {
   localStorage.setItem('theme', themeName);
+}
+
+export function getThemeName() {
+  const themeName = localStorage.getItem('theme');
+  if (themeName !== 'dark' && themeName !== 'light') {
+    return 'auto';
+  } else return themeName;
 }
 
 export function getReferralId() {
@@ -264,11 +396,30 @@ export function removeReferralId() {
   localStorage.removeItem('referral');
 }
 
-export function getThemeName() {
-  const themeName = localStorage.getItem('theme');
-  if (themeName !== 'dark' && themeName !== 'light') {
-    return 'auto';
-  } else return themeName;
+export function saveRiskAlertVisible() {
+  // any string value works
+  localStorage.setItem('riskAlertVisible', 'yes');
+}
+
+export function getRiskAlertVisible() {
+  const riskAlertVisible = localStorage.getItem('riskAlertVisible');
+  if (riskAlertVisible) {
+    return false;
+  }
+  return true;
+}
+
+export function saveNewUserCheck() {
+  // any string value works
+  localStorage.setItem('newUserCheck', 'yes');
+}
+
+export function getNewUserCheck() {
+  const newUserCheck = localStorage.getItem('newUserCheck');
+  if (newUserCheck) {
+    return false;
+  }
+  return true;
 }
 
 function getLanguageFromBrowser() {

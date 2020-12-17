@@ -1,12 +1,12 @@
-import { connect } from "react-redux";
-import I from "components/I";
+import { connect } from 'react-redux';
+import I from 'components/I';
 
-import AssetDropdown from "modals/components/AssetDropdown";
+import AssetDropdown from 'modals/components/AssetDropdown';
 
-import { AssetDropdownMenuItem, LargeTableHeader } from "styles/Styles";
-import { updateMarketFilter } from "redux/actions/MyOrderPage";
-import { withTheme } from "styled-components";
-import React from "react";
+import { AssetDropdownMenuItem, LargeTableHeader } from 'styles/Styles';
+import { updateMarketFilter } from 'redux/actions/MyOrderPage';
+import { withTheme } from 'styled-components';
+import React from 'react';
 
 class Header extends React.PureComponent {
   render() {
@@ -24,8 +24,8 @@ class Header extends React.PureComponent {
             small={true}
           >
             <span>
-              {" "}
-              <I s={market.market} />{" "}
+              {' '}
+              <I s={market.market} />{' '}
             </span>
           </AssetDropdownMenuItem>
         );
@@ -35,9 +35,9 @@ class Header extends React.PureComponent {
 
     const menuItem = (
       <AssetDropdownMenuItem
-        key={"all"}
+        key={'all'}
         onClick={() => {
-          this.props.updateMarketFilter("All");
+          this.props.updateMarketFilter('All');
         }}
         small={true}
       >
@@ -49,8 +49,8 @@ class Header extends React.PureComponent {
 
     const options = [menuItem, ...marketsOptions];
 
-    let selected = "";
-    if (this.props.myOrderPage.marketFilter === "All") {
+    let selected = '';
+    if (this.props.myOrderPage.marketFilter === 'All') {
       selected = <I s="All Markets" />;
     } else {
       selected = <I s={this.props.myOrderPage.marketFilter} />;
@@ -60,10 +60,10 @@ class Header extends React.PureComponent {
       <LargeTableHeader>
         <div
           style={{
-            width: "200px",
+            width: '200px',
           }}
         >
-          <AssetDropdown options={options} selected={selected} small={true} />
+          <AssetDropdown options={options} selected={selected} size={'small'} />
         </div>
       </LargeTableHeader>
     );

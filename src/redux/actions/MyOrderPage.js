@@ -1,19 +1,19 @@
-import { getOrders } from "lightcone/api/v1/orders";
-import { getUserTrades } from "lightcone/api/v1/userTrades";
+import { getOrders } from 'lightcone/api/v1/orders';
+import { getUserTrades } from 'lightcone/api/v1/userTrades';
 
-export const UPDATE_ALL_OPEN_ORDERS = "UPDATE_ALL_OPEN_ORDERS";
-export const UPDATE_ALL_HISTORY_ORDERS = "UPDATE_ALL_HISTORY_ORDERS";
-export const EMPTY_ALL_OPEN_ORDERS = "EMPTY_ALL_OPEN_ORDERS";
-export const EMPTY_ALL_HISTORY_ORDERS = "EMPTY_ALL_HISTORY_ORDERS";
+export const UPDATE_ALL_OPEN_ORDERS = 'UPDATE_ALL_OPEN_ORDERS';
+export const UPDATE_ALL_HISTORY_ORDERS = 'UPDATE_ALL_HISTORY_ORDERS';
+export const EMPTY_ALL_OPEN_ORDERS = 'EMPTY_ALL_OPEN_ORDERS';
+export const EMPTY_ALL_HISTORY_ORDERS = 'EMPTY_ALL_HISTORY_ORDERS';
 
 // Trades
-export const UPDATE_USER_TRANSACTIONS = "UPDATE_USER_TRANSACTIONS";
-export const EMPTY_USER_TRANSACTIONS = "EMPTY_USER_TRANSACTIONS";
+export const UPDATE_USER_TRANSACTIONS = 'UPDATE_USER_TRANSACTIONS';
+export const EMPTY_USER_TRANSACTIONS = 'EMPTY_USER_TRANSACTIONS';
 
 //Socket
-export const UPDATE_SOCKET_ALL_ORDER = "UPDATE_SOCKET_ALL_ORDER";
+export const UPDATE_SOCKET_ALL_ORDER = 'UPDATE_SOCKET_ALL_ORDER';
 
-export const UPDATE_MARKET_FILTER = "UPDATE_MARKET_FILTER";
+export const UPDATE_MARKET_FILTER = 'UPDATE_MARKET_FILTER';
 
 export function updateSocketAllOrder(order) {
   return {
@@ -47,7 +47,7 @@ export function fetchMyOpenOrders(
           market,
           limit,
           offset,
-          statuses: ["waiting", "processing"],
+          statuses: ['waiting', 'processing'],
           apiKey,
           tokens,
         });
@@ -80,7 +80,7 @@ export function fetchMyHistoryOrders(
           market,
           limit,
           offset,
-          statuses: ["processed", "failed", "cancelled", "expired"],
+          statuses: ['processed', 'failed', 'cancelled', 'expired'],
           apiKey,
           tokens,
         });

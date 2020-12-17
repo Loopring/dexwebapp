@@ -1,6 +1,6 @@
-import PropTypes from "prop-types";
-import React from "react";
-import styled from "styled-components";
+import PropTypes from 'prop-types';
+import React from 'react';
+import styled from 'styled-components';
 
 const Table = styled.table`
   width: 100%;
@@ -26,13 +26,13 @@ const CompactOrderTable = ({
 }) => (
   <Table {...props}>
     {/* HiddenCompactTableHead is to set column width */}
-    {tableHeaderVisibility === "hidden" ? (
+    {tableHeaderVisibility === 'hidden' ? (
       <HiddenCompactTableHead />
     ) : (
       <CollapseCompactTableHead>
         <tr>
           {headerLabels.map((label, i) => (
-            <th key={i} style={{ userSelect: "none" }}>
+            <th key={i} style={{ userSelect: 'none' }}>
               {label}
             </th>
           ))}
@@ -51,7 +51,7 @@ CompactOrderTable.propTypes = {
 
 CompactOrderTable.defaultProps = {
   headerLabels: [],
-  tableHeaderVisibility: "hidden",
+  tableHeaderVisibility: 'hidden',
 };
 
 export default CompactOrderTable;

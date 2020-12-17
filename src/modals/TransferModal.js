@@ -1,6 +1,6 @@
-import { ActionButton, AssetDropdownMenuItem } from "styles/Styles";
+import { ActionButton, AssetDropdownMenuItem } from 'styles/Styles';
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Instruction,
   MyModal,
@@ -16,9 +16,9 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
 import { faTwitter } from '@fortawesome/free-brands-svg-icons/faTwitter';
 
 import { formatter } from 'lightcone/common';
+import { getStorageId, lightconeGetAccount } from 'lightcone/api/LightconeAPI';
 import { getWalletType } from 'lightcone/api/localStorgeAPI';
 import { isValidAddress } from 'ethereumjs-util';
-import { lightconeGetAccount } from 'lightcone/api/LightconeAPI';
 import { notifyError, notifySuccess } from 'redux/actions/Notification';
 import { showTransferModal } from 'redux/actions/ModalManager';
 import { withUserPreferences } from 'components/UserPreferenceContext';
@@ -33,13 +33,13 @@ import NumericInput from 'components/NumericInput';
 import React from 'react';
 import WalletConnectIndicator from 'modals/components/WalletConnectIndicator';
 import WalletConnectIndicatorPlaceholder from 'modals/components/WalletConnectIndicatorPlaceholder';
-import WhyIcon from 'components/WhyIcon';
+
 import styled, { withTheme } from 'styled-components';
 
 import config from 'lightcone/config';
 
 import './TransferModal.less';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
+
 import { fetchTransfers } from 'redux/actions/MyAccountPage';
 import { submitTransfer } from 'lightcone/api/v1/transfer';
 
@@ -51,7 +51,7 @@ const SearchStyled = styled(Search)`
     height: 100%;
 
     .ant-input-search-icon {
-      display: ${(props) => (props.loading ? "table-cell" : "none")};
+      display: ${(props) => (props.loading ? 'table-cell' : 'none')};
       vertical-align: middle;
       color: ${(props) => props.theme.textDim};
     }
@@ -63,14 +63,15 @@ class TransferModal extends React.Component {
     loading: false,
     amount: null,
     amountF: null,
-    addressValue: "",
+    addressValue: '',
     addressLoading: false,
-    toAddress: "",
+    toAddress: '',
     receiver: null,
     validateAddress: true,
     nonce: -1,
     validateAmount: true,
     availableAmount: 0,
+    balance: 0,
     errorMessage1: '',
     errorToken: '',
     errorMessage2: '',
@@ -97,11 +98,12 @@ class TransferModal extends React.Component {
     ) {
       this.setState({
         loading: false,
+        configLoading: false,
         amount: null,
         amountF: null,
-        toAddress: "",
+        toAddress: '',
         receiver: null,
-        addressValue: "",
+        addressValue: '',
         addressLoading: false,
         validateAddress: true,
         nonce: -1,
@@ -123,16 +125,28 @@ class TransferModal extends React.Component {
     // Reset amount and error message
     this.setState({
       amount: null,
+      amountF: null,
       validateAmount: true,
+    });
+  };
+
+  handleSelectedFeeToken = (token) => {
+    this.setState({
+      feeToken: token,
     });
   };
 
   loadData(tokenSymbol) {
     (async () => {
       try {
+        this.setState({ configLoading: true });
         const { balances } = this.props.balances;
         const tokenBalance = this.getAvailableAmount(tokenSymbol, balances);
-        const amountF = this.getFee(tokenSymbol);
+        const amountF = config.fromWEI(
+          tokenSymbol,
+          this.getFee(tokenSymbol),
+          this.props.exchange.tokens
+        );
         let validateAmount = !this.state.amount;
         if (!validateAmount) {
           validateAmount =
@@ -145,24 +159,24 @@ class TransferModal extends React.Component {
 
         this.setState({
           availableAmount: tokenBalance,
+          balance: this.getBalance(tokenSymbol, balances),
           validateAmount,
           amountF,
           nonce: accountNonce,
+          configLoading: false,
         });
-      } catch (error) {}
+      } catch (error) {
+        this.setState({ configLoading: false });
+      }
     })();
   }
 
   getFee = (tokenSymbol) => {
-    const { tokens, transferFees } = this.props.exchange;
+    const { transferFees } = this.props.exchange;
     if (transferFees) {
-      const fee = transferFees.find(
-        (f) => f.token.toUpperCase() === tokenSymbol.toUpperCase()
-      ).fee;
-      return config.fromWEI(tokenSymbol, fee, tokens);
-    } else {
-      return "0";
-    }
+      const feeConfig = config.getFeeByToken(tokenSymbol, transferFees);
+      return feeConfig ? feeConfig.fee : '0';
+    } else return '0';
   };
 
   getAvailableAmount = (symbol, balances) => {
@@ -171,12 +185,31 @@ class TransferModal extends React.Component {
     const holdBalance = balances.find(
       (ba) => ba.tokenId === selectedToken.tokenId
     );
+
+    const avaliableBalance = holdBalance
+      ? formatter
+          .toBig(holdBalance.totalAmount)
+          .minus(holdBalance.frozenAmount)
+          .minus(this.getFee(symbol))
+      : formatter.toBig(0);
+
+    return config.fromWEI(
+      selectedToken.symbol,
+      avaliableBalance.isPositive() ? avaliableBalance : 0,
+      tokens
+    );
+  };
+
+  getBalance = (symbol, balances) => {
+    const tokens = this.props.exchange.tokens;
+    const selectedToken = config.getTokenBySymbol(symbol, tokens);
+    const holdBalance = balances.find(
+      (ba) => ba.tokenId === selectedToken.tokenId
+    );
     return holdBalance
       ? config.fromWEI(
           selectedToken.symbol,
-          formatter
-            .toBig(holdBalance.totalAmount)
-            .minus(holdBalance.frozenAmount),
+          formatter.toBig(holdBalance.totalAmount),
           tokens
         )
       : config.fromWEI(selectedToken.symbol, 0, tokens);
@@ -198,22 +231,22 @@ class TransferModal extends React.Component {
     }
 
     // Check amount decimal points
-    let errorMessage1 = "";
-    let errorToken = "";
-    let errorMessage2 = "";
+    let errorMessage1 = '';
+    let errorToken = '';
+    let errorMessage2 = '';
 
     const { tokens } = this.props.exchange;
     const token = config.getTokenBySymbol(selectedTokenSymbol, tokens);
 
-    if (token.symbol && validateAmount && value.split(".").length === 2) {
-      var inputPrecision = value.split(".")[1].length;
+    if (token.symbol && validateAmount && value.split('.').length === 2) {
+      var inputPrecision = value.split('.')[1].length;
       if (
         inputPrecision > token.decimals ||
         (parseFloat(value) === 0 && inputPrecision === token.decimals)
       ) {
-        errorMessage1 = "Maximum_amount_input_decimal_part_1";
+        errorMessage1 = 'Maximum_amount_input_decimal_part_1';
         errorToken = `${token.decimals}`;
-        errorMessage2 = "Maximum_input_decimal_part_2";
+        errorMessage2 = 'Maximum_input_decimal_part_2';
         validateAmount = false;
       }
     }
@@ -240,114 +273,141 @@ class TransferModal extends React.Component {
     }
   };
 
-  submitTransfer = () => {
+  test_3_6 = () => {
     this.setState({
       loading: true,
     });
 
-    let { amount, amountF, receiver, nonce, memo } = this.state;
-    const { tokens, exchangeId } = this.props.exchange;
+    let { amount, amountF, toAddress, nonce, receiver, memo } = this.state;
+    const { tokens } = this.props.exchange;
     // Transfer
     let symbol = this.props.modalManager.transferToken;
 
     // Need to use Share to generate link if there is an update.
-    const twitterLink = 'https://twitter.com/intent/tweet?original_referer=http%3A%2F%2Flocalhost%3A3001%2Faccount%2Ftransfers&ref_src=twsrc%5Etfw&text=I%20just%20made%20a%20layer-2%20transfer%20on%20Ethereum%20using%20the%20newly%20launched%20Loopring%20Pay.%20It%20was%20instant%2C%20free%2C%20and%20completely%20self-custodial%20thanks%20to%20Loopring%27s%20zkRollup.%20%23EthereumScalesToday%20%23LoopringPay%20Get%20in%20the%20fast%20lane%20at%20https%3A%2F%2Floopring.io&tw_p=tweetbutton';
+    const twitterLink = `https://twitter.com/intent/tweet?original_referer=http%3A%2F%2Flocalhost%3A3001%2Faccount%2Ftransfers&ref_src=twsrc%5Etfw&text=I%20just%20made%20a%20layer-2%20transfer%20on%20Ethereum%20using%20the%20newly%20launched%20Loopring%20Pay.%20It%20was%20instant%2C%20free%2C%20and%20completely%20self-custodial%20thanks%20to%20Loopring%27s%20zkRollup.%20%23EthereumScalesToday%20%23LoopringPay%20Get%20in%20the%20fast%20lane%20at%20https%3A%2F%2Floopring.io&tw_p=tweetbutton`;
+
+    const { dexAccount } = this.props;
+
     (async () => {
-        try {
-          if (nonce === -1) {
-            const { accountNonce } = await lightconeGetAccount(
-              window.wallet.address
-            );
-
-            nonce = accountNonce;
-          }
-
-          const { transfer, ecdsaSig } = await window.wallet.signTransfer(
-            {
-              exchangeId,
-              receiver: receiver,
-              token: symbol,
-              amount,
-              tokenF: symbol,
-              amountF,
-              nonce,
-              label: config.getLabel(),
-              memo,
-            },
-            tokens
-          );
-
-          await submitTransfer(
-            transfer,
-            ecdsaSig,
-            this.props.dexAccount.account.apiKey
-          );
-
-          let message;
-          if (this.props.userPreferences.language === 'zh') {
-            message = <I s="TransferInstructionNotification" />;
-          } else {
-            message = (
-              <div>
-                <div>
-                  <I s="TransferInstructionNotification" />
-                </div>
-
-                <Row
-                  style={{
-                    marginTop: '3px',
-                  }}
-                  gutter={6}
-                >
-                  <Col>
-                    <I s="Share on" />
-                  </Col>
-                  <Col>
-                    <a
-                      className="btn-twitter"
-                      onClick={() => {
-                        window.open(
-                          twitterLink,
-                          'newwindow',
-                          'width=720,height=480'
-                        );
-                      }}
-                    >
-                      <FontAwesomeIcon
-                        style={{
-                          paddingTop: '1px',
-                        }}
-                        icon={faTwitter}
-                      />{' '}
-                      Twitter
-                    </a>
-                  </Col>
-                </Row>
-              </div>
-            );
-          }
-
-          notifySuccess(message, this.props.theme, 20);
-        } catch (err) {
-          console.error('transfer failed', err);
-          notifyError(
-            <I s="TransferInstructionNotificationFailed" />,
-            this.props.theme
-          );
-        } finally {
-          this.getTransferHistory();
-          this.props.closeModal();
+      try {
+        if (nonce === -1) {
           const { accountNonce } = await lightconeGetAccount(
             window.wallet.address
           );
-          this.setState({
-            loading: false,
-            amount: null,
-            nonce: accountNonce,
-          });
+
+          nonce = accountNonce;
         }
+
+        const tokenConf = config.getTokenBySymbol(symbol, tokens);
+
+        const storageId = await getStorageId(
+          dexAccount.account.accountId,
+          tokenConf.tokenId,
+          dexAccount.account.apiKey
+        );
+
+        const validUntil =
+          Math.ceil(new Date().getTime() / 1000) + 3600 * 24 * 60;
+
+        const amountInBN = config.toWEI(tokenConf.symbol, amount, tokens);
+        const amountFInBN = config.toWEI(tokenConf.symbol, amountF, tokens);
+
+        let data = {
+          exchange: this.props.exchange.exchangeAddress,
+          from: dexAccount.account.owner,
+          to: toAddress,
+          tokenID: tokenConf.tokenId,
+          token: tokenConf.tokenId,
+          amount: amountInBN,
+          feeTokenID: tokenConf.tokenId,
+          feeToken: tokenConf.tokenId,
+          maxFeeAmount: amountFInBN,
+          validUntil: Math.floor(validUntil),
+          storageID: storageId.offchainId,
+          storageId: storageId.offchainId,
+          memo: memo,
+        };
+
+        data['security'] = 4;
+        data['payerId'] = dexAccount.account.accountId;
+        data['payerAddr'] = dexAccount.account.owner;
+        data['payeeId'] = 0; // 后端支持把payeeId设置成0，只赋值payeeAddr即可，且在开户的时候payeeId必须为0
+        data['payeeAddr'] = toAddress;
+
+        const { ecdsaSig, eddsaSig } = await window.wallet.signTransfer(data);
+        data['eddsaSig'] = eddsaSig;
+        // data['ecdsaSig'] = ecdsaSig + '02';
+
+        await submitTransfer(
+          data,
+          ecdsaSig,
+          this.props.dexAccount.account.apiKey
+        );
+
+        let message;
+        if (this.props.userPreferences.language === 'zh') {
+          message = <I s="TransferInstructionNotification" />;
+        } else {
+          message = (
+            <div>
+              <div>
+                <I s="TransferInstructionNotification" />
+              </div>
+
+              <Row
+                style={{
+                  marginTop: '3px',
+                }}
+                gutter={6}
+              >
+                <Col>
+                  <I s="Share on" />
+                </Col>
+                <Col>
+                  <a
+                    className="btn-twitter"
+                    onClick={() => {
+                      window.open(
+                        twitterLink,
+                        'newwindow',
+                        'width=720,height=480'
+                      );
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      style={{
+                        paddingTop: '1px',
+                      }}
+                      icon={faTwitter}
+                    />{' '}
+                    Twitter
+                  </a>
+                </Col>
+              </Row>
+            </div>
+          );
+        }
+
+        notifySuccess(message, this.props.theme, 20);
+      } catch (err) {
+        console.error('transfer failed', err);
+        notifyError(
+          <I s="TransferInstructionNotificationFailed" />,
+          this.props.theme
+        );
+      } finally {
+        this.getTransferHistory();
+        this.props.closeModal();
+        const { accountNonce } = await lightconeGetAccount(
+          window.wallet.address
+        );
+        this.setState({
+          loading: false,
+          amount: null,
+          nonce: accountNonce,
+        });
       }
-    )();
+    })();
   };
 
   onClose = () => {
@@ -358,7 +418,7 @@ class TransferModal extends React.Component {
     const { dexAccount, exchange, balances, fetchTransfers } = this.props;
 
     let tokenSymbol;
-    if (balances.tokenFilter !== "All") {
+    if (balances.tokenFilter !== 'All') {
       tokenSymbol = balances.tokenFilter;
     }
     fetchTransfers(
@@ -383,7 +443,7 @@ class TransferModal extends React.Component {
       });
     }
 
-    this.submitTransfer();
+    this.test_3_6();
   };
 
   enterAmount = (e) => {
@@ -404,11 +464,21 @@ class TransferModal extends React.Component {
     this.onToAddressChangeLoadData(value);
   };
 
+  isValidENS = (value) => {
+    return (
+      value.toLowerCase().endsWith('.eth') ||
+      value.toLowerCase().endsWith('.xyz') ||
+      value.toLowerCase().endsWith('.luxe') ||
+      value.toLowerCase().endsWith('.kred') ||
+      value.toLowerCase().endsWith('.art')
+    );
+  };
+
   onToAddressChangeLoadData = debounce((value) => {
     (async () => {
       let address = value;
       // Check ENS
-      if (value.toLowerCase().match(/\.(eth|xyz)$/g)) {
+      if (this.isValidENS(value)) {
         this.setState({
           addressLoading: true,
         });
@@ -416,6 +486,7 @@ class TransferModal extends React.Component {
           await window.wallet.web3.eth.ens
             .getAddress(value)
             .then(function (addr) {
+              console.log(addr);
               address = addr;
             });
         } catch (e) {}
@@ -466,15 +537,16 @@ class TransferModal extends React.Component {
   }, 500);
 
   transferAll = () => {
-    const { availableAmount, amountF } = this.state;
-    const amount = parseFloat(availableAmount) - parseFloat(amountF);
+    const { availableAmount } = this.state;
+    // availableAmount has included transfer fee.
+    const amount = parseFloat(availableAmount);
 
     this.setState({
       amount: Math.max(0, amount),
       validateAmount: amount > 0,
-      errorMessage1: "",
-      errorToken: "",
-      errorMessage2: "",
+      errorMessage1: '',
+      errorToken: '',
+      errorMessage2: '',
     });
   };
 
@@ -493,33 +565,24 @@ class TransferModal extends React.Component {
   render() {
     const theme = this.props.theme;
 
-    const { availableAmount } = this.state;
+    const { availableAmount, balance } = this.state;
+    const { balances } = this.props.balances;
     const { tokens } = this.props.exchange;
 
     const selectedTokenSymbol = this.props.modalManager.transferToken;
-    const { balances } = this.props.balances;
     const selectedToken = config.getTokenBySymbol(selectedTokenSymbol, tokens);
-    const holdBalance = balances.find(
-      (ba) => ba.tokenId === selectedToken.tokenId
-    );
-
-    // String type with correct precision
-    const holdAmount = holdBalance
-      ? config.fromWEI(
-          selectedToken.symbol,
-          formatter
-            .toBig(holdBalance.totalAmount)
-            .minus(holdBalance.frozenAmount),
-          tokens
-        )
-      : config.fromWEI(selectedToken.symbol, 0, tokens);
+    let isLpToken = selectedToken.name.split('-').length - 1 >= 2;
 
     const options = tokens
-      .filter((token) => token.enabled)
+      .filter(
+        (token) =>
+          token.transferEnabled &&
+          balances.find((ba) => ba.tokenId === token.tokenId)
+      )
       .map((token, i) => {
         const option = {};
         option.key = token.symbol;
-        option.text = token.symbol + " - " + token.name;
+        option.text = token.symbol + ' - ' + token.name;
 
         const menuItem = (
           <AssetDropdownMenuItem
@@ -529,7 +592,13 @@ class TransferModal extends React.Component {
             }}
           >
             <span>
-              {token.symbol} - <I s={token.name} />
+              {isLpToken ? (
+                <div>{token.symbol}</div>
+              ) : (
+                <div>
+                  {token.symbol} - <I s={token.name} />{' '}
+                </div>
+              )}
             </span>
           </AssetDropdownMenuItem>
         );
@@ -544,7 +613,7 @@ class TransferModal extends React.Component {
         <FontAwesomeIcon
           icon={faClock}
           style={{
-            visibility: "hidden",
+            visibility: 'hidden',
           }}
         />
       </div>
@@ -552,28 +621,28 @@ class TransferModal extends React.Component {
     tips.push(
       <I
         s={
-          getWalletType() === "MetaMask"
-            ? "metaMaskPendingTxTip"
-            : "walletConnectPendingTxTip"
+          getWalletType() === 'MetaMask'
+            ? 'metaMaskPendingTxTip'
+            : 'walletConnectPendingTxTip'
         }
       />
     );
 
     let indicator;
-    if (tips.length === 1 && getWalletType() !== "MetaMask") {
+    if (tips.length === 1 && getWalletType() !== 'MetaMask') {
       indicator = <WalletConnectIndicator />;
     } else {
       indicator = (
         <ModalIndicator
           title={
-            getWalletType() === "MetaMask"
-              ? "metamaskConfirm"
-              : "walletConnectConfirm"
+            getWalletType() === 'MetaMask'
+              ? 'metamaskConfirm'
+              : 'walletConnectConfirm'
           }
           tipIcons={tipIcons}
           tips={tips}
           imageUrl={
-            getWalletType() === "MetaMask"
+            getWalletType() === 'MetaMask'
               ? `/assets/images/${theme.imgDir}/metamask_pending.png`
               : ``
           }
@@ -583,7 +652,7 @@ class TransferModal extends React.Component {
     }
 
     let isWalletConnectLoading =
-      this.state.loading && tips.length === 1 && getWalletType() !== "MetaMask";
+      this.state.loading && tips.length === 1 && getWalletType() !== 'MetaMask';
 
     let referralLink;
     if (
@@ -592,7 +661,7 @@ class TransferModal extends React.Component {
     ) {
       referralLink = `${window.location.host}/invite/${this.props.dexAccount.account.accountId}`;
     } else {
-      referralLink = "";
+      referralLink = '';
     }
 
     return (
@@ -617,15 +686,23 @@ class TransferModal extends React.Component {
           />
           <Section
             style={{
-              display: isWalletConnectLoading ? "none" : "block",
+              display: isWalletConnectLoading ? 'none' : 'block',
             }}
           >
             <Instruction>
               <I s="TransferInstruction_1" />
             </Instruction>
 
-            <Instruction>
-              <I s="TransferInstruction_2" />{" "}
+            {isLpToken ? (
+              <Instruction style={{ color: theme.red }}>
+                <I s="TransferInstruction_lptoken" />
+              </Instruction>
+            ) : (
+              <div />
+            )}
+
+            {/* <Instruction>
+              <I s="TransferInstruction_2" />{' '}
               <CopyToClipboard text={referralLink}>
                 <a
                   onClick={() => {
@@ -636,19 +713,14 @@ class TransferModal extends React.Component {
                 </a>
               </CopyToClipboard>
               <I s="TransferInstruction_2_end" />
-              {this.props.userPreferences.language !== "zh" && (
-                <WhyIcon
-                  text="ReferralLinkInstruction"
-                  description="ReferralLinkInstructionDescription"
-                />
-              )}
-            </Instruction>
+            </Instruction> */}
 
             <ul>
-              {!!this.state.amountF && Number(this.state.amountF) !== 0 ? (
+              {this.state.configLoading ||
+              (!!this.state.amountF && Number(this.state.amountF) !== 0) ? (
                 <li>
-                  <I s="TransferInstruction_Fee_1" />{" "}
-                  {this.state.amountF ? this.state.amountF : "-"}{" "}
+                  <I s="TransferInstruction_Fee_1" />{' '}
+                  {this.state.amountF ? this.state.amountF : '-'}{' '}
                   {selectedTokenSymbol}
                   <I s="TransferInstruction_Fee_2" />
                 </li>
@@ -663,7 +735,7 @@ class TransferModal extends React.Component {
 
           <Section
             style={{
-              display: isWalletConnectLoading ? "none" : "block",
+              display: isWalletConnectLoading ? 'none' : 'block',
             }}
           >
             <Group label={<I s="Asset" />}>
@@ -671,7 +743,13 @@ class TransferModal extends React.Component {
                 options={options}
                 selected={
                   <span>
-                    {selectedToken.symbol} - <I s={selectedToken.name} />
+                    {isLpToken ? (
+                      <div>{selectedToken.symbol}</div>
+                    ) : (
+                      <div>
+                        {selectedToken.symbol} - <I s={selectedToken.name} />{' '}
+                      </div>
+                    )}
                   </span>
                 }
               />
@@ -687,14 +765,14 @@ class TransferModal extends React.Component {
                 loading={this.state.addressLoading}
                 disabled={this.state.addressLoading}
               />
-              {this.state.addressValue.toLowerCase().match(/\.(eth|xyz)$/g) &&
+              {this.isValidENS(this.state.addressValue) &&
                 !!this.state.toAddress && (
                   <div
                     style={{
-                      paddingTop: "12px",
+                      paddingTop: '12px',
                     }}
                   >
-                    {" "}
+                    {' '}
                     <I s="Ethereum Address" />: {this.state.toAddress}
                   </div>
                 )}
@@ -748,12 +826,17 @@ class TransferModal extends React.Component {
 
           <Section
             style={{
-              display: isWalletConnectLoading ? "none" : "block",
+              display: isWalletConnectLoading ? 'none' : 'block',
             }}
           >
             <LabelValue
-              label={<I s="Balance on Loopring" />}
-              value={holdAmount}
+              label={<I s="Layer-2 Balance" />}
+              value={balance}
+              unit={selectedTokenSymbol.toUpperCase()}
+            />
+            <LabelValue
+              label={<I s="Available to transfer" />}
+              value={availableAmount}
               unit={selectedTokenSymbol.toUpperCase()}
               onClick={() => this.transferAll()}
             />
@@ -761,7 +844,7 @@ class TransferModal extends React.Component {
 
           <Section
             style={{
-              display: isWalletConnectLoading ? "none" : "block",
+              display: isWalletConnectLoading ? 'none' : 'block',
             }}
           >
             <ActionButton
@@ -769,7 +852,8 @@ class TransferModal extends React.Component {
                 this.state.amount <= 0 ||
                 !this.state.validateAmount ||
                 this.state.loading ||
-                !this.state.validateAddress
+                !this.state.validateAddress ||
+                !this.state.addressValue
               }
               onClick={() => this.onClick()}
             >
@@ -797,7 +881,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    closeModal: () => dispatch(showTransferModal(false, "")),
+    closeModal: () => dispatch(showTransferModal(false, '')),
     showTransferModal: (token) => dispatch(showTransferModal(true, token)),
     fetchTransfers: (limit, offset, accountId, tokenSymbol, apiKey, tokens) =>
       dispatch(

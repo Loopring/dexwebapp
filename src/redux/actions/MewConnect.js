@@ -1,6 +1,6 @@
-export const CONNECT_TO_MEW_CONNECT = "CONNECT_TO_MEW_CONNECT";
+export const CONNECT_TO_MEW_CONNECT = 'CONNECT_TO_MEW_CONNECT';
 export const CONNECT_TO_MEW_CONNECT_COMPLETE =
-  "CONNECT_TO_MEW_CONNECT_COMPLETE";
+  'CONNECT_TO_MEW_CONNECT_COMPLETE';
 
 export function connectToMewConnect(startConnecting) {
   return {

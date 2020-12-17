@@ -1,9 +1,9 @@
-import { ThemeContext } from "styled-components";
-import I from "components/I";
-import React, { useContext } from "react";
+import { ThemeContext } from 'styled-components';
+import I from 'components/I';
+import React, { useContext } from 'react';
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons/faExclamationTriangle";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons/faExclamationTriangle';
 
 const TradePanelErrorMessage = ({
   show,
@@ -14,15 +14,15 @@ const TradePanelErrorMessage = ({
   return (
     <div
       style={{
-        display: show ? "initial" : "none",
-        fontSize: "0.85rem",
+        display: show ? 'initial' : 'none',
+        fontSize: '0.85rem',
         color: useContext(ThemeContext).red,
-        height: "24px",
-        fontWeight: "600",
+        height: '24px',
+        fontWeight: '600',
       }}
     >
       <FontAwesomeIcon
-        style={{ marginRight: "8px" }}
+        style={{ marginRight: '8px' }}
         size="1x"
         icon={faExclamationTriangle}
       />

@@ -1,25 +1,25 @@
-import React from "react";
+import React from 'react';
 
-import HistoryOrdersTable from "./components/HistoryOrdersTable";
-import HistoryTradesTable from "./components/HistoryTradesTable";
-import OpenOrdersTable from "./components/OpenOrdersTable";
-import SimpleSecondaryPageLayout from "../components/SimpleSecondaryPageLayout";
+import HistoryOrdersTable from './components/HistoryOrdersTable';
+import HistoryTradesTable from './components/HistoryTradesTable';
+import OpenOrdersTable from './components/OpenOrdersTable';
+import SimpleSecondaryPageLayout from '../components/SimpleSecondaryPageLayout';
 
 const orderSubPages = [
   {
-    id: "open-orders",
-    label: "Open Orders",
-    url: "/orders/open-orders",
+    id: 'open-orders',
+    label: 'Open Orders',
+    url: '/orders/open-orders',
   },
   {
-    id: "order-history",
-    label: "Order History",
-    url: "/orders/order-history",
+    id: 'order-history',
+    label: 'Order History',
+    url: '/orders/order-history',
   },
   {
-    id: "trade-history",
-    label: "Fill History",
-    url: "/orders/trade-history",
+    id: 'trade-history',
+    label: 'Fill History',
+    url: '/orders/trade-history',
   },
 ];
 

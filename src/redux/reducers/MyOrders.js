@@ -7,12 +7,12 @@ import {
   UPDATE_OPEN_ORDERS_OFFSET,
   UPDATE_SHOW_ALL_OPEN_ORDERS,
   UPDATE_SOCKET_ORDER,
-} from "redux/actions/MyOrders";
+} from 'redux/actions/MyOrders';
 import {
   getShowAllOpenOrders,
   removeShowAllOpenOrders,
   saveShowAllOpenOrders,
-} from "lightcone/api/localStorgeAPI";
+} from 'lightcone/api/localStorgeAPI';
 
 const initialState = {
   // 'waiting', 'processing'
@@ -35,13 +35,13 @@ export const MyOrdersReducer = (state = initialState, action) => {
   switch (action.type) {
     case UPDATE_MY_OPEN_ORDERS: {
       const response = action.payload.response;
-      const orders = response["orders"];
+      const orders = response['orders'];
       orders.sort((a, b) => b.createdAt - a.createdAt);
       return {
         ...state,
         isOpenOrdersLoading: false,
         openOrders: orders,
-        openOrdersTotalNum: response["totalNum"],
+        openOrdersTotalNum: response['totalNum'],
       };
     }
     case UPDATE_SHOW_ALL_OPEN_ORDERS: {
@@ -76,8 +76,8 @@ export const MyOrdersReducer = (state = initialState, action) => {
       return {
         ...state,
         isHistoryOrdersLoading: false,
-        historyOrders: response["orders"],
-        historyOrdersTotalNum: response["totalNum"],
+        historyOrders: response['orders'],
+        historyOrdersTotalNum: response['totalNum'],
       };
     }
     case UPDATE_HISTORY_ORDERS_OFFSET: {
@@ -107,7 +107,11 @@ export const MyOrdersReducer = (state = initialState, action) => {
      */
     case UPDATE_SOCKET_ORDER:
       const order = action.payload.order;
-      if (order.status === "waiting" || order.status === "processing") {
+      // TODO: 3.6. Is waiting order in 3.6?
+      if (
+        order.status === 'waiting' ||
+        order.status === 'TX_STATUS_PROCESSING'
+      ) {
         const openOrders = state.openOrders.filter(
           (o) => o.hash !== order.hash
         );

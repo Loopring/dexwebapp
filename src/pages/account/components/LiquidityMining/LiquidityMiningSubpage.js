@@ -1,20 +1,14 @@
-import { connect } from "react-redux";
-import I from "components/I";
-import React from "react";
-import styled, { withTheme } from "styled-components";
+import { connect } from 'react-redux';
 
-import LiquidityMiningTable from "./LiquidityMiningTable";
+import { withTheme } from 'styled-components';
+import React from 'react';
 
-import { compareDexAccounts } from "components/services/utils";
-import { getLiquidityMiningRank } from "lightcone/api/LiquidityMiningAPI";
-import { updateLiquidityMiningRank } from "redux/actions/LiquidityMining";
+import LiquidityMiningTable from './LiquidityMiningTable';
 
-const MarketLabel = styled.div`
-  color: ${(props) => props.theme.textBright};
-  font-size: 0.9rem;
-  font-weight: 600;
-  padding-bottom: 10px;
-`;
+import { compareDexAccounts } from 'components/services/utils';
+import { getLiquidityMiningRank } from 'lightcone/api/LiquidityMiningAPI';
+import { updateLiquidityMiningRank } from 'redux/actions/LiquidityMining';
+import config from 'lightcone/config';
 
 class LiquidityMiningSubpage extends React.Component {
   state = {
@@ -22,27 +16,15 @@ class LiquidityMiningSubpage extends React.Component {
   };
 
   componentDidMount() {
-    if (this.props.market in this.props.liquidityMining.rewardCollection) {
-      let rewards = this.props.liquidityMining.rewardCollection[
-        this.props.market
-      ];
-      this.setState({
-        rewards,
-      });
-    }
-    if (
-      this.props.exchange.isInitialized &&
-      this.props.dexAccount.account.apiKey
-    ) {
+    if (this.props.exchange.isInitialized) {
       this.loadData();
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (
-      (this.props.exchange.isInitialized !== prevProps.exchange.isInitialized ||
-        !compareDexAccounts(prevProps.dexAccount, this.props.dexAccount)) &&
-      this.props.dexAccount.account.apiKey
+      this.props.exchange.isInitialized !== prevProps.exchange.isInitialized ||
+      !compareDexAccounts(prevProps.dexAccount, this.props.dexAccount)
     ) {
       this.loadData();
     }
@@ -67,16 +49,19 @@ class LiquidityMiningSubpage extends React.Component {
   }
 
   render() {
+    const tokens = this.props.exchange.tokens;
+    const tokenId = this.props.config.tokenId;
+    const token = config.getTokenByTokenId(tokenId, tokens);
+    const quoteToken = token ? token.symbol : 'USDT';
+
     return (
       <div>
-        <MarketLabel>
-          <I s="Total Ranking" />: {this.props.market}
-        </MarketLabel>
         <LiquidityMiningTable
           market={this.props.market}
+          quoteToken={quoteToken}
           data={this.state.rewards}
           length={this.state.rewards.length}
-          placeHolder={"NoRankingData"}
+          placeHolder={'NoRankingData'}
         />
       </div>
     );

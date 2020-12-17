@@ -1,28 +1,102 @@
 // Taken and modified from
 // https://github.com/iden3/circomlib
 
+// from https://github.com/Loopring/protocols/blob/master/packages/loopring_v3.js/src/eddsa.ts
+
+import { F1Field, utils } from 'ffjavascript';
 import { bigInt } from 'snarkjs';
 import { createHash } from './poseidon';
-
 import babyJub from './babyjub';
 import createBlakeHash from 'blake-hash';
+import crypto from 'crypto';
 
-function generateKeyPair(seed) {
-  const secretKey = bigInt.leBuff2int(seed).mod(babyJub.subOrder);
-  const publicKey = babyJub.mulPointEscalar(babyJub.Base8, secretKey);
-  return {
-    publicKeyX: publicKey[0].toString(10),
-    publicKeyY: publicKey[1].toString(10),
+var assert = require('assert');
+
+function getKeyPair() {
+  const entropy = crypto.randomBytes(32);
+  const Fr = new F1Field(babyJub.subOrder);
+  let secretKey = utils.leBuff2int(entropy);
+  secretKey = Fr.e(secretKey);
+
+  // Increment the secretKey until we found a point that is compressable
+  let unpacked = null;
+  while (unpacked == null) {
+    const publicKey = babyJub.mulPointEscalar(babyJub.Base8, secretKey);
+    const packed = this.pack(
+      publicKey[0].toString(10),
+      publicKey[1].toString(10)
+    );
+    unpacked = this.unpack(packed);
+    if (unpacked == null) {
+      secretKey = Fr.add(secretKey, Fr.e('1'));
+    } else {
+      assert(
+        unpacked.publicKeyX === publicKey[0].toString(10),
+        'invalid unpack X'
+      );
+      assert(
+        unpacked.publicKeyY === publicKey[1].toString(10),
+        'invalid unpack Y'
+      );
+    }
+  }
+  assert(
+    babyJub.inCurve([
+      babyJub.F.e(unpacked.publicKeyX),
+      babyJub.F.e(unpacked.publicKeyY),
+    ]),
+    'invalid point'
+  );
+
+  const keyPair = {
+    publicKeyX: unpacked.publicKeyX,
+    publicKeyY: unpacked.publicKeyY,
     secretKey: secretKey.toString(10),
   };
+  return keyPair;
 }
 
-function generatePubKeyFromPrivate(secretKey) {
-  const publicKey = babyJub.mulPointEscalar(babyJub.Base8, bigInt(secretKey));
-  return {
-    publicKeyX: publicKey[0].toString(10),
-    publicKeyY: publicKey[1].toString(10),
-  };
+function pack(publicKeyX, publicKeyY) {
+  const keyX = babyJub.F.e(publicKeyX);
+  const keyY = babyJub.F.e(publicKeyY);
+  const packed = babyJub.packPoint([keyX, keyY]);
+  const reversed = Buffer.alloc(32);
+  for (let i = 0; i < 32; i++) {
+    reversed[31 - i] = packed[i];
+  }
+  return reversed.toString('hex');
+}
+
+function unpack(publicKey) {
+  if (publicKey.startsWith('0x')) {
+    publicKey = publicKey.slice(2);
+  }
+  while (publicKey.length < 64) {
+    publicKey = '0' + publicKey;
+  }
+  // Special case for 0
+  if (publicKey === '00'.repeat(32)) {
+    const pubKey = {
+      publicKeyX: '0',
+      publicKeyY: '0',
+    };
+    return pubKey;
+  } else {
+    let packed = Buffer.from(publicKey, 'hex');
+    const reversed = Buffer.alloc(32);
+    for (let i = 0; i < 32; i++) {
+      reversed[31 - i] = packed[i];
+    }
+    const unpacked = babyJub.unpackPoint(reversed);
+    if (unpacked == null) {
+      return null;
+    }
+    const pubKey = {
+      publicKeyX: unpacked[0].toString(10),
+      publicKeyY: unpacked[1].toString(10),
+    };
+    return pubKey;
+  }
 }
 
 function sign(strKey, msg) {
@@ -74,9 +148,30 @@ function verify(msg, sig, pubKey) {
   return true;
 }
 
+function generateKeyPair(seed) {
+  const secretKey = bigInt.leBuff2int(seed).mod(babyJub.subOrder);
+  const publicKey = babyJub.mulPointEscalar(babyJub.Base8, secretKey);
+  return {
+    publicKeyX: publicKey[0].toString(10),
+    publicKeyY: publicKey[1].toString(10),
+    secretKey: secretKey.toString(10),
+  };
+}
+
+function generatePubKeyFromPrivate(secretKey) {
+  const publicKey = babyJub.mulPointEscalar(babyJub.Base8, bigInt(secretKey));
+  return {
+    publicKeyX: publicKey[0].toString(10),
+    publicKeyY: publicKey[1].toString(10),
+  };
+}
+
 export default {
-  generateKeyPair,
+  getKeyPair,
+  pack,
+  unpack,
   sign,
   verify,
+  generateKeyPair,
   generatePubKeyFromPrivate,
 };

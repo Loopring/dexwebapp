@@ -9,14 +9,14 @@ import {
   UPDATE_ACCOUNT,
   WALLET_UNCONNECTED,
   getAllAccountStates,
-} from "redux/actions/DexAccount";
+} from 'redux/actions/DexAccount';
 
 import {
   getAccountFromLocal,
   removeAccountFromLocal,
   saveAccountToLocal,
   saveLoginRecord,
-} from "lightcone/api/localStorgeAPI";
+} from 'lightcone/api/localStorgeAPI';
 
 /**
  * account :
@@ -43,7 +43,7 @@ export const DexAccountReducer = (state = initialState, action) => {
       return {
         account: {
           ...state.account,
-          accountKey: "",
+          accountKey: '',
         },
       };
     }
@@ -60,7 +60,7 @@ export const DexAccountReducer = (state = initialState, action) => {
       // console.log('window.wallet.walletType', window.wallet.walletType);
 
       if (window.wallet && window.wallet.walletType) {
-        latestAccount["walletType"] = window.wallet.walletType;
+        latestAccount['walletType'] = window.wallet.walletType;
       }
       saveAccountToLocal(latestAccount);
 
@@ -111,7 +111,8 @@ export const DexAccountReducer = (state = initialState, action) => {
         account: {
           ...state.account,
           state: REGISTERED,
-          accountKey: "",
+          accountKey: '',
+          apiKey: undefined,
         },
       };
     }

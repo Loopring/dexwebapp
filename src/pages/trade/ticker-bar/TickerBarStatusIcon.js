@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 const TickerBarStatusIcon = () => (
   <svg width="15px" height="9px" viewBox="0 0 10 6">

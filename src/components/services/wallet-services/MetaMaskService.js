@@ -35,6 +35,7 @@ import { fetchNonce } from 'redux/actions/Nonce';
 import { notifyError } from 'redux/actions/Notification';
 import Wallet from 'lightcone/wallet';
 import Web3 from 'web3';
+import detectEthereumProvider from '@metamask/detect-provider';
 
 import { loginModal, registerAccountModal } from 'redux/actions/ModalManager';
 import { saveWalletType } from 'lightcone/api/localStorgeAPI';
@@ -66,24 +67,32 @@ class MetaMaskService extends Component {
         // https://web3js.readthedocs.io/en/v1.2.6/web3.html
         // console.log('Web3.givenProvider', Web3.givenProvider);
 
-        const web3 = new Web3(Web3.givenProvider);
+        // This is a bad design in MetaMask.
+        // In general, consumers should never overwrite window.ethereum
+        // or attempt to modify the provider object.
+        const provider = await detectEthereumProvider({
+          mustBeMetaMask: true,
+        });
+
+        const web3 = new Web3(provider);
         window.web3 = web3;
+
+        // window.ethereum can be only used by MetaMask
         // Need to reset etheruem manually.
         // In the implementation, if windown.ethereum is not null,\
         // it will be reset by MetaMask.
-        window.ethereum = Web3.givenProvider;
+        // window.ethereum = provider;
 
         // console.log('window.web3', window.web3);
         // console.log('window.ethereum', window.ethereum);
 
         // Enable session
-        // The window.ethereum.enable() line actually makes the popup UI request
-        // to connect your dApp to MetaMask, and window.web3 becomes the updated version.
-        await window.ethereum.enable();
-        window.ethereum.autoRefreshOnNetworkChange = false;
+        // The window.ethereum.request({ method: 'eth_requestAccounts' }) line
+        // actually makes the popup UI request
+        // to connect your dApp to MetaMask.
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
 
         const accounts = await web3.eth.getAccounts();
-        window.ethereum.accounts = accounts;
 
         window.wallet = new Wallet('MetaMask', window.web3, accounts[0]);
 
@@ -118,6 +127,8 @@ class MetaMaskService extends Component {
   }
 
   setupSubscribe() {
+    // The event 'data' is deprecated and may be removed in the future.
+    /*
     this.subscription = new Web3(window.ethereum).eth
       .subscribe('newBlockHeaders', function (error, result) {})
       .on(
@@ -128,6 +139,7 @@ class MetaMaskService extends Component {
           }
         }.bind(this)
       );
+    */
 
     window.ethereum.on('accountsChanged', (accounts) => {
       if (
@@ -150,7 +162,7 @@ class MetaMaskService extends Component {
       }
     });
 
-    window.ethereum.on('networkChanged', (networkVersion) => {
+    window.ethereum.on('chainChanged', (networkVersion) => {
       this.props.connectToMetaMask(true);
     });
   }

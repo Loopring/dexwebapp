@@ -1,15 +1,18 @@
-import { createGlobalStyle } from "styled-components";
+import { createGlobalStyle } from 'styled-components';
 
 const AntdModalStyles = createGlobalStyle`
 
 .ant-modal-content {
   background-color: ${(props) => props.theme.popupBackground};
+  border-radius: 12px;
 }
 
 .ant-modal-content > .ant-modal-header {
   background-color: ${(props) => props.theme.popupHeaderBackground};
   border-bottom: none;
   padding: 14px 24px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
 }
 
 .ant-modal-title {
@@ -18,6 +21,10 @@ const AntdModalStyles = createGlobalStyle`
 
 .ant-modal-body {
   padding: 18px 60px;
+
+  @media only screen and (max-width: 770px) {
+    padding: 18px 20px;
+  }
 }
 
 .ant-modal-close-x {
@@ -90,9 +97,9 @@ const AntdModalStyles = createGlobalStyle`
   button.ant-btn.ant-btn-sm.ant-btn-primary {
     background: ${(props) => props.theme.primary}!important;
     color: ${(props) => props.theme.textBigButton}!important;
-     &:hover {
-        color: ${(props) => props.theme.highlight}!important;
-     }
+    &:hover {
+      color: ${(props) => props.theme.highlight}!important;
+    }
   }
 }
 `;

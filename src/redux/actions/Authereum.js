@@ -1,6 +1,5 @@
-export const CONNECT_TO_AUTHEREUM = "CONNECT_TO_AUTHEREUM";
-export const CONNECT_TO_AUTHEREUM_COMPLETE =
-  "CONNECT_TO_AUTHEREUM_COMPLETE";
+export const CONNECT_TO_AUTHEREUM = 'CONNECT_TO_AUTHEREUM';
+export const CONNECT_TO_AUTHEREUM_COMPLETE = 'CONNECT_TO_AUTHEREUM_COMPLETE';
 
 export function connectToAuthereum(startConnecting) {
   return {

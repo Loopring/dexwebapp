@@ -1,9 +1,9 @@
-import Numeral from "numeral";
-import PropTypes from "prop-types";
-import React from "react";
-import styled from "styled-components";
+import Numeral from 'numeral';
+import PropTypes from 'prop-types';
+import React from 'react';
+import styled from 'styled-components';
 
-import { countTrailingZeroes } from "./defaults/util";
+import { countTrailingZeroes } from './defaults/util';
 
 const LowContrast = styled.span`
   color: ${(props) => props.theme.textDim};
@@ -31,8 +31,8 @@ const PrettySize = ({ size = 0, format, side }) => {
   const numTrailingZeroes = countTrailingZeroes(formattedSize);
   // get digit arrays before and after decimal
   const [digitsBeforeDecimal, digitsAfterDecimal = []] = formattedSize
-    .split(".")
-    .map((str) => str.split(""));
+    .split('.')
+    .map((str) => str.split(''));
   // splice trailing zeroes into seperate array
   const trailingZeroes = digitsAfterDecimal.splice(
     digitsAfterDecimal.length - numTrailingZeroes
@@ -51,7 +51,7 @@ const PrettySize = ({ size = 0, format, side }) => {
 PrettySize.propTypes = {
   size: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   format: PropTypes.string,
-  side: PropTypes.oneOf(["buy", "sell"]),
+  side: PropTypes.oneOf(['buy', 'sell']),
 };
 
 export default PrettySize;

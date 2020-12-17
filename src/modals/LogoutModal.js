@@ -1,16 +1,16 @@
-import { Button, Spin } from "antd";
-import { MyModal } from "./styles/Styles";
-import { connect } from "react-redux";
-import { logoutAll } from "redux/actions/DexAccount";
-import { showLogoutModal } from "redux/actions/ModalManager";
-import AppLayout from "AppLayout";
-import I from "components/I";
-import ModalIndicator from "modals/components/ModalIndicator";
-import React from "react";
+import { Button, Spin } from 'antd';
+import { MyModal } from './styles/Styles';
+import { connect } from 'react-redux';
+import { logoutAll } from 'redux/actions/DexAccount';
+import { showLogoutModal } from 'redux/actions/ModalManager';
+import AppLayout from 'AppLayout';
+import I from 'components/I';
+import ModalIndicator from 'modals/components/ModalIndicator';
+import React from 'react';
 
-import styled, { withTheme } from "styled-components";
+import styled, { withTheme } from 'styled-components';
 
-import { Instruction, Section, TextPopupTitle } from "modals/styles/Styles";
+import { Instruction, Section, TextPopupTitle } from 'modals/styles/Styles';
 
 const MyButton = styled(Button)`
   font-size: 1rem !important;
@@ -43,25 +43,25 @@ class LogoutModal extends React.Component {
     this.setState({ loading: true });
     // If it's WalletConnect, close provider session.
     // so that next time it will require QR code.
-    console.log("LogoutModal", window.wallet);
-
-    if (window.wallet && window.wallet.walletType === "WalletConnect") {
+    if (window.wallet && window.wallet.walletType === 'WalletConnect') {
       (async () => {
         try {
-          await window.ethereum.close();
+          if (window.ethereum.close) {
+            await window.ethereum.close();
+          }
           this.props.logoutAll();
         } catch (error) {
           console.log(error);
         }
       })();
-    } else if (window.wallet && window.wallet.walletType === "MetaMask") {
+    } else if (window.wallet && window.wallet.walletType === 'MetaMask') {
       this.props.logoutAll();
     }
 
     setTimeout(() => {
       this.onClose();
       this.setState({ loading: false });
-    }, 100);
+    }, 2000);
   };
 
   onClose = () => {
@@ -75,7 +75,7 @@ class LogoutModal extends React.Component {
         width={AppLayout.modalWidth}
         title={
           <TextPopupTitle>
-            <I s="Logout" />
+            <I s="Lock" />
           </TextPopupTitle>
         }
         footer={null}
@@ -86,7 +86,7 @@ class LogoutModal extends React.Component {
       >
         <Spin
           spinning={this.state.loading}
-          indicator={<ModalIndicator title="Logging out..." marginTop="60px" />}
+          indicator={<ModalIndicator title="Locking..." marginTop="30px" />}
         >
           <Section>
             <Instruction>
@@ -98,11 +98,11 @@ class LogoutModal extends React.Component {
           </Section>
           <Section
             style={{
-              textAlign: "center",
+              textAlign: 'center',
             }}
           >
             <ConfirmButton onClick={() => this.onClick()}>
-              <I s="Yes, log me out." />
+              <I s="Yes, lock my layer-2." />
             </ConfirmButton>
             <CancelButton onClick={() => this.onClose()}>
               <I s="Cancel" />

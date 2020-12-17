@@ -1,11 +1,11 @@
-import { connect } from "react-redux";
-import I from "components/I";
-import React from "react";
+import { connect } from 'react-redux';
+import I from 'components/I';
+import React from 'react';
 
-import styled, { withTheme } from "styled-components";
+import styled, { withTheme } from 'styled-components';
 
-import { Button } from "antd";
-import { updateOrderBookTradeHistoryPanelType } from "redux/actions/Tabs";
+import { Button } from 'antd';
+import { updateOrderBookTradeHistoryPanelType } from 'redux/actions/Tabs';
 
 const TabHeaderDiv = styled.div`
   padding-top: 7px;
@@ -15,31 +15,31 @@ const TabHeaderDiv = styled.div`
 
 class TabHeader extends React.Component {
   clickedBuyButton = () => {
-    this.props.updateOrderBookTradeHistoryPanelType("orderBook");
+    this.props.updateOrderBookTradeHistoryPanelType('orderBook');
   };
 
   clickedSellButton = () => {
-    this.props.updateOrderBookTradeHistoryPanelType("tradeHistory");
+    this.props.updateOrderBookTradeHistoryPanelType('tradeHistory');
   };
 
   render() {
     const theme = this.props.theme;
-    const isBuy = this.props.tabs.type1 === "orderBook" ? true : false;
-    const isSell = this.props.tabs.type1 === "tradeHistory" ? true : false;
+    const isBuy = this.props.tabs.type1 === 'orderBook' ? true : false;
+    const isSell = this.props.tabs.type1 === 'tradeHistory' ? true : false;
 
     const buttonStyle = {
       color: theme.textWhite,
       backgroundColor: theme.background,
-      borderStyle: "none",
-      height: "30px",
-      borderRadius: "0px",
-      fontWeight: "600",
-      fontSize: "0.9rem",
-      padding: "0px 2px",
-      margin: "0px 15px 0px 0px",
-      borderBottomWidth: "2px",
-      borderBottomStyle: "solid",
-      borderBottomColor: "transparent",
+      borderStyle: 'none',
+      height: '30px',
+      borderRadius: '0px',
+      fontWeight: '600',
+      fontSize: '0.9rem',
+      padding: '0px 2px',
+      margin: '0px 15px 0px 0px',
+      borderBottomWidth: '2px',
+      borderBottomStyle: 'solid',
+      borderBottomColor: 'transparent',
     };
 
     const buyButtonActiveStyle = {

@@ -1,63 +1,91 @@
-import { Col, Row } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { LargeTableHeader } from "styles/Styles";
-import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
-import { faEquals } from "@fortawesome/free-solid-svg-icons/faEquals";
-import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
-import { withTheme } from "styled-components";
-import BalanceHeaderEstimatedValue from "pages/account/components/Balance/BalanceHeaderEstimatedValue";
-import React from "react";
+import { Col, Row } from 'antd';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { LargeTableHeader } from 'styles/Styles';
+
+import * as fm from 'lightcone/common/formatter';
+import { connect } from 'react-redux';
+import { faEquals } from '@fortawesome/free-solid-svg-icons/faEquals';
+import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus';
+import { getLpTokenPrice } from 'pages/swap/components/utils';
+import { withTheme } from 'styled-components';
+import BalanceHeaderEstimatedValue from 'pages/account/components/Balance/BalanceHeaderEstimatedValue';
+import React from 'react';
+import config from 'lightcone/config';
 
 class BalanceHeader extends React.PureComponent {
   getEstimatedValues() {
     let isPriceLoading = true;
-    let balanceonEthereumSum = null;
-    let balanceonEthereumEstimatedValue = null;
+    let balanceOnEthereumSum = null;
+    let balanceOnEthereumEstimatedValue = null;
 
     let balanceOnExchangeSum = null;
     let balanceOnExchangeSumEstimatedValue = null;
 
     // Prices
-    const { prices } = this.props.cmcPrice;
+    const { prices } = this.props.legalPrice;
+    const { tokens } = this.props;
 
     // Base units are ETH and USDT prices
-    let ethFilteredPrice = prices.filter((price) => price.symbol === "ETH");
-    let usdtFilteredPrice = prices.filter((price) => price.symbol === "USDT");
+    let ethFilteredPrice = prices.filter((price) => price.symbol === 'ETH');
+    let usdtFilteredPrice = prices.filter((price) => price.symbol === 'USDT');
+
     if (ethFilteredPrice.length === 1 && usdtFilteredPrice.length === 1) {
       isPriceLoading = false;
       let ethPrice = parseFloat(ethFilteredPrice[0].price);
       let usdtPrice = parseFloat(usdtFilteredPrice[0].price);
 
-      balanceonEthereumSum = 0;
-      balanceonEthereumEstimatedValue = 0;
+      balanceOnEthereumSum = 0;
+      balanceOnEthereumEstimatedValue = 0;
       balanceOnExchangeSum = 0;
       balanceOnExchangeSumEstimatedValue = 0;
 
-      // Balance on Ethereum
+      // Layer-1 Balance
       for (var key in this.props.balanceOnEthereumDict) {
-        const balanceOnExchange = this.props.balanceOnEthereumDict[key];
+        const balanceOnExchange = Number(
+          this.props.balanceOnEthereumDict[key].toString().replace(/,/g, '')
+        );
         const filteredPrice = prices.filter((price) => price.symbol === key);
         // If price is not found, set values to null
-        if (filteredPrice.length === 1 || key === "DAI") {
+        if (filteredPrice.length === 1 || key === 'DAI') {
           let price = 0;
           // https://api.loopring.io/api/v1/price doesn't return DAI price
-          if (key === "DAI") {
+          if (key === 'DAI') {
             price = usdtPrice;
           } else {
             price = parseFloat(filteredPrice[0].price);
           }
 
-          balanceonEthereumEstimatedValue =
-            balanceonEthereumEstimatedValue +
-            parseFloat(balanceOnExchange) * price;
+          balanceOnEthereumEstimatedValue =
+            balanceOnEthereumEstimatedValue + balanceOnExchange * price;
+        }
+
+        if (key.includes('-') && this.props.ammMarkets) {
+          const ammMarket = this.props.ammMarkets.find((ammMarket) => {
+            const poolTokenConf1 = config.getTokenByTokenId(
+              ammMarket.poolTokenId,
+              tokens
+            );
+            return poolTokenConf1.symbol === key;
+          });
+          if (ammMarket) {
+            const lpTokenPrice = getLpTokenPrice(
+              ammMarket,
+              ammMarket.snapshot,
+              tokens,
+              prices
+            );
+            balanceOnEthereumEstimatedValue =
+              balanceOnEthereumEstimatedValue +
+              balanceOnExchange * lpTokenPrice;
+          }
         }
       }
 
-      if (balanceonEthereumEstimatedValue && ethPrice > 0) {
-        balanceonEthereumSum = balanceonEthereumEstimatedValue / ethPrice;
+      if (balanceOnEthereumEstimatedValue && ethPrice > 0) {
+        balanceOnEthereumSum = balanceOnEthereumEstimatedValue / ethPrice;
       }
 
+      // Layer-2 Balance
       for (let i = 0; i < this.props.balances.length; i++) {
         const balance = this.props.balances[i];
         const filteredPrice = prices.filter(
@@ -65,10 +93,10 @@ class BalanceHeader extends React.PureComponent {
         );
 
         // If price is not found, set values to null
-        if (filteredPrice.length === 1 || balance.token.symbol === "DAI") {
+        if (filteredPrice.length === 1 || balance.token.symbol === 'DAI') {
           let price = 0;
           // https://api.loopring.io/api/v1/price doesn't return DAI price
-          if (balance.token.symbol === "DAI") {
+          if (balance.token.symbol === 'DAI') {
             price = usdtPrice;
           } else {
             price = parseFloat(filteredPrice[0].price);
@@ -76,7 +104,26 @@ class BalanceHeader extends React.PureComponent {
 
           balanceOnExchangeSumEstimatedValue =
             balanceOnExchangeSumEstimatedValue +
-            parseFloat(balance.totalAmountInString) * price;
+            Number(balance.totalAmountInString.toString().replace(/,/g, '')) *
+              price;
+        }
+
+        if (balance.token.symbol.includes('-') && this.props.ammMarkets) {
+          const ammMarket = this.props.ammMarkets.find(
+            (ammMarket) => ammMarket.poolTokenId === balance.tokenId
+          );
+          if (ammMarket) {
+            const lpTokenPrice = getLpTokenPrice(
+              ammMarket,
+              ammMarket.snapshot,
+              tokens,
+              prices
+            );
+            balanceOnExchangeSumEstimatedValue =
+              balanceOnExchangeSumEstimatedValue +
+              Number(balance.totalAmountInString.toString().replace(/,/g, '')) *
+                lpTokenPrice;
+          }
         }
       }
 
@@ -87,8 +134,8 @@ class BalanceHeader extends React.PureComponent {
 
     return {
       isPriceLoading,
-      balanceonEthereumSum,
-      balanceonEthereumEstimatedValue,
+      balanceOnEthereumSum,
+      balanceOnEthereumEstimatedValue,
       balanceOnExchangeSum,
       balanceOnExchangeSumEstimatedValue,
     };
@@ -105,14 +152,16 @@ class BalanceHeader extends React.PureComponent {
         <BalanceHeaderEstimatedValue
           title={title}
           isLoading={true}
-          sum={""}
-          estimatedValue={""}
+          sum={''}
+          estimatedValue={''}
         />
       );
     } else {
-      let sumDipslay = `${sum.toFixed(3)} ETH`;
-      let legalPrefix = this.props.cmcPrice.legalPrefix;
-      let estimatedValueDisplay = `${legalPrefix}${estimatedValue.toFixed(2)}`;
+      let sumDipslay = `${fm.numberWithCommas(sum.toFixed(3))} ETH`;
+      let legalPrefix = this.props.legalPrice.legalPrefix;
+      let estimatedValueDisplay = `${legalPrefix}${fm.numberWithCommas(
+        estimatedValue.toFixed(2)
+      )}`;
 
       return (
         <BalanceHeaderEstimatedValue
@@ -135,22 +184,22 @@ class BalanceHeader extends React.PureComponent {
             {this.toSumDisplay(
               this.props.isBalancesLoading,
               estimatedValues.isPriceLoading,
-              "Estimated Total Value",
-              estimatedValues.balanceonEthereumSum +
+              'Estimated Total Value',
+              estimatedValues.balanceOnEthereumSum +
                 estimatedValues.balanceOnExchangeSum,
-              estimatedValues.balanceonEthereumEstimatedValue +
+              estimatedValues.balanceOnEthereumEstimatedValue +
                 estimatedValues.balanceOnExchangeSumEstimatedValue
             )}
           </Col>
           <Col
             style={{
-              maxWidth: "20px",
+              maxWidth: '20px',
             }}
           >
             <FontAwesomeIcon
               style={{
                 color: this.props.theme.textDim,
-                minHeight: "100%",
+                minHeight: '100%',
               }}
               icon={faEquals}
             />
@@ -159,20 +208,20 @@ class BalanceHeader extends React.PureComponent {
             {this.toSumDisplay(
               this.props.isBalancesLoading,
               estimatedValues.isPriceLoading,
-              "Estimated Value on Ethereum",
-              estimatedValues.balanceonEthereumSum,
-              estimatedValues.balanceonEthereumEstimatedValue
+              'Estimated Value on Ethereum',
+              estimatedValues.balanceOnEthereumSum,
+              estimatedValues.balanceOnEthereumEstimatedValue
             )}
           </Col>
           <Col
             style={{
-              maxWidth: "20px",
+              maxWidth: '20px',
             }}
           >
             <FontAwesomeIcon
               style={{
                 color: this.props.theme.textDim,
-                minHeight: "100%",
+                minHeight: '100%',
               }}
               icon={faPlus}
             />
@@ -181,7 +230,7 @@ class BalanceHeader extends React.PureComponent {
             {this.toSumDisplay(
               false,
               estimatedValues.isPriceLoading,
-              "Estimated Value on Loopring",
+              'Estimated Value on Loopring',
               estimatedValues.balanceOnExchangeSum,
               estimatedValues.balanceOnExchangeSumEstimatedValue
             )}
@@ -193,14 +242,12 @@ class BalanceHeader extends React.PureComponent {
 }
 
 const mapStateToProps = (state) => {
-  const { cmcPrice } = state;
-  return { cmcPrice };
+  const { legalPrice, ammMarkets, exchange } = state;
+  return {
+    legalPrice,
+    ammMarkets: ammMarkets.ammMarkets,
+    tokens: exchange.tokens,
+  };
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({}, dispatch);
-};
-
-export default withTheme(
-  connect(mapStateToProps, mapDispatchToProps)(BalanceHeader)
-);
+export default withTheme(connect(mapStateToProps, null)(BalanceHeader));

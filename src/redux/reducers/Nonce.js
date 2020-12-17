@@ -1,4 +1,4 @@
-import { UPDATE_NONCE } from "redux/actions/Nonce";
+import { UPDATE_NONCE } from 'redux/actions/Nonce';
 
 const initialState = {
   nonce: [],

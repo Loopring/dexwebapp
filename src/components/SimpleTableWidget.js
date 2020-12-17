@@ -1,11 +1,11 @@
-import { ConfigProvider, Table } from "antd";
-import EmptyTableIndicator from "components/EmptyTableIndicator";
-import I from "components/I";
-import React, { useContext } from "react";
+import { ConfigProvider, Table } from 'antd';
+import EmptyTableIndicator from 'components/EmptyTableIndicator';
+import I from 'components/I';
+import React from 'react';
 
-import { SimpleTableContainer } from "styles/Styles";
-import TableLoadingSpin from "components/TableLoadingSpin";
-import styled, { ThemeContext } from "styled-components";
+import { SimpleTableContainer } from 'styles/Styles';
+import TableLoadingSpin from 'components/TableLoadingSpin';
+import styled from 'styled-components';
 
 const Cell = styled.div`
   font-size: 0.9rem;
@@ -29,7 +29,6 @@ const SimpleTableWidget = ({
   margin,
   loading,
 }) => {
-  const theme = useContext(ThemeContext);
   const _rowData = rowData || [];
   const customizeRenderEmpty = () => <EmptyTableIndicator text={emptyText} />;
 
@@ -40,15 +39,17 @@ const SimpleTableWidget = ({
         <I s={builder.label} />
       </Header>
     ),
-    dataIndex: "col_" + j,
+    dataIndex: 'col_' + j,
   }));
 
   const dataSource = _rowData.map((row, i) => {
     var rowValue = { key: i };
 
     columnBuilders.forEach((builder, j) => {
-      rowValue["col_" + j] = (
-        <Cell margin={margin}>{builder.getColValue(row)}</Cell>
+      rowValue['col_' + j] = (
+        <Cell margin={margin} sortedValue={builder.sortedValue(row)}>
+          {builder.getColValue(row)}
+        </Cell>
       );
     });
 
@@ -68,20 +69,6 @@ const SimpleTableWidget = ({
             pagination={false}
           />
         </TableLoadingSpin>
-        {/* {dataSource.length > 10 ? (
-          <Pagination
-            style={{
-              padding: '30px 0px',
-              background: theme.background,
-              textAlign: 'center',
-            }}
-            size=""
-            total={dataSource.length}
-            pageSize={10}
-          />
-        ) : (
-          <div />
-        )} */}
       </ConfigProvider>
     </SimpleTableContainer>
   );

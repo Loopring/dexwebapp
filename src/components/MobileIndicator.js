@@ -1,13 +1,13 @@
-import { connect } from "react-redux";
-import React from "react";
+import { connect } from 'react-redux';
+import React from 'react';
 
-import { withTheme } from "styled-components";
-import AppLayout from "AppLayout";
-import I from "components/I";
+import { withTheme } from 'styled-components';
+import AppLayout from 'AppLayout';
+import I from 'components/I';
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Layout } from "antd";
-import { faMobile } from "@fortawesome/free-solid-svg-icons/faMobile";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Layout } from 'antd';
+import { faMobile } from '@fortawesome/free-solid-svg-icons/faMobile';
 
 const { Content } = Layout;
 
@@ -30,36 +30,36 @@ class MobileIndicator extends React.Component {
           <Content
             width="100%"
             style={{
-              padding: "0",
+              padding: '0',
               backgroundColor: this.props.theme.foreground,
-              borderLeftStyle: "none",
+              borderLeftStyle: 'none',
             }}
           >
             <div
               style={{
-                margin: "auto",
-                fontSize: "0.9rem",
-                fontWeight: "normal",
+                margin: 'auto',
+                fontSize: '0.9rem',
+                fontWeight: 'normal',
                 color: this.props.theme.textWhite,
               }}
             >
               <FontAwesomeIcon
                 icon={faMobile}
                 style={{
-                  display: "block",
-                  margin: "auto",
-                  marginTop: "35%",
-                  marginBottom: "40px",
+                  display: 'block',
+                  margin: 'auto',
+                  marginTop: '35%',
+                  marginBottom: '40px',
                   color: this.props.theme.primary,
                 }}
                 size="5x"
               />
               <div
                 style={{
-                  display: "block",
-                  width: "280px",
-                  margin: "auto",
-                  marginBottom: "40px",
+                  display: 'block',
+                  width: '280px',
+                  margin: 'auto',
+                  marginBottom: '40px',
 
                   color: this.props.theme.textDim,
                 }}

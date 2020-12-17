@@ -1,22 +1,22 @@
-import { connect } from "react-redux";
-import { history } from "redux/configureStore";
-import { withTheme } from "styled-components";
-import React from "react";
+import { connect } from 'react-redux';
+import { history } from 'redux/configureStore';
+import { withTheme } from 'styled-components';
+import React from 'react';
 
-import I from "components/I";
+import I from 'components/I';
 
-import { emptyTradePanel } from "redux/actions/TradePanel";
-import { saveLastTradePage } from "lightcone/api/localStorgeAPI";
-import { setMarket } from "redux/actions/market/CurrentMarket";
-import { updateOrderBooksLevel } from "redux/actions/market/OrderBook";
+import { emptyTradePanel } from 'redux/actions/TradePanel';
+import { saveLastTradePage } from 'lightcone/api/localStorgeAPI';
+import { setMarket } from 'redux/actions/market/CurrentMarket';
+import { updateOrderBooksLevel } from 'redux/actions/market/OrderBook';
 
-import { notifyError } from "redux/actions/Notification";
+import { notifyError } from 'redux/actions/Notification';
 
 class MarketService extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     let pair;
-    if (typeof this.props.match.params.pair === "undefined") {
-      pair = "LRC-USDT";
+    if (typeof this.props.match.params.pair === 'undefined') {
+      pair = 'LRC-USDT';
     } else {
       pair = this.props.match.params.pair;
     }
@@ -27,7 +27,7 @@ class MarketService extends React.Component {
     ) {
       const newMarket = pair;
       if (
-        !this.props.markets.find(
+        !this.props.exchange.markets.find(
           (m) => m.enabled && m.market === newMarket.toUpperCase()
         )
       ) {
@@ -37,14 +37,14 @@ class MarketService extends React.Component {
           </span>,
           this.props.theme
         );
-        saveLastTradePage("LRC-USDT");
-        history.push("/404");
+        saveLastTradePage('LRC-USDT');
+        history.push('/404');
         return;
       }
     }
 
     if (
-      pair.toUpperCase() !== this.props.market.currentMarket.current ||
+      pair.toUpperCase() !== this.props.currentMarket.current ||
       (prevProps.match.params.pair && prevProps.match.params.pair !== pair)
     ) {
       let market = pair;
@@ -60,11 +60,10 @@ class MarketService extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  const { market, exchange } = state;
+  const { currentMarket, exchange } = state;
   return {
-    market,
-    tokens: exchange.tokens,
-    markets: exchange.markets,
+    currentMarket,
+    exchange,
   };
 };
 

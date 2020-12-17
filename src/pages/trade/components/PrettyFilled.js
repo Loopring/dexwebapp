@@ -1,6 +1,6 @@
-import { ThemeContext } from "styled-components";
-import PropTypes from "prop-types";
-import React, { useContext } from "react";
+import { ThemeContext } from 'styled-components';
+import PropTypes from 'prop-types';
+import React, { useContext } from 'react';
 
 const PrettyFilled = ({ filled }) => {
   const theme = useContext(ThemeContext);

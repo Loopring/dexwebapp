@@ -1,36 +1,33 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
-import { faCircleNotch } from "@fortawesome/free-solid-svg-icons/faCircleNotch";
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+
 import {
   showDepositModal,
   showTransferModal,
   showWithdrawModal,
-} from "redux/actions/ModalManager";
-import { withTheme } from "styled-components";
-import React from "react";
+} from 'redux/actions/ModalManager';
+import { withTheme } from 'styled-components';
+import React from 'react';
 
+import * as fm from 'lightcone/common/formatter';
 import {
   DepositOutlineButton,
   TransferOutlineButton,
   WithdrawOutlineButton,
-} from "styles/Styles";
-import { debounce } from "lodash";
-import { fetchWalletBalance } from "modals/components/utils";
-import BalanceHeader from "pages/account/components/Balance/BalanceHeader";
-import BalanceHeaderNavBar from "pages/account/components/Balance/BalanceHeaderNavBar";
-import I from "components/I";
-import SimpleTableWidget from "components/SimpleTableWidget";
+} from 'styles/Styles';
+import { debounce } from 'lodash';
+import { fetchWalletBalance } from 'modals/components/utils';
+import BalanceHeader from 'pages/account/components/Balance/BalanceHeader';
+import BalanceHeaderNavBar from 'pages/account/components/Balance/BalanceHeaderNavBar';
+import I from 'components/I';
+import SimpleTableWidget from 'components/SimpleTableWidget';
 
 class BalanceTable extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      balanceOnEthereumDict: {},
-      isBalancesLoading: true,
-      searchInput: "",
-    };
-  }
+  state = {
+    balanceOnEthereumDict: {},
+    isBalancesLoading: true,
+    searchInput: '',
+  };
 
   componentDidMount() {
     this.mounted = true;
@@ -70,16 +67,18 @@ class BalanceTable extends React.PureComponent {
           this.setState({
             isBalancesLoading: true,
           });
-          const { tokens } = this.props;
+          const tokens = this.props.tokens.filter((token) => token.enabled);
           const balanceOnEthereumDict = {};
-          for (let i = 0; i < tokens.length; i++) {
-            const token = tokens[i];
-            balanceOnEthereumDict[token.symbol] = await fetchWalletBalance(
-              this.props.dexAccount.account.address,
-              token.symbol,
-              tokens
-            );
-          }
+          const walletBalances = await fetchWalletBalance(
+            this.props.dexAccount.account.address,
+            tokens.map((token) => token.symbol),
+            tokens
+          );
+
+          walletBalances.forEach((ba) => {
+            balanceOnEthereumDict[ba.symbol] = ba.balance;
+          });
+
           if (this.mounted) {
             this.setState({
               balanceOnEthereumDict,
@@ -97,73 +96,123 @@ class BalanceTable extends React.PureComponent {
 
   columnBuilders = [
     {
-      label: "Asset",
-      align: "left",
+      label: 'Asset',
+      align: 'left',
       width: 240,
       getColValue: (balance) => {
         return (
           <span>
-            {balance.token.symbol} - <I s={balance.token.name} />
+            {balance.token.name.split('-').length - 1 >= 2 ? (
+              <div>{balance.token.symbol}</div>
+            ) : (
+              <div>
+                {balance.token.symbol} - <I s={balance.token.name} />{' '}
+              </div>
+            )}
+            {balance.token.memo ? '(' : ''}{' '}
+            {balance.token.memo ? <I s={balance.token.memo} /> : ''}{' '}
+            {balance.token.memo ? ')' : ''}
           </span>
         );
       },
+      sortedValue: (balance) => {
+        return balance.token.symbol;
+      },
+      sorter: (a, b) => {
+        return a.col_0.props.sortedValue.localeCompare(
+          b.col_0.props.sortedValue
+        );
+      },
+      sortDirections: ['ascend', 'descend'],
     },
     {
-      label: "Balance on Ethereum",
-      align: "right",
+      label: 'Layer-1 Balance',
+      align: 'right',
+      width: 200,
+      sortedValue: (balance) => {
+        if (this.state.balanceOnEthereumDict[balance.token.symbol]) {
+          return Number(
+            this.state.balanceOnEthereumDict[balance.token.symbol]
+              .toString()
+              .replace(/,/g, '')
+          );
+        } else {
+          return 0;
+        }
+      },
+      sorter: (a, b) => {
+        return a.col_1.props.sortedValue !== b.col_1.props.sortedValue
+          ? a.col_1.props.sortedValue - b.col_1.props.sortedValue
+          : a.col_0.props.sortedValue.localeCompare(b.col_0.props.sortedValue);
+      },
+      sortDirections: ['ascend', 'descend'],
       getColValue: (balance) => {
         if (this.state.balanceOnEthereumDict[balance.token.symbol]) {
-          return this.state.balanceOnEthereumDict[balance.token.symbol];
-        } else {
-          return (
-            <div>
-              <FontAwesomeIcon
-                style={{
-                  width: "14px",
-                  height: "14px",
-                }}
-                color={this.props.theme.textDim}
-                icon={faCircleNotch}
-                spin={true}
-              />
-            </div>
+          return fm.numberWithCommas(
+            this.state.balanceOnEthereumDict[balance.token.symbol]
           );
+        } else {
+          return 0;
         }
       },
     },
     {
-      label: "Balance on Loopring",
-      align: "right",
+      label: 'Layer-2 Balance',
+      align: 'right',
+      width: 220,
+      sortedValue: (balance) => {
+        return parseFloat(balance.totalAmountInString);
+      },
+      sorter: (a, b) => {
+        return a.col_2.props.sortedValue !== b.col_2.props.sortedValue
+          ? a.col_2.props.sortedValue - b.col_2.props.sortedValue
+          : a.col_0.props.sortedValue.localeCompare(b.col_0.props.sortedValue);
+      },
+      sortDirections: ['descend', 'ascend'],
       getColValue: (balance) => {
-        return balance.totalAmountInString;
+        return fm.numberWithCommas(balance.totalAmountInString);
       },
     },
     {
-      label: "Available Balance",
-      align: "right",
+      label: 'Available Balance',
+      align: 'right',
+      width: 200,
+      sortedValue: (balance) => {
+        return parseFloat(balance.available);
+      },
+      sorter: (a, b) => {
+        return a.col_3.props.sortedValue !== b.col_3.props.sortedValue
+          ? a.col_3.props.sortedValue - b.col_3.props.sortedValue
+          : a.col_0.props.sortedValue.localeCompare(b.col_0.props.sortedValue);
+      },
+      sortDirections: ['descend', 'ascend'],
       getColValue: (balance) => {
-        return <div>{balance.availableInAssetPanel}</div>;
+        return <div>{fm.numberWithCommas(balance.availableInAssetPanel)}</div>;
       },
     },
     {
-      label: "Operations",
-      align: "center",
+      label: 'Operations',
+      align: 'center',
+      sortedValue: (balance) => {
+        return balance.token.symbol;
+      },
       getColValue: (balance) => {
         return (
           <div>
             <TransferOutlineButton
               style={{
-                marginRight: "8px",
+                marginRight: '8px',
               }}
               onClick={() => {
                 this.props.showTransferModal(true, balance.token.symbol);
               }}
+              disabled={balance.token.transferEnabled !== true}
             >
               <I s="Transfer" />
             </TransferOutlineButton>
             <DepositOutlineButton
               style={{
-                marginRight: "8px",
+                marginRight: '8px',
               }}
               onClick={() => {
                 this.props.showDepositModal(true, balance.token.symbol);
@@ -221,7 +270,10 @@ class BalanceTable extends React.PureComponent {
         let balanceOnEthereum = this.state.balanceOnEthereumDict[
           balance.token.symbol
         ];
-        if (balanceOnEthereum && parseFloat(balanceOnEthereum) > 0) {
+        if (
+          balanceOnEthereum &&
+          Number(balanceOnEthereum.toString().replace(/,/g, '')) > 0
+        ) {
           return true;
         }
         return false;
@@ -231,7 +283,7 @@ class BalanceTable extends React.PureComponent {
     }
 
     let filteredSearchInputBalances = [];
-    if (this.state.searchInput !== "") {
+    if (this.state.searchInput !== '') {
       filteredSearchInputBalances = filteredBalances.filter((balance) => {
         if (
           balance.token.symbol.toLowerCase().indexOf(this.state.searchInput) ===

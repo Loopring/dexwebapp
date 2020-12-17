@@ -1,44 +1,46 @@
-import { connect } from "react-redux";
-import I from "components/I";
-import React from "react";
-import styled, { withTheme } from "styled-components";
+import { connect } from 'react-redux';
+import I from 'components/I';
+import React from 'react';
+import styled, { withTheme } from 'styled-components';
 
-import AppLayout from "AppLayout";
+import AppLayout from 'AppLayout';
 
-import "@ant-design/compatible/assets/index.css";
-import { ActionButton } from "styles/Styles";
-import { Button, Spin } from "antd";
+import { ActionButton } from 'styles/Styles';
+import { Button, Spin } from 'antd';
 
 import {
   fetchMyHistoryOrders,
   fetchMyOpenOrders,
-} from "redux/actions/MyOrders";
+} from 'redux/actions/MyOrders';
 
-import { fetchMyAccountPage } from "redux/actions/MyAccountPage";
-import { getOrderId, submitOrderToLightcone } from "lightcone/api/LightconeAPI";
-import { updateAmount, updatePrice } from "redux/actions/TradePanel";
-import AssetPanel from "pages/trade/asset-panel/AssetPanel";
-import NumericInput from "components/NumericInput";
-import TradeTabButtons from "./components/TradeTabButtons";
+import { fetchMyAccountPage } from 'redux/actions/MyAccountPage';
+import {
+  getStorageId,
+  submitOrderToLightcone,
+} from 'lightcone/api/LightconeAPI';
+import { updateAmount, updatePrice } from 'redux/actions/TradePanel';
+import AssetPanel from 'pages/trade/asset-panel/AssetPanel';
+import NumericInput from 'components/NumericInput';
+import TradeTabButtons from './components/TradeTabButtons';
 
-import { LOGGED_IN } from "redux/actions/DexAccount";
-import { formatter } from "lightcone/common";
-import config from "lightcone/config";
+import { LOGGED_IN } from 'redux/actions/DexAccount';
+import { formatter } from 'lightcone/common';
+import config from 'lightcone/config';
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleNotch } from "@fortawesome/free-solid-svg-icons/faCircleNotch";
-import { faEthereum } from "@fortawesome/free-brands-svg-icons/faEthereum";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCircleNotch } from '@fortawesome/free-solid-svg-icons/faCircleNotch';
+import { faEthereum } from '@fortawesome/free-brands-svg-icons/faEthereum';
 
 import {
   getEtherscanLink,
   saveAccountToLocal,
-} from "lightcone/api/localStorgeAPI";
-import { notifyError, notifySuccess } from "redux/actions/Notification";
+} from 'lightcone/api/localStorgeAPI';
+import { notifyError, notifySuccess } from 'redux/actions/Notification';
 
-import TradePanelErrorMessage from "pages/trade/trade-panel/components/TradePanelErrorMessage";
-import TradePanelWarnMessage from "pages/trade/trade-panel/components/TradePanelWarnMessage";
+import TradePanelErrorMessage from 'pages/trade/trade-panel/components/TradePanelErrorMessage';
+import TradePanelWarnMessage from 'pages/trade/trade-panel/components/TradePanelWarnMessage';
 
-const BigNumber = require("bignumber.js");
+const BigNumber = require('bignumber.js');
 
 const TitleLabel = styled.div`
   padding-top: 16px;
@@ -91,13 +93,13 @@ class TradePanel extends React.Component {
     baseAmountValidate: true,
     quoteAmountValidate: true,
     orderTotalValidate: true,
-    errorMessage1: "",
-    errorToken: "",
-    errorMessage2: "",
-    warnMessage: "",
+    errorMessage1: '',
+    errorToken: '',
+    errorMessage2: '',
+    warnMessage: '',
     loading: false,
     isBuy: true,
-    sellToken: "-",
+    sellToken: '-',
     needPriceConfirm: false,
     orderTotal: null,
     autoUpdateAmountFirst: true,
@@ -105,7 +107,7 @@ class TradePanel extends React.Component {
 
   componentDidMount() {
     const { tradePanel } = this.props;
-    const isBuy = tradePanel.tradeType.toLowerCase() === "buy";
+    const isBuy = tradePanel.tradeType.toLowerCase() === 'buy';
     const sellToken = isBuy
       ? this.props.currentMarket.quoteTokenSymbol
       : this.props.currentMarket.baseTokenSymbol;
@@ -125,9 +127,11 @@ class TradePanel extends React.Component {
           this.props.dexAccount.account.address &&
         this.props.currentMarket.current)
     ) {
+      // console.log('update current market', this.props.currentMarket.current);
+
       const { currentMarket, tradePanel, exchange } = this.props;
-      const tokens = currentMarket.current.split("-");
-      const isBuy = tradePanel.tradeType.toLowerCase() === "buy";
+      const tokens = currentMarket.current.split('-');
+      const isBuy = tradePanel.tradeType.toLowerCase() === 'buy';
       const sellToken = isBuy ? tokens[1] : tokens[0];
 
       const baseToken = config.getTokenBySymbol(
@@ -140,11 +144,11 @@ class TradePanel extends React.Component {
         exchange.tokens
       );
 
-      // Onlly check when token info is ready.
+      // Only check when token info is ready.
       if (baseToken.symbol && quoteToken.symbol) {
-        let errorMessage1 = "";
-        let errorToken = "";
-        let errorMessage2 = "";
+        let errorMessage1 = '';
+        let errorToken = '';
+        let errorMessage2 = '';
 
         let priceValidate =
           !tradePanel.price || parseFloat(tradePanel.price) >= 0;
@@ -153,9 +157,9 @@ class TradePanel extends React.Component {
         if (
           priceValidate &&
           tradePanel.price &&
-          tradePanel.price.split(".").length === 2
+          tradePanel.price.split('.').length === 2
         ) {
-          inputPrecision = tradePanel.price.split(".")[1].length;
+          inputPrecision = tradePanel.price.split('.')[1].length;
           const marketConfig = config.getMarketByPair(
             currentMarket.current,
             exchange.markets
@@ -166,9 +170,9 @@ class TradePanel extends React.Component {
             (parseFloat(tradePanel.price) === 0 &&
               inputPrecision === precisionForPrice)
           ) {
-            errorMessage1 = "Maximum_price_input_decimal_part_1";
+            errorMessage1 = 'Maximum_price_input_decimal_part_1';
             errorToken = `${precisionForPrice}`;
-            errorMessage2 = "Maximum_input_decimal_part_2";
+            errorMessage2 = 'Maximum_input_decimal_part_2';
             priceValidate = false;
           }
         }
@@ -227,20 +231,20 @@ class TradePanel extends React.Component {
 
         if (priceValidate && !baseAmountValidate) {
           if (baseAmount < minBaseAmount) {
-            errorMessage1 = "Minimum_order_size";
+            errorMessage1 = 'Minimum_order_size';
             errorToken = ` ${minBaseAmount} ${baseToken.symbol}`;
           } else if (baseAmount > maxBaseAmount) {
-            errorMessage1 = "Maximum_order_size";
+            errorMessage1 = 'Maximum_order_size';
             errorToken = ` ${maxBaseAmount} ${baseToken.symbol}`;
           }
         }
 
         if (baseAmountValidate && !quoteAmountValidate) {
           if (quoteAmount < minQuoteAmount) {
-            errorMessage1 = "Minimum_order_size";
+            errorMessage1 = 'Minimum_order_size';
             errorToken = ` ${minQuoteAmount} ${quoteToken.symbol}`;
           } else if (quoteAmount > maxQuoteAmount) {
-            errorMessage1 = "Maximum_order_size";
+            errorMessage1 = 'Maximum_order_size';
             errorToken = ` ${maxQuoteAmount} ${quoteToken.symbol}`;
           }
         }
@@ -253,18 +257,18 @@ class TradePanel extends React.Component {
           quoteAmountValidate
         ) {
           const amount =
-            tradePanel.tradeType === "sell" ? baseAmount : quoteAmount;
-          if (tradePanel.tradeType === "sell") {
+            tradePanel.tradeType === 'sell' ? baseAmount : quoteAmount;
+          if (tradePanel.tradeType === 'sell') {
             baseAmountValidate =
               amount <= this.getAvailableAmount(sellToken, this.props.balances);
             if (!baseAmountValidate) {
-              errorMessage1 = "Your balance is insufficient!";
+              errorMessage1 = 'Your balance is insufficient!';
             }
           } else {
             quoteAmountValidate =
               amount <= this.getAvailableAmount(sellToken, this.props.balances);
             if (!quoteAmountValidate) {
-              errorMessage1 = "Your balance is insufficient!";
+              errorMessage1 = 'Your balance is insufficient!';
             }
           }
         }
@@ -274,49 +278,49 @@ class TradePanel extends React.Component {
           baseAmountValidate &&
           baseAmountValidate &&
           tradePanel.amount &&
-          tradePanel.amount.split(".").length === 2
+          tradePanel.amount.split('.').length === 2
         ) {
-          inputPrecision = tradePanel.amount.split(".")[1].length;
+          inputPrecision = tradePanel.amount.split('.')[1].length;
           const precision = (baseToken && baseToken.precision) || 6;
           if (
             inputPrecision > precision ||
             (parseFloat(tradePanel.amount) === 0 &&
               inputPrecision === precision)
           ) {
-            errorMessage1 = "Maximum_amount_input_decimal_part_1";
+            errorMessage1 = 'Maximum_amount_input_decimal_part_1';
             errorToken = `${precision}`;
-            errorMessage2 = "Maximum_input_decimal_part_2";
+            errorMessage2 = 'Maximum_input_decimal_part_2';
             baseAmountValidate = false;
           }
         }
 
         if (
-          errorMessage1 === "" &&
+          errorMessage1 === '' &&
           baseAmountValidate &&
           !!this.state.orderTotal &&
-          this.state.orderTotal.split(".").length === 2
+          this.state.orderTotal.split('.').length === 2
         ) {
-          const orderTotalPrecision = this.state.orderTotal.split(".")[1]
+          const orderTotalPrecision = this.state.orderTotal.split('.')[1]
             .length;
           const precision = (quoteToken && quoteToken.precision) || 6;
           if (orderTotalPrecision > precision) {
-            errorMessage1 = "Maximum_order_total_input_decimal_part_1";
+            errorMessage1 = 'Maximum_order_total_input_decimal_part_1';
             errorToken = `${precision}`;
-            errorMessage2 = "Maximum_input_decimal_part_2";
+            errorMessage2 = 'Maximum_input_decimal_part_2';
             orderTotalValidate = false;
           }
         }
 
         // Display warinings
-        let warnMessage = "";
-        if (errorMessage1 === "" && priceValidate && tradePanel.price) {
+        let warnMessage = '';
+        if (errorMessage1 === '' && priceValidate && tradePanel.price) {
           if (tradePanel.price && this.props.ticker.close) {
             let latestPrice = parseFloat(this.props.ticker.close);
             let price = parseFloat(this.props.tradePanel.price);
             if (price > 1.2 * latestPrice && isBuy) {
-              warnMessage = "BuyPriceHigher";
+              warnMessage = 'BuyPriceHigher';
             } else if (price < 0.8 * latestPrice && !isBuy) {
-              warnMessage = "SellPriceLower";
+              warnMessage = 'SellPriceLower';
             }
           }
         }
@@ -335,23 +339,6 @@ class TradePanel extends React.Component {
         });
       }
     }
-
-    // if (
-    //   prevProps.modalManager.isEnterPasswordModalVisible !==
-    //     this.props.modalManager.isEnterPasswordModalVisible &&
-    //   this.props.modalManager.isEnterPasswordModalVisible === false &&
-    //   this.state.waitingForPassword === true
-    // ) {
-    //   // Try to submit order again after users enter password.
-    //   this.setState(
-    //     {
-    //       waitingForPassword: false,
-    //     },
-    //     () => {
-    //       this.pressedButton();
-    //     }
-    //   );
-    // }
 
     if (
       (prevProps.tradePanel.updateOrderTotalReferenceCount !==
@@ -393,11 +380,10 @@ class TradePanel extends React.Component {
     const holdBalance = balances.find(
       (ba) => ba.tokenId === selectedToken.tokenId
     );
-    try {
-      return holdBalance ? Number(holdBalance.available) : 0;
-    } catch {
-      return 0;
+    if (holdBalance) {
+      return Number(holdBalance.available.replace(/,/g, ''));
     }
+    return 0;
   };
 
   onPriceValueChange = (value) => {
@@ -466,11 +452,11 @@ class TradePanel extends React.Component {
     });
 
     // If value is invalid, return
-    if (value == "" || Number(value) == 0) {
+    if (value == '' || Number(value) == 0) {
       if (this.state.autoUpdateAmountFirst) {
-        this.props.updateAmount("", false);
+        this.props.updateAmount('', false);
       } else {
-        this.props.updatePrice("", false);
+        this.props.updatePrice('', false);
       }
       return;
     }
@@ -564,7 +550,7 @@ class TradePanel extends React.Component {
         // Amount is always in base token
         const amountInBigNumber = new BigNumber(amount);
 
-        const isBuy = this.props.tradePanel.tradeType === "buy";
+        const isBuy = this.props.tradePanel.tradeType === 'buy';
 
         var tokenS;
         var tokenSId;
@@ -594,22 +580,27 @@ class TradePanel extends React.Component {
 
         const tradingPrivKey = this.props.dexAccount.account.accountKey;
         if (!tradingPrivKey) {
-          throw new Error("please login first");
+          throw new Error('please login first');
         }
 
+        // TODO: 3.6 /api/v2/orderId is not found
         // Get order id
         const accountId = this.props.dexAccount.account.accountId;
         const apiKey = this.props.dexAccount.account.apiKey;
         // Use token sell id
-        const orderId = await getOrderId(accountId, tokenSId, apiKey);
+        const storageId = await getStorageId(accountId, tokenSId, apiKey);
+        const orderId = storageId.orderId;
 
         // Timestamp in second
         const validSince = new Date().getTime() / 1000 - 3600;
-        const validUntil = new Date().getTime() / 1000 + 3600 * 24 * 10000;
 
-        const signedOrder = window.wallet.submitOrder(
+        // TODO: how to set validUntil
+        const validUntil = new Date().getTime() / 1000 + 3600 * 1 * 10000;
+
+        console.log('exchange', exchange);
+        const signedOrderData = window.wallet.submitOrder(
           exchange.tokens,
-          exchange.exchangeId,
+          exchange.exchangeAddress,
           tokenS,
           tokenB,
           amountS,
@@ -619,10 +610,13 @@ class TradePanel extends React.Component {
           validUntil,
           config.getLabel(),
           isBuy,
-          config.getChannelId()
+          config.getChannelId(),
+          'LIMIT_ORDER'
         );
 
-        await submitOrderToLightcone(signedOrder, apiKey);
+        signedOrderData['storageId'] = orderId;
+
+        await submitOrderToLightcone(signedOrderData, apiKey);
 
         saveAccountToLocal(this.props.dexAccount.account);
 
@@ -656,7 +650,7 @@ class TradePanel extends React.Component {
         );
 
         // Reset trade form
-        this.props.updateAmount("", true);
+        this.props.updateAmount('', true);
 
         notifySuccess(
           <I s="Your order has been submitted." />,
@@ -664,7 +658,7 @@ class TradePanel extends React.Component {
         );
       } catch (err) {
         console.log(err);
-        notifyError(<I s="Failed to submit your order." />, this.props.theme);
+        notifyError(<I s="Failed to swap." />, this.props.theme);
       } finally {
         this.setState({
           loading: false,
@@ -692,15 +686,6 @@ class TradePanel extends React.Component {
         validateAmount: true,
       });
     }
-
-    // if (this.props.dexAccount.account.password === null) {
-    //   this.setState({
-    //     waitingForPassword: true,
-    //   });
-    //   this.props.showEnterPasswordModal(true);
-    // } else {
-    //
-    // }
 
     this.submitOrder();
   };
@@ -736,7 +721,7 @@ class TradePanel extends React.Component {
   getExchangeContractLink = () => {
     const addr =
       this.props.exchange.chainId === 1
-        ? "loopringio.eth"
+        ? 'loopringio.eth'
         : this.props.exchange.exchangeAddress;
 
     return `${getEtherscanLink(this.props.exchange.chainId)}/address/${addr}`;
@@ -806,7 +791,7 @@ class TradePanel extends React.Component {
         style={{
           height: AppLayout.mainScreenHeight,
           backgroundColor: theme.sidePanelBackground,
-          overflow: "scroll",
+          overflow: 'scroll',
         }}
       >
         <div
@@ -823,14 +808,14 @@ class TradePanel extends React.Component {
         >
           <div
             style={{
-              paddingTop: "0px",
-              paddingBottom: "0px",
+              paddingTop: '0px',
+              paddingBottom: '0px',
             }}
           >
             <TradeTabButtons disabled={wrongNetworkInputDisable} />
             <div
               style={{
-                marginBottom: "10px",
+                marginBottom: '10px',
               }}
             >
               <TitleLabel>
@@ -867,9 +852,9 @@ class TradePanel extends React.Component {
 
               <div
                 style={{
-                  margin: "4px 1px",
-                  display: "flex",
-                  justifyContent: "space-between",
+                  margin: '4px 1px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
                 }}
               >
                 <PercentageButton
@@ -938,8 +923,8 @@ class TradePanel extends React.Component {
               <TradePanelWarnMessage
                 show={
                   this.props.dexAccount.account.state === LOGGED_IN &&
-                  this.state.errorMessage1 === "" &&
-                  this.state.warnMessage !== ""
+                  this.state.errorMessage1 === '' &&
+                  this.state.warnMessage !== ''
                 }
                 message={this.state.warnMessage}
               />
@@ -962,13 +947,13 @@ class TradePanel extends React.Component {
           >
             <FontAwesomeIcon
               size="2x"
-              style={{ opacity: 0.5, marginBottom: "8px" }}
+              style={{ opacity: 0.5, marginBottom: '8px' }}
               icon={faEthereum}
             />
             <div
               style={{
-                fontSize: "0.75rem",
-                opacity: "0.75",
+                fontSize: '0.75rem',
+                opacity: '0.75',
               }}
             >
               <I s="Powered by Ethereum & Loopring" />

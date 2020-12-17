@@ -1,5 +1,5 @@
-import PropTypes from "prop-types";
-import styled from "styled-components";
+import PropTypes from 'prop-types';
+import styled from 'styled-components';
 
 const StickyContainer = styled.div`
   top: 0;

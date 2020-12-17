@@ -1,6 +1,6 @@
-import I from "./I";
-import React, { useContext } from "react";
-import styled, { ThemeContext } from "styled-components";
+import I from './I';
+import React, { useContext } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 
 const EmptyTableIndicatorWrapper = styled.div`
   text-align: center;
@@ -25,10 +25,10 @@ const EmptyTableIndicator = ({ text, ...props }) => {
       <img
         style={{
           marginTop: props.marginTop,
-          width: "68px",
-          height: "auto",
-          userSelect: "none",
-          opacity: "1",
+          width: '68px',
+          height: 'auto',
+          userSelect: 'none',
+          opacity: '1',
         }}
         src={`/assets/images/${theme.imgDir}/no-data.svg`}
         alt="No Data"
@@ -36,8 +36,8 @@ const EmptyTableIndicator = ({ text, ...props }) => {
       />
       <div
         style={{
-          paddingTop: "2px",
-          fontSize: "0.85rem",
+          paddingTop: '2px',
+          fontSize: '0.85rem',
           marginBottom: props.marginTop,
         }}
       >
@@ -48,7 +48,7 @@ const EmptyTableIndicator = ({ text, ...props }) => {
 };
 
 EmptyTableIndicator.defaultProps = {
-  marginTop: "10%",
+  marginTop: '10%',
   loading: false,
 };
 

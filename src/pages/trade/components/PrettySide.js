@@ -1,6 +1,6 @@
-import PropTypes from "prop-types";
-import React from "react";
-import styled from "styled-components";
+import PropTypes from 'prop-types';
+import React from 'react';
+import styled from 'styled-components';
 
 const ThinLowContrast = styled.span`
   color: ${(props) => props.theme.textWhite};
@@ -8,11 +8,11 @@ const ThinLowContrast = styled.span`
 `;
 
 const PrettySide = ({ side }) => {
-  return <ThinLowContrast>{side === "buy" ? "Buy" : "Sell"}</ThinLowContrast>;
+  return <ThinLowContrast>{side === 'buy' ? 'Buy' : 'Sell'}</ThinLowContrast>;
 };
 
 PrettySide.propTypes = {
-  side: PropTypes.oneOf(["buy", "sell"]),
+  side: PropTypes.oneOf(['buy', 'sell']),
 };
 
 export default PrettySide;

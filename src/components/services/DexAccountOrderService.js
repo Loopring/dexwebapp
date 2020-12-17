@@ -1,15 +1,15 @@
-import { connect } from "react-redux";
-import React from "react";
+import { connect } from 'react-redux';
+import React from 'react';
 
-import { compareDexAccounts } from "./utils";
+import { compareDexAccounts } from './utils';
 import {
   emptyMyHistoryOrders,
   emptyMyOpenOrders,
   fetchMyHistoryOrders,
   fetchMyOpenOrders,
-} from "redux/actions/MyOrders";
+} from 'redux/actions/MyOrders';
 
-import { LOGGED_IN } from "redux/actions/DexAccount";
+import { LOGGED_IN } from 'redux/actions/DexAccount';
 
 class DexAccountOrderService extends React.Component {
   componentDidUpdate(prevProps, prevState) {

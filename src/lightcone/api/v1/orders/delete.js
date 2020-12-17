@@ -1,3 +1,4 @@
+import * as fm from '../../../common/formatter';
 import { request } from '../../../common';
 
 export async function cancelOrders(
@@ -12,11 +13,25 @@ export async function cancelOrders(
     orderHash: orderHash,
     clientOrderId: clientOrderId,
   };
-  const signature = signed.Rx + ',' + signed.Ry + ',' + signed.s;
+  let signatureRx_Hex = fm.clearHexPrefix(
+    fm.toHex(fm.toBN(signed.Rx.toString('hex')))
+  );
+  let signatureRy_Hex = fm.clearHexPrefix(
+    fm.toHex(fm.toBN(signed.Ry.toString('hex')))
+  );
+  let signatureS_Hex = fm.clearHexPrefix(
+    fm.toHex(fm.toBN(signed.s.toString('hex')))
+  );
+  const signature =
+    '0x' +
+    signatureRx_Hex.padStart(64, '0') +
+    signatureRy_Hex.padStart(64, '0') +
+    signatureS_Hex.padStart(64, '0');
   const headers = {
     'X-API-KEY': apiKey,
     'X-API-SIG': signature,
   };
+
   return await request({
     method: 'DELETE',
     url: '/api/v2/orders',
@@ -29,7 +44,20 @@ export async function cancelAllOrders(accountId, signed, apiKey) {
   const params = {
     accountId: accountId,
   };
-  const signature = signed.Rx + ',' + signed.Ry + ',' + signed.s;
+  let signatureRx_Hex = fm.clearHexPrefix(
+    fm.toHex(fm.toBN(signed.Rx.toString('hex')))
+  );
+  let signatureRy_Hex = fm.clearHexPrefix(
+    fm.toHex(fm.toBN(signed.Ry.toString('hex')))
+  );
+  let signatureS_Hex = fm.clearHexPrefix(
+    fm.toHex(fm.toBN(signed.s.toString('hex')))
+  );
+  const signature =
+    '0x' +
+    signatureRx_Hex.padStart(64, '0') +
+    signatureRy_Hex.padStart(64, '0') +
+    signatureS_Hex.padStart(64, '0');
   const headers = {
     'X-API-KEY': apiKey,
     'X-API-SIG': signature,
@@ -37,54 +65,6 @@ export async function cancelAllOrders(accountId, signed, apiKey) {
   return await request({
     method: 'DELETE',
     url: '/api/v2/orders',
-    headers: headers,
-    params,
-  });
-}
-
-export async function batchCancelByHash(
-  accountId,
-  orderHashes,
-  signed,
-  apiKey
-) {
-  const params = {
-    accountId: accountId,
-    orderHash: orderHashes.join(),
-  };
-  const signature = signed.Rx + ',' + signed.Ry + ',' + signed.s;
-  const headers = {
-    'X-API-KEY': apiKey,
-    'X-API-SIG': signature,
-  };
-
-  return await request({
-    method: 'DELETE',
-    url: '/api/v2/orders/byHash',
-    headers: headers,
-    params,
-  });
-}
-
-export async function batchCancelByClientOrderId(
-  accountId,
-  clientOrderIds,
-  signed,
-  apiKey
-) {
-  const params = {
-    accountId: accountId,
-    clientOrderId: clientOrderIds.join(),
-  };
-  const signature = signed.Rx + ',' + signed.Ry + ',' + signed.s;
-  const headers = {
-    'X-API-KEY': apiKey,
-    'X-API-SIG': signature,
-  };
-
-  return await request({
-    method: 'DELETE',
-    url: '/api/v2/orders/byClientOrderId',
     headers: headers,
     params,
   });

@@ -1,6 +1,6 @@
-import PropTypes from "prop-types";
-import React from "react";
-import styled from "styled-components";
+import PropTypes from 'prop-types';
+import React from 'react';
+import styled from 'styled-components';
 
 const FullWidthTable = styled.table`
   width: 100%;
@@ -18,8 +18,8 @@ const CompactTableHead = ({ children, ...props }) => (
     <thead>
       <tr
         style={{
-          fontSize: "0.8rem",
-          textTransform: "uppercase",
+          fontSize: '0.8rem',
+          textTransform: 'uppercase',
         }}
       >
         {children}

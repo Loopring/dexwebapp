@@ -1,20 +1,22 @@
-import { ConfigProvider, List, Radio } from "antd";
-import { SearchInput } from "styles/Styles";
-import { connect } from "react-redux";
-import { debounce } from "lodash";
-import { getTicker } from "lightcone/api/LightconeAPI";
-import { history } from "redux/configureStore";
-import { withUserPreferences } from "components/UserPreferenceContext";
-import I from "components/I";
-import React from "react";
-import config from "lightcone/config";
-import styled, { withTheme } from "styled-components";
+import { Col, ConfigProvider, List, Radio, Row, Spin } from 'antd';
+import { SearchInput } from 'styles/Styles';
+import { connect } from 'react-redux';
+import { getTicker } from 'lightcone/api/LightconeAPI';
+import { history } from 'redux/configureStore';
+import { withUserPreferences } from 'components/UserPreferenceContext';
+import I from 'components/I';
+import React from 'react';
+import config from 'lightcone/config';
+import styled, { withTheme } from 'styled-components';
 
-import { emptyOrderBooks } from "redux/actions/market/OrderBook";
-import { getEtherscanLink } from "lightcone/api/localStorgeAPI";
-import { sortAndCheckNewMarkets } from "./utils";
-import ColumnWrapper from "./components/ColumnWrapper";
-import EmptyTableIndicator from "components/EmptyTableIndicator";
+import { checkMarketIsNew, sortByVolume } from './utils';
+import { emptyOrderBooks } from 'redux/actions/market/OrderBook';
+import { getEtherscanLink } from 'lightcone/api/localStorgeAPI';
+import ColumnWrapper from './components/ColumnWrapper';
+import EmptyTableIndicator from 'components/EmptyTableIndicator';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch } from '@fortawesome/free-solid-svg-icons/faSearch';
 
 const AssetIcon = styled.a`
   display: inline-block;
@@ -45,7 +47,7 @@ const ListItem = styled(List.Item)`
 `;
 
 const RadioButton = styled(Radio.Button)`
-  width: 25%;
+  width: 16.66%;
   text-align: center;
 `;
 
@@ -53,8 +55,8 @@ class MarketSelector extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      filter: "",
-      groupSelect: "all",
+      filter: '',
+      groupSelect: 'all',
       tickers: [],
     };
   }
@@ -72,14 +74,13 @@ class MarketSelector extends React.Component {
     }
 
     if (
-      prevProps.exchange.isInitialized !== this.props.exchange.isInitialized &&
-      this.props.isVisible
+      prevProps.exchange.isInitialized !== this.props.exchange.isInitialized
     ) {
       this.loadData();
     }
   }
 
-  loadData = debounce(() => {
+  loadData() {
     (async () => {
       try {
         const tickers = await getTicker(
@@ -93,11 +94,11 @@ class MarketSelector extends React.Component {
         });
       } catch (error) {}
     })();
-  }, 500);
+  }
 
   getAssetUrl(token, exchangeAddress) {
     var addr = window.wallet ? window.wallet.address : exchangeAddress;
-    if (token.symbol === "ETH")
+    if (token.symbol === 'ETH')
       return `${getEtherscanLink(this.props.exchange.chainId)}/address/${addr}`;
     else
       return `${getEtherscanLink(this.props.exchange.chainId)}/token/${
@@ -106,19 +107,25 @@ class MarketSelector extends React.Component {
   }
 
   getAssetIconUrl(token) {
-    const { theme } = this.props;
+    const defaultIcon = `url("/assets/images/default_logo.png")`;
     var path;
-    if (token.symbol === "ETH") {
-      return "url(/assets/images/ETH.png)";
-    } else if (token.symbol === "LRC") {
-      return "url(/assets/images/LRC.png)";
-    } else if (token.symbol === "KEEP") {
-      return `url("/assets/images/${theme.imgDir}/KEEP.png")`;
-    } else if (token.symbol.toUpperCase() === "TBTC") {
-      return `url("/assets/images/TBTC.png")`;
+    if (token.symbol === 'ETH') {
+      path = 'info';
+    } else if (token.symbol === 'LRC') {
+      return 'url(/assets/images/LRC.png)';
+    } else if (token.symbol.toUpperCase() === 'TON') {
+      // Use default icon for TON
+      return defaultIcon;
+    } else if (token.symbol.toUpperCase() === 'DEFIL') {
+      return 'url(/assets/images/DeFi+L.png)';
+    } else if (token.symbol.toUpperCase() === 'DEFIS') {
+      return 'url(/assets/images/DeFi++S.png)';
+    } else if (token.symbol.toUpperCase() === 'DOUGH') {
+      return 'url(/assets/images/DOUGH2v.png)';
     } else {
-      return "url(/assets/images/ETH.png)";
+      path = 'assets/' + token.address;
     }
+    return 'url(/assets/images/ethereum/' + path + '/logo.png)';
   }
 
   onSearchInputChange = (e) => {
@@ -135,10 +142,10 @@ class MarketSelector extends React.Component {
 
   clickedMarketItem = (updatedMarket) => {
     if (
-      this.props.market.currentMarket.current.toUpperCase() !==
+      this.props.currentMarket.current.toUpperCase() !==
       updatedMarket.market.toUpperCase()
     ) {
-      history.push("/trade/" + updatedMarket.market.toUpperCase());
+      history.push('/trade/' + updatedMarket.market.toUpperCase());
       // Empty orderbooks
       this.props.emptyOrderBooks(0);
       this.props.closePopover();
@@ -148,24 +155,26 @@ class MarketSelector extends React.Component {
   render() {
     const userPreferences = this.props.userPreferences;
     const language = userPreferences.language;
-    let placeholder = language === "en" ? "Search market" : "搜索市场对";
+    let placeholder = language === 'en' ? 'Search market' : '搜索市场对';
 
     const { filter, groupSelect } = this.state;
     const { theme } = this.props;
     let markets =
-      filter !== ""
+      filter !== ''
         ? this.props.exchange.markets.filter(
             (x) => x.market.includes(filter.toUpperCase()) && x.enabled
           )
         : this.props.exchange.markets.filter((x) => x.enabled);
 
-    if (groupSelect !== "all") {
+    markets = checkMarketIsNew(markets);
+
+    if (groupSelect === 'new') {
+      markets = markets.filter((x) => x.isNew);
+    } else if (groupSelect !== 'all') {
       markets = markets.filter((x) =>
         x.market.includes(groupSelect.toUpperCase())
       );
     }
-
-    markets = sortAndCheckNewMarkets(markets);
 
     let updatedMarkets = [];
     for (let i = 0; i < markets.length; i = i + 1) {
@@ -177,41 +186,44 @@ class MarketSelector extends React.Component {
       let updatedMarket = {
         ...market,
         baseToken: config.getTokenBySymbol(
-          market.market.split("-")[0],
+          market.market.split('-')[0],
           this.props.exchange.tokens
         ),
         quoteToken: config.getTokenBySymbol(
-          market.market.split("-")[1],
+          market.market.split('-')[1],
           this.props.exchange.tokens
         ),
       };
       if (tickers.length === 1) {
-        updatedMarket["ticker"] = tickers[0];
+        updatedMarket['ticker'] = tickers[0];
       } else {
-        updatedMarket["ticker"] = {
-          percentChange24h: "-",
-          volume: "-",
-          close: "-",
+        updatedMarket['ticker'] = {
+          percentChange24h: '-',
+          volume: '-',
+          close: '-',
         };
       }
       updatedMarkets.push(updatedMarket);
     }
 
+    // Sort by volume. No need to sort alphabetically.
+    updatedMarkets = sortByVolume(updatedMarkets, this.props.legalPrice.prices);
+
     const customizeRenderEmpty = () => (
-      <EmptyTableIndicator text={"NoMarketSelects"} loading={false} />
+      <EmptyTableIndicator text={'NoMarketSelects'} loading={false} />
     );
 
     return (
       <div
         style={{
-          width: "400px",
+          width: '400px',
         }}
       >
         <Radio.Group
           style={{
-            width: "100%",
-            paddingTop: "8px",
-            paddingBottom: "8px",
+            width: '100%',
+            paddingTop: '8px',
+            paddingBottom: '8px',
           }}
           onChange={this.onGroupSelectChange}
           defaultValue="all"
@@ -220,102 +232,125 @@ class MarketSelector extends React.Component {
           <RadioButton value="lrc">LRC</RadioButton>
           <RadioButton value="eth">ETH</RadioButton>
           <RadioButton value="usdt">USDT</RadioButton>
+          <RadioButton value="btc">BTC</RadioButton>
+          <RadioButton value="new">New</RadioButton>
         </Radio.Group>
 
-        <SearchInput
-          style={{
-            margin: "4px 0",
-            width: "140px",
-            height: "30px !important",
-            fontSize: "0.9rem !important",
-          }}
-          placeholder={placeholder}
-          onChange={this.onSearchInputChange}
-        />
+        <Row gutter={8}>
+          <Col
+            style={{
+              paddingLeft: '10px',
+              paddingRight: '0px',
+              margin: 'auto 0px',
+              color: theme.textWhite,
+            }}
+          >
+            <span>
+              <FontAwesomeIcon icon={faSearch} />
+            </span>
+          </Col>
+          <Col span={5}>
+            <SearchInput
+              style={{
+                margin: '4px 0',
+                width: '140px',
+                height: '30px !important',
+                fontSize: '0.9rem !important',
+              }}
+              placeholder={placeholder}
+              onChange={this.onSearchInputChange}
+            />
+          </Col>
+        </Row>
+
         <div
           style={{
-            paddingTop: "8px",
-            maxHeight: "calc(100vh - 230px)",
-            overflowY: "scroll",
+            paddingTop: '8px',
+            maxHeight: 'calc(100vh - 230px)',
+            overflowY: 'scroll',
           }}
         >
-          <ConfigProvider
-            renderEmpty={updatedMarkets.length === 0 && customizeRenderEmpty}
-          >
-            <List
-              bordered
-              dataSource={updatedMarkets}
-              renderItem={(updatedMarket) => (
-                <div
-                  onClick={() => {
-                    this.clickedMarketItem(updatedMarket);
-                  }}
-                >
-                  <ListItem>
-                    <AssetIcon
-                      href={this.getAssetUrl(
-                        updatedMarket.baseToken,
-                        this.props.exchange.exchangeAddress
-                      )}
-                      target="_blank"
-                      style={{
-                        backgroundImage: this.getAssetIconUrl(
-                          updatedMarket.baseToken
-                        ),
-                      }}
-                    />
+          <Spin spinning={this.state.tickers.length === 0}>
+            <ConfigProvider
+              renderEmpty={updatedMarkets.length === 0 && customizeRenderEmpty}
+            >
+              <List
+                bordered
+                dataSource={updatedMarkets}
+                renderItem={(updatedMarket) => (
+                  <div
+                    onClick={() => {
+                      this.clickedMarketItem(updatedMarket);
+                    }}
+                  >
+                    <ListItem>
+                      <AssetIcon
+                        href={this.getAssetUrl(
+                          updatedMarket.baseToken,
+                          this.props.exchange.exchangeAddress
+                        )}
+                        target="_blank"
+                        style={{
+                          backgroundImage: this.getAssetIconUrl(
+                            updatedMarket.baseToken
+                          ),
+                        }}
+                      />
 
-                    <span
-                      style={{
-                        width: "20%",
-                        minWidth: "120px",
-                      }}
-                    >
-                      <ColumnWrapper
-                        textAlign="left"
-                        isNew={updatedMarket.isNew}
-                        row1={updatedMarket.market}
-                        row2={<I s={updatedMarket.baseToken.name} />}
-                      />
-                    </span>
-                    <span
-                      style={{
-                        width: "46%",
-                        marginRight: "4%",
-                      }}
-                    >
-                      <ColumnWrapper
-                        textAlign="right"
-                        row1={`${updatedMarket.ticker.volume} ${updatedMarket.quoteToken.symbol}`}
-                        row2={<I s="24h Volume" />}
-                      />
-                    </span>
-                    <span
-                      style={{
-                        width: "30%",
-                      }}
-                    >
-                      <ColumnWrapper
-                        textAlign="right"
-                        row1={
-                          updatedMarket.ticker.close
-                            ? updatedMarket.ticker.close
-                            : "-"
-                        }
-                        row2={`${updatedMarket.ticker.percentChange24h}%`}
-                        row2Color={
-                          updatedMarket.ticker.percentChange24h &&
-                          updatedMarket.ticker.percentChange24h.startsWith("-")
-                            ? theme.downColor
-                            : theme.upColor
-                        }
-                      />
-                    </span>
-                  </ListItem>
-                </div>
-              )}
-            />
-          </ConfigProvider>
+                      <span
+                        style={{
+                          width: '20%',
+                          minWidth: '120px',
+                        }}
+                      >
+                        <ColumnWrapper
+                          textAlign="left"
+                          isNew={updatedMarket.isNew}
+                          row1={updatedMarket.market}
+                          row2={<I s={updatedMarket.baseToken.name} />}
+                        />
+                      </span>
+                      <span
+                        style={{
+                          width: '46%',
+                          marginRight: '4%',
+                        }}
+                      >
+                        <ColumnWrapper
+                          textAlign="right"
+                          row1={`${updatedMarket.ticker.volume} ${updatedMarket.quoteToken.symbol}`}
+                          row2={<I s="24h Volume" />}
+                        />
+                      </span>
+                      <span
+                        style={{
+                          width: '30%',
+                        }}
+                      >
+                        <ColumnWrapper
+                          textAlign="right"
+                          row1={
+                            updatedMarket.ticker.close
+                              ? updatedMarket.ticker.close
+                              : '-'
+                          }
+                          row2={`${updatedMarket.ticker.percentChange24h}%`}
+                          row2Color={
+                            updatedMarket.ticker.percentChange24h &&
+                            updatedMarket.ticker.percentChange24h.startsWith(
+                              '-'
+                            )
+                              ? theme.downColor
+                              : theme.upColor
+                          }
+                        />
+                      </span>
+                    </ListItem>
+                  </div>
+                )}
+              />
+            </ConfigProvider>
+          </Spin>
         </div>
       </div>
     );
@@ -323,10 +358,11 @@ class MarketSelector extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  const { market, exchange } = state;
+  const { legalPrice, currentMarket, exchange } = state;
 
   return {
-    market,
+    legalPrice,
+    currentMarket,
     exchange,
   };
 };

@@ -1,9 +1,9 @@
-import { getExchangeInfo } from "lightcone/api/LightconeAPI";
-import { getMarketInfo } from "lightcone/api/v1/marketinfo";
-import { getTokenInfo } from "lightcone/api/v1/tokeninfo";
+import { getExchangeInfo } from 'lightcone/api/LightconeAPI';
+import { getMarketInfo } from 'lightcone/api/v1/marketinfo';
+import { getTokenInfo } from 'lightcone/api/v1/tokeninfo';
 
-export const INITIALIZE_INFO = "INITIALIZE_INFO";
-export const UPDATE_INFO = "UPDATE_INFO";
+export const INITIALIZE_INFO = 'INITIALIZE_INFO';
+export const UPDATE_INFO = 'UPDATE_INFO';
 
 export function updateInfo(info) {
   return {
@@ -52,6 +52,7 @@ export function fetchAllExchangeInfo() {
       const marketNames = markets.map((val) => {
         return val.market;
       });
+
       const tokens = await getTokensFromRelay();
       dispatch(initializeInfo(info, markets, marketNames, tokens));
     })();
@@ -102,7 +103,7 @@ async function getInfoFromRelay() {
     return await getExchangeInfo();
   } catch (e) {
     console.log(e);
-    if (e.message.indexOf("timeout") !== -1) {
+    if (e.message.indexOf('timeout') !== -1) {
       return await getInfoFromRelay();
     } else {
       throw e;
@@ -115,7 +116,7 @@ async function getMarketsFromRelay() {
     return await getMarketInfo();
   } catch (e) {
     console.log(e);
-    if (e.message.indexOf("timeout") !== -1) {
+    if (e.message.indexOf('timeout') !== -1) {
       return await getMarketsFromRelay();
     }
   }
@@ -126,7 +127,7 @@ async function getTokensFromRelay() {
     return await getTokenInfo();
   } catch (e) {
     console.log(e);
-    if (e.message.indexOf("timeout") !== -1) {
+    if (e.message.indexOf('timeout') !== -1) {
       return await getTokensFromRelay();
     }
   }

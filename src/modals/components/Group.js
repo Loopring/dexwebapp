@@ -1,18 +1,18 @@
-import React from "react";
+import React from 'react';
 
 const Group = ({ label, children }) => {
   return (
     <div
       style={{
-        fontWeight: "400",
-        fontSize: "0.9rem",
+        fontWeight: '400',
+        fontSize: '0.9rem',
       }}
     >
       {label ? (
         <div
           style={{
-            paddingBottom: "8px",
-            userSelect: "none",
+            paddingBottom: '8px',
+            userSelect: 'none',
           }}
         >
           {label}
@@ -22,8 +22,8 @@ const Group = ({ label, children }) => {
       )}
       <div
         style={{
-          display: "block",
-          marginBottom: "12px",
+          display: 'block',
+          marginBottom: '12px',
         }}
       >
         {children}

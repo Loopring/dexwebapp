@@ -1,10 +1,10 @@
-import { connect } from "react-redux";
-import React from "react";
+import { connect } from 'react-redux';
+import React from 'react';
 
-import { compareDexAccounts } from "./utils";
-import { fetchMyAccountPage } from "redux/actions/MyAccountPage";
+import { compareDexAccounts } from './utils';
+import { fetchMyAccountPage } from 'redux/actions/MyAccountPage';
 
-import { LOGGED_IN } from "redux/actions/DexAccount";
+import { LOGGED_IN } from 'redux/actions/DexAccount';
 
 class DexAccountBalanceService extends React.Component {
   componentDidUpdate(prevProps, prevState) {

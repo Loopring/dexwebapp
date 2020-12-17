@@ -1,56 +1,56 @@
-import { ActionButton } from "styles/Styles";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Input, Spin } from "antd";
-import { Instruction, Section, TextPopupTitle } from "modals/styles/Styles";
-import { MyModal } from "./styles/Styles";
-import { REGISTERING, updateAccount } from "redux/actions/DexAccount";
-import { connect } from "react-redux";
-import { faArrowRight } from "@fortawesome/free-solid-svg-icons/faArrowRight";
-import { faCheck } from "@fortawesome/free-solid-svg-icons/faCheck";
-import { faClock } from "@fortawesome/free-solid-svg-icons/faClock";
-import { faGraduationCap } from "@fortawesome/free-solid-svg-icons/faGraduationCap";
-import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
-import { fetchGasPrice } from "redux/actions/GasPrice";
-import { fetchNonce } from "redux/actions/Nonce";
-import { formatter } from "lightcone/common";
+import { ActionButton } from 'styles/Styles';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Input, Spin } from 'antd';
+import { Instruction, Section, TextPopupTitle } from 'modals/styles/Styles';
+import { MyModal } from './styles/Styles';
+import { REGISTERING, updateAccount } from 'redux/actions/DexAccount';
+import { connect } from 'react-redux';
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons/faArrowRight';
+import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
+import { faClock } from '@fortawesome/free-solid-svg-icons/faClock';
+import { faGraduationCap } from '@fortawesome/free-solid-svg-icons/faGraduationCap';
+import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
+import { fetchGasPrice } from 'redux/actions/GasPrice';
+import { fetchNonce } from 'redux/actions/Nonce';
+import { formatter } from 'lightcone/common';
 import {
   getReferralId,
   getWalletType,
   removeReferralId,
   setReferralId,
-} from "lightcone/api/localStorgeAPI";
-import { history } from "redux/configureStore";
-import { notifyError, notifySuccess } from "redux/actions/Notification";
-import { registerAccountModal } from "redux/actions/ModalManager";
-import { setRefer } from "lightcone/api/LightconeAPI";
-import { sleep } from "./components/utils";
-import { withTheme } from "styled-components";
-import { withUserPreferences } from "components/UserPreferenceContext";
-import AppLayout from "AppLayout";
-import I from "components/I";
-import React from "react";
-import WhyIcon from "components/WhyIcon";
+} from 'lightcone/api/localStorgeAPI';
+import { history } from 'redux/configureStore';
+import { notifyError, notifySuccess } from 'redux/actions/Notification';
+import { registerAccountModal } from 'redux/actions/ModalManager';
+import { setRefer } from 'lightcone/api/LightconeAPI';
+import { sleep } from './components/utils';
+import { withTheme } from 'styled-components';
+import { withUserPreferences } from 'components/UserPreferenceContext';
+import AppLayout from 'AppLayout';
+import I from 'components/I';
+import React from 'react';
+import WhyIcon from 'components/WhyIcon';
 
-import Group from "modals/components/Group";
-import ModalIndicator from "modals/components/ModalIndicator";
-import config from "lightcone/config";
+import Group from 'modals/components/Group';
+import ModalIndicator from 'modals/components/ModalIndicator';
+import config from 'lightcone/config';
 
 class RegisterAccountModal extends React.Component {
   state = {
     isRegister: false,
-    referrer: "",
+    referrer: '',
     isInvited: false,
     loading: false,
     processingNum: 1,
   };
 
-  title = (<I s="Register Account" />);
-  buttonLabel = (<I s="Register Account" />);
+  title = (<I s="Activate Layer-2" />);
+  buttonLabel = (<I s="Activate Layer-2" />);
   getInstructions = () => {
     const learnAccountKeysUrl =
-      this.props.userPreferences.language === "zh"
-        ? "https://loopring.org/#/post/new-approach-to-generating-layer-2-account-keys-cn"
-        : "https://loopring.org/#/post/looprings-new-approach-to-generating-layer-2-account-keys";
+      this.props.userPreferences.language === 'zh'
+        ? 'https://loopring.org/#/post/new-approach-to-generating-layer-2-account-keys-cn'
+        : 'https://loopring.org/#/post/looprings-new-approach-to-generating-layer-2-account-keys';
 
     return (
       <Section>
@@ -62,50 +62,28 @@ class RegisterAccountModal extends React.Component {
             <I s="RegisterAccountInstruction_Timing" />
             <WhyIcon text="TimingWhy" />
           </li>
-          <li>
-            <I s="RegisterAccountInstruction_Fee_1" />
-            {config.getFeeByType("deposit", this.props.exchange.onchainFees)
-              ? config.fromWEI(
-                  "ETH",
-                  Number(
-                    config.getFeeByType(
-                      "create",
-                      this.props.exchange.onchainFees
-                    ).fee
-                  ) +
-                    config.getFeeByType(
-                      "deposit",
-                      this.props.exchange.onchainFees
-                    ).fee,
-                  this.props.exchange.tokens
-                )
-              : "-"}{" "}
-            ETH
-            <I s="RegisterAccountInstruction_Fee_2" />
-            <WhyIcon text="RegisterAccountInstruction_FeeWhy" />
-          </li>
         </ul>
 
         <div
           style={{
-            textAlign: "center",
+            textAlign: 'center',
             color: this.props.theme.green,
-            paddingBottom: "12px",
-            borderBottom: "1px solid " + this.props.theme.seperator,
-            marginTop: "24px",
-            paddingTop: "12px",
-            borderTop: "1px solid " + this.props.theme.seperator,
+            paddingBottom: '12px',
+            borderBottom: '1px solid ' + this.props.theme.seperator,
+            marginTop: '24px',
+            paddingTop: '12px',
+            borderTop: '1px solid ' + this.props.theme.seperator,
           }}
         >
           <FontAwesomeIcon
             style={{
-              marginRight: "12px",
+              marginRight: '12px',
             }}
             size="2x"
             icon={faGraduationCap}
           />
           <a
-            style={{ fontSize: "1rem", color: this.props.theme.green }}
+            style={{ fontSize: '1rem', color: this.props.theme.green }}
             target="_blank"
             rel="noopener noreferrer"
             href={learnAccountKeysUrl}
@@ -135,16 +113,16 @@ class RegisterAccountModal extends React.Component {
           isRegister: true,
         });
 
-        let refer_id = "";
+        let refer_id = '';
         if (this.props.pathname) {
-          if (this.props.pathname.startsWith("/invite/")) {
-            refer_id = this.props.pathname.replace("/invite/", "");
+          if (this.props.pathname.startsWith('/invite/')) {
+            refer_id = this.props.pathname.replace('/invite/', '');
           }
-        } else if (this.props.pathname === "/invite") {
-          refer_id = "";
+        } else if (this.props.pathname === '/invite') {
+          refer_id = '';
         }
 
-        const reg = new RegExp("^([1-9][0-9]{0,6})$");
+        const reg = new RegExp('^([1-9][0-9]{0,6})$');
         const localReferralId = getReferralId();
         const referrer = localReferralId ? localReferralId : refer_id;
         if (!Number.isNaN(refer_id) && reg.test(refer_id)) {
@@ -175,7 +153,7 @@ class RegisterAccountModal extends React.Component {
   reset() {
     this.setState({
       isRegister: false,
-      referrer: "",
+      referrer: '',
       loading: false,
     });
   }
@@ -188,9 +166,9 @@ class RegisterAccountModal extends React.Component {
 
     (async () => {
       try {
-        const fee = formatter
-          .toBig(config.getFeeByType("create", exchange.onchainFees).fee)
-          .plus(config.getFeeByType("deposit", exchange.onchainFees).fee);
+        const fee = formatter.toBig(
+          config.getFeeByType('create', exchange.onchainFees).fee
+        );
 
         const { keyPair } = await window.wallet.generateKeyPair(
           exchange.exchangeAddress,
@@ -198,14 +176,14 @@ class RegisterAccountModal extends React.Component {
         );
 
         if (!keyPair || keyPair.secretKey === undefined) {
-          throw new Error("Failed to generate keyPair.");
+          throw new Error('Failed to generate keyPair.');
         }
         this.setState({
           processingNum: this.state.processingNum + 1,
         });
         // Add a delay for WalletConnect. Their server is not real time to response.
         // We can change 10 seconds to shorter
-        if (getWalletType() === "WalletConnect") {
+        if (getWalletType() === 'WalletConnect') {
           await sleep(6000);
         }
 
@@ -215,9 +193,9 @@ class RegisterAccountModal extends React.Component {
             exchangeAddress: exchange.exchangeAddress,
             fee: fee.toString(),
             chainId: exchange.chainId,
-            token: config.getTokenBySymbol("ETH", exchange.tokens),
-            amount: "",
-            permission: "",
+            token: config.getTokenBySymbol('ETH', exchange.tokens),
+            amount: '',
+            permission: '',
             nonce: nonce.nonce,
             gasPrice: gasPrice.gasPrice,
           },
@@ -234,10 +212,10 @@ class RegisterAccountModal extends React.Component {
 
         this.props.updateAccount(account);
 
-        //setReferrer or  promotion code
+        // setReferrer or  promotion code
         try {
           if (this.state.referrer) {
-            const reg = new RegExp("^([1-9][0-9]{0,6})$");
+            const reg = new RegExp('^([1-9][0-9]{0,6})$');
             if (
               !Number.isNaN(this.state.referrer) &&
               reg.test(this.state.referrer)
@@ -262,12 +240,12 @@ class RegisterAccountModal extends React.Component {
           }
         } catch (e) {
           console.log(e);
-          console.log("failed to set referrer or promotion code");
+          console.log('failed to set referrer or promotion code');
         }
 
         // If it's from invite, navigate to trade page
-        if (this.props.pathname.startsWith("/invite/")) {
-          history.push("/trade");
+        if (this.props.pathname.startsWith('/invite/')) {
+          history.push('/trade');
         }
 
         notifySuccess(
@@ -303,17 +281,17 @@ class RegisterAccountModal extends React.Component {
     let indicator = (
       <ModalIndicator
         title={
-          getWalletType() === "MetaMask"
-            ? "metamaskConfirm"
-            : "walletConnectConfirm"
+          getWalletType() === 'MetaMask'
+            ? 'metamaskConfirm'
+            : 'walletConnectConfirm'
         }
         tipIcons={[
           <div key="1">
             <FontAwesomeIcon
               icon={processingNum === 1 ? faArrowRight : faCheck}
               style={{
-                marginRight: "8px",
-                width: "20px",
+                marginRight: '8px',
+                width: '20px',
                 color: processingNum === 1 ? theme.primary : theme.green,
               }}
             />
@@ -322,8 +300,8 @@ class RegisterAccountModal extends React.Component {
             <FontAwesomeIcon
               icon={processingNum === 2 ? faArrowRight : faClock}
               style={{
-                marginRight: "8px",
-                width: "20px",
+                marginRight: '8px',
+                width: '20px',
                 color: processingNum === 2 ? theme.primary : theme.textDim,
               }}
             />
@@ -332,42 +310,42 @@ class RegisterAccountModal extends React.Component {
             <FontAwesomeIcon
               icon={faClock}
               style={{
-                visibility: "hidden",
+                visibility: 'hidden',
               }}
             />
           </div>,
         ]}
         tips={[
           <div key="1">
-            <I s={"generateKeyPairTip"} />
+            <I s={'generateKeyPairTip'} />
           </div>,
           <div key="2">
-            <I s={"registerTxTip"} />
+            <I s={'registerTxTip'} />
           </div>,
           <I
             key="3"
             s={
-              getWalletType() === "MetaMask"
-                ? "metaMaskPendingTxTip"
-                : "walletConnectPendingTxTip"
+              getWalletType() === 'MetaMask'
+                ? 'metaMaskPendingTxTip'
+                : 'walletConnectPendingTxTip'
             }
           />,
         ]}
         imageUrl={
-          getWalletType() === "MetaMask"
+          getWalletType() === 'MetaMask'
             ? `/assets/images/${theme.imgDir}/metamask_pending.png`
-            : ""
+            : ''
         }
         marginTop="60px"
-        textAlign={"left"}
+        textAlign={'left'}
       />
     );
 
     const indicatorPlaceholder = this.state.loading ? (
       <div
         style={{
-          height: getWalletType() === "MetaMask" ? "115px" : "0px",
-          display: "block",
+          height: getWalletType() === 'MetaMask' ? '115px' : '0px',
+          display: 'block',
         }}
       />
     ) : (
@@ -394,8 +372,8 @@ class RegisterAccountModal extends React.Component {
             {this.state.isRegister && (
               <div
                 style={{
-                  paddingTop: "12px",
-                  marginTop: "18px",
+                  paddingTop: '12px',
+                  marginTop: '18px',
                 }}
               >
                 <Group label={<I s="Referral ID / Promotion Code" />}>
@@ -417,20 +395,20 @@ class RegisterAccountModal extends React.Component {
             )}
           </Section>
           {this.props.showLoginModal &&
-          this.props.dexAccount.account.state !== "LOGGED_IN" ? (
+          this.props.dexAccount.account.state !== 'LOGGED_IN' ? (
             <Section>
               <Group>
-                <div style={{ height: "20px" }}>
+                <div style={{ height: '20px' }}>
                   <a
                     onClick={() => {
                       this.props.closeModal();
                       this.props.showLoginModal();
                     }}
                     style={{
-                      float: "right",
+                      float: 'right',
                     }}
                   >
-                    <I s="Try to login again?" />
+                    <I s="Try to unlock again?" />
                   </a>
                 </div>
               </Group>

@@ -1,31 +1,32 @@
-import { connect } from "react-redux";
-import I from "components/I";
-import React from "react";
-import styled, { withTheme } from "styled-components";
+import { connect } from 'react-redux';
+import I from 'components/I';
+import React from 'react';
+import styled, { withTheme } from 'styled-components';
 
-import { ConfigProvider, Pagination, Table } from "antd";
-import Moment from "moment";
-import TableLoadingSpin from "components/TableLoadingSpin";
-import WhyIcon from "components/WhyIcon";
+import { ConfigProvider, Pagination, Table } from 'antd';
+import Moment from 'moment';
+import TableLoadingSpin from 'components/TableLoadingSpin';
+import WhyIcon from 'components/WhyIcon';
 
 import {
+  DepositOutlineButton,
   LargeTableRow,
   LargeTableRowFailed,
   LargeTableRowProcessed,
   LargeTableRowProcessing,
   SimpleTableContainer,
   TextCompactTableHeader,
-} from "styles/Styles";
-import EmptyTableIndicator from "components/EmptyTableIndicator";
+} from 'styles/Styles';
+import EmptyTableIndicator from 'components/EmptyTableIndicator';
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { faCheckCircle } from "@fortawesome/free-solid-svg-icons/faCheckCircle";
-import { faCircleNotch } from "@fortawesome/free-solid-svg-icons/faCircleNotch";
-import { faClock } from "@fortawesome/free-solid-svg-icons/faClock";
-import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons/faExclamationCircle";
+import { faCheckCircle } from '@fortawesome/free-solid-svg-icons/faCheckCircle';
+import { faCircleNotch } from '@fortawesome/free-solid-svg-icons/faCircleNotch';
+import { faClock } from '@fortawesome/free-solid-svg-icons/faClock';
+import { faExclamationCircle } from '@fortawesome/free-solid-svg-icons/faExclamationCircle';
 
-import { getEtherscanLink } from "lightcone/api/localStorgeAPI";
+import { getEtherscanLink } from 'lightcone/api/localStorgeAPI';
 
 const StatusFontAwesomeIcon = styled(FontAwesomeIcon)`
   margin-right: 4px;
@@ -45,27 +46,27 @@ class WithdrawalTable extends React.Component {
         title: (
           <TextCompactTableHeader
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
             }}
           >
             <I s="Timestamp" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "date",
-        width: "12%",
+        dataIndex: 'date',
+        width: '10%',
       },
       {
         title: (
           <TextCompactTableHeader
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
             }}
           >
             <I s="Asset" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "asset",
-        width: "12%",
+        dataIndex: 'asset',
+        width: '16%',
       },
       {
         title: (
@@ -73,8 +74,8 @@ class WithdrawalTable extends React.Component {
             <I s="Amount Requested" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "amount",
-        width: "12%",
+        dataIndex: 'amount',
+        width: '16%',
       },
       {
         title: (
@@ -82,8 +83,8 @@ class WithdrawalTable extends React.Component {
             <I s="Amount Withdrawn" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "realAmount",
-        width: "12%",
+        dataIndex: 'realAmount',
+        width: '16%',
       },
       {
         title: (
@@ -91,69 +92,74 @@ class WithdrawalTable extends React.Component {
             <I s="Fee" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "fee",
-        width: "12%",
+        dataIndex: 'fee',
+        width: '10%',
       },
+      /*
       {
         title: (
           <TextCompactTableHeader>
             <I s="Request Tx" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "txHash",
-        width: "16%",
+        dataIndex: 'txHash',
+        width: '12%',
       },
+      */
       {
         title: (
           <TextCompactTableHeader>
             <I s="Withdraw Tx" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "withdrawHash",
-        width: "16%",
+        dataIndex: 'withdrawHash',
+        width: '20%',
       },
       {
         title: (
           <TextCompactTableHeader
             style={{
-              width: "100%",
-              textAlign: "center",
+              width: '100%',
+              textAlign: 'center',
             }}
           >
             <div
               style={{
-                textAlign: "left",
-                paddingRight: "14px",
+                textAlign: 'left',
+                paddingRight: '4px',
               }}
             >
-              <I s="Status" />
+              <I s="Status / Operations" />
             </div>
           </TextCompactTableHeader>
         ),
-        dataIndex: "status",
-        width: "12%",
+        dataIndex: 'status',
+        width: '12%',
       },
     ];
 
     const data = [];
     for (let i = 0; i < this.props.data.length; i++) {
       const transaction = this.props.data[i];
-      var status = "-";
-      if (transaction.status === "processing") {
+
+      console.log('transaction ', transaction);
+
+      var status = '-';
+      if (transaction.status === 'TX_STATUS_PROCESSING') {
         status = (
           <LargeTableRowProcessing
-            style={{ color: theme.highlight, textAlign: "left" }}
+            style={{ color: theme.highlight, textAlign: 'left' }}
           >
             <StatusFontAwesomeIcon icon={faCircleNotch} spin />
             <div>
-              <I s="Processing" /> <WhyIcon text="StatusProcessing" />
+              <I s="Processing" /> <WhyIcon text="WithdrawStatusProcessing" />
             </div>
           </LargeTableRowProcessing>
         );
-      } else if (transaction.status === "processed") {
+      } else if (transaction.status === 'TX_STATUS_PROCESSED') {
         status = (
           <LargeTableRowProcessed
-            style={{ color: theme.green, textAlign: "left" }}
+            style={{ color: theme.green, textAlign: 'left' }}
           >
             <StatusFontAwesomeIcon icon={faCheckCircle} />
             <div>
@@ -161,47 +167,64 @@ class WithdrawalTable extends React.Component {
             </div>
           </LargeTableRowProcessed>
         );
-      } else if (transaction.status === "failed") {
+      } else if (transaction.status === 'TX_STATUS_FAILED') {
         status = (
-          <LargeTableRowFailed style={{ color: theme.red, textAlign: "left" }}>
+          <LargeTableRowFailed style={{ color: theme.red, textAlign: 'left' }}>
             <StatusFontAwesomeIcon icon={faExclamationCircle} />
             <div>
-              <I s="Failed" />
+              <I s="Claimable" />
+              <DepositOutlineButton
+                style={{
+                  marginLeft: '8px',
+                  marginRight: '8px',
+                }}
+                onClick={() => this.props.claim(transaction.requestId)}
+              >
+                <I s="Claim" />
+              </DepositOutlineButton>
             </div>
           </LargeTableRowFailed>
         );
-      } else if (transaction.status === "received") {
-        status = (
-          <LargeTableRowProcessing
-            style={{ color: theme.orange, textAlign: "left" }}
-          >
-            <StatusFontAwesomeIcon icon={faClock} />
-
-            <div>
-              {this.props.blockNum - transaction.blockNum <= 30 ? (
-                <div>
-                  <I s="Confirming" /> <WhyIcon text="StatusConfirming" />(
-                  {Math.max(this.props.blockNum - transaction.blockNum, 0)} /
-                  30)
-                </div>
-              ) : (
-                <div>
-                  <I s="Processing" /> <WhyIcon text="StatusProcessing" />
-                </div>
-              )}
-            </div>
-          </LargeTableRowProcessing>
-        );
+      } else if (transaction.status === 'TX_STATUS_RECEIVED') {
+        status =
+          this.props.blockNum - transaction.blockNum <= 30 ? (
+            <LargeTableRowProcessing
+              style={{ color: theme.orange, textAlign: 'left' }}
+            >
+              <StatusFontAwesomeIcon icon={faClock} />
+              <div>
+                <I s="Confirming" />(
+                {Math.max(this.props.blockNum - transaction.blockNum, 0)} / 18)
+                <WhyIcon text="StatusConfirmingWithdrawal" />
+              </div>
+            </LargeTableRowProcessing>
+          ) : (
+            <LargeTableRowProcessing
+              style={{ color: theme.highlight, textAlign: 'left' }}
+            >
+              <StatusFontAwesomeIcon icon={faCircleNotch} spin />
+              <div>
+                <I s="Processing" /> <WhyIcon text="WithdrawStatusProcessing" />
+              </div>
+            </LargeTableRowProcessing>
+          );
       }
       data.push({
         key: i,
         asset: (
           <LargeTableRow
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
             }}
           >
-            {transaction.symbol} - <I s={transaction.tokenName} />
+            {transaction.tokenName &&
+            transaction.tokenName.split('-').length - 1 >= 2 ? (
+              <div>{transaction.symbol}</div>
+            ) : (
+              <div>
+                {transaction.symbol} - <I s={transaction.tokenName} />{' '}
+              </div>
+            )}
           </LargeTableRow>
         ),
         amount: (
@@ -226,13 +249,14 @@ class WithdrawalTable extends React.Component {
         date: (
           <LargeTableRow
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
               color: theme.textDim,
             }}
           >
             {Moment(transaction.timestamp).format(theme.timeFormat)}
           </LargeTableRow>
         ),
+        /*
         txHash: (
           <LargeTableRow>
             <a
@@ -242,10 +266,11 @@ class WithdrawalTable extends React.Component {
               target="_blank"
               rel="noopener noreferrer"
             >
-              {transaction.txHashInUI}
+              {transaction.txHash ? transaction.txHashInUI : '-'}
             </a>
           </LargeTableRow>
         ),
+        */
         withdrawHash: (
           <LargeTableRow>
             <a
@@ -262,8 +287,8 @@ class WithdrawalTable extends React.Component {
         status: (
           <div
             style={{
-              textAlign: "center",
-              paddingRight: "14px",
+              textAlign: 'center',
+              paddingRight: '14px',
             }}
           >
             {status}
@@ -293,9 +318,9 @@ class WithdrawalTable extends React.Component {
           {hasPagination ? (
             <Pagination
               style={{
-                padding: "30px 0px 30px 0px",
+                padding: '30px 0px 30px 0px',
                 background: theme.background,
-                textAlign: "center",
+                textAlign: 'center',
               }}
               size=""
               total={this.props.total}

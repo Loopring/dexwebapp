@@ -1,4 +1,4 @@
-import { createGlobalStyle } from "styled-components";
+import { createGlobalStyle } from 'styled-components';
 
 const WalletConnectStyles = createGlobalStyle`
 // Wallet connect
@@ -14,6 +14,8 @@ const WalletConnectStyles = createGlobalStyle`
   background-color: ${(props) => props.theme.popupHeaderBackground} !important;
   padding: 14px 24px !important;
   margin-bottom: 40px !important;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
 }
 
 .walletconnect-modal__headerLogo {
@@ -24,9 +26,15 @@ const WalletConnectStyles = createGlobalStyle`
 
 .walletconnect-modal__base {
   background: ${(props) => props.theme.popupBackground} !important;
-  border-radius: 2px !important;
+  border-radius: 12px !important;
   max-width: 600px!important;
   width: 540px!important;
+
+  @media only screen and (max-width: 770px) {
+    margin-right: 10px;
+    margin-left:10px;
+    width: 95% !important
+  }
 }
 
 .walletconnect-modal__close__wrapper {
@@ -72,6 +80,10 @@ const WalletConnectStyles = createGlobalStyle`
   border-radius: 4px;
   width: 320px !important;
   user-select: none !important;
+
+  @media only screen and (max-width: 770px) {
+    width: 260px !important;
+  }
 }
 
 ////////////////// I18N ////////////////////////////
@@ -79,8 +91,12 @@ const WalletConnectStyles = createGlobalStyle`
 p.walletconnect-qrcode__text {
     font-size: 0!important;
     ::before {
-        font-size: 0.9rem !important;
-        content: "${(props) => props.theme.walletConnectI18n.scanQrCode}";
+      display:block;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        white-space: pre;
+        color: ${(props) => props.theme.red}!important;
+        content: '${(props) => props.theme.walletConnectI18n.scanQrCode}';
     }
 }
 

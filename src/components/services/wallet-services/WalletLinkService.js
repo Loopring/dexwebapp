@@ -103,8 +103,8 @@ class WalletLinkService extends Component {
       const web3 = new Web3(provider);
       window.web3 = web3;
 
-      // Assign use window.ethereum
-      window.ethereum = provider;
+      // Assign use window.provider
+      window.provider = provider;
 
       window.wallet = new Wallet('WalletLink', window.web3, accounts[0]);
 
@@ -131,27 +131,27 @@ class WalletLinkService extends Component {
   setupSubscribe() {
     /*
     // Subscribe to accounts change
-    window.ethereum.on('accountsChanged', (accounts) => {
+    window.provider.on('accountsChanged', (accounts) => {
       this.props.connectToWalletLink(true);
     });
 
     // Subscribe to chainId change
-    window.ethereum.on('chainChanged', (chainId) => {
+    window.provider.on('chainChanged', (chainId) => {
       this.props.connectToWalletLink(true);
     });
 
     // Subscribe to networkId change
-    window.ethereum.on('networkChanged', (networkId) => {
+    window.provider.on('networkChanged', (networkId) => {
       this.props.connectToWalletLink(true);
     });
 
     // Subscribe to session connection/open
-    window.ethereum.on('open', () => {
+    window.provider.on('open', () => {
       console.log('open');
     });
 
     // Subscribe to session disconnection/close
-    window.ethereum.on('close', (code, reason) => {
+    window.provider.on('close', (code, reason) => {
       console.log('WalletLink', code, reason);
     });
     */

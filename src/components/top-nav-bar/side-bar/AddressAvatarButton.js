@@ -1,11 +1,11 @@
-import AppLayout from "AppLayout";
-import Blockies from "react-blockies";
-import React, { useContext } from "react";
-import styled, { ThemeContext } from "styled-components";
+import AppLayout from 'AppLayout';
+import Blockies from 'react-blockies';
+import React, { useContext } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 
-import { CopyToClipboard } from "react-copy-to-clipboard";
-import { Tooltip } from "antd";
-import I from "components/I";
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { Tooltip } from 'antd';
+import I from 'components/I';
 
 const MyBlockies = styled(Blockies)`
   border-radius: 50%;
@@ -22,20 +22,20 @@ export const AddressAvatarButton = ({ fullAddress, address }) => {
         <CopyToClipboard text={fullAddress}>
           <div
             style={{
-              cursor: "pointer",
-              textAlign: "center",
+              cursor: 'pointer',
+              textAlign: 'center',
             }}
           >
             <div
               style={{
-                fontSize: "0.9rem",
-                fontWeight: "600",
-                width: "152px",
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                width: '152px',
               }}
             >
               {fullAddress}
             </div>
-            <div style={{ paddingTop: "8px", fontSize: "0.8rem" }}>
+            <div style={{ paddingTop: '8px', fontSize: '0.8rem' }}>
               <I s="Click to copy" />
             </div>
           </div>
@@ -46,10 +46,10 @@ export const AddressAvatarButton = ({ fullAddress, address }) => {
       <CopyToClipboard text={fullAddress}>
         <div
           style={{
-            display: "flex",
-            cursor: "pointer",
-            alignItems: "center",
-            justifyContent: "center",
+            display: 'flex',
+            cursor: 'pointer',
+            alignItems: 'center',
+            justifyContent: 'center',
             height: AppLayout.topNavBarHeight,
           }}
         >
@@ -57,11 +57,11 @@ export const AddressAvatarButton = ({ fullAddress, address }) => {
 
           <span
             style={{
-              marginLeft: "12px",
-              userSelect: "none",
+              marginLeft: '12px',
+              userSelect: 'none',
               color: theme.textWhite,
-              fontSize: "0.9rem",
-              fontWeight: "600",
+              fontSize: '0.9rem',
+              fontWeight: '600',
             }}
           >
             {address}

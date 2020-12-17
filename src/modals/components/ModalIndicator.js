@@ -1,10 +1,10 @@
-import { Col, Row } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ThemeContext } from "styled-components";
-import I from "components/I";
-import React, { useContext } from "react";
+import { Col, Row } from 'antd';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ThemeContext } from 'styled-components';
+import I from 'components/I';
+import React, { useContext } from 'react';
 
-import { faCircleNotch } from "@fortawesome/free-solid-svg-icons/faCircleNotch";
+import { faCircleNotch } from '@fortawesome/free-solid-svg-icons/faCircleNotch';
 
 const ModalIndicator = ({
   title,
@@ -16,8 +16,8 @@ const ModalIndicator = ({
 }) => {
   const theme = useContext(ThemeContext);
   const tips_ = tips || [];
-  const marginTop_ = marginTop || "80px";
-  const textAlign_ = textAlign || "left";
+  const marginTop_ = marginTop || '80px';
+  const textAlign_ = textAlign || 'left';
 
   let tipsDiv;
   if (tipIcons && tips && tipIcons.length === tips.length) {
@@ -25,7 +25,7 @@ const ModalIndicator = ({
       <div
         style={{
           textAlign: textAlign_,
-          margin: "16px",
+          margin: '16px',
         }}
         key={i}
       >
@@ -40,7 +40,7 @@ const ModalIndicator = ({
       <div
         style={{
           textAlign: textAlign_,
-          margin: "16px",
+          margin: '16px',
         }}
         key={i}
       >
@@ -55,16 +55,16 @@ const ModalIndicator = ({
         icon={faCircleNotch}
         size="2x"
         spin
-        style={{ margin: "20px", marginTop: marginTop_ }}
+        style={{ margin: '20px', marginTop: marginTop_ }}
       />
 
       <div
         style={{
-          margin: "16px",
-          paddingLeft: "20px",
-          paddingRight: "20px",
+          margin: '16px',
+          paddingLeft: '20px',
+          paddingRight: '20px',
           color: theme.primary,
-          fontSize: "1rem",
+          fontSize: '1rem',
         }}
       >
         <I s={title} />
@@ -72,7 +72,7 @@ const ModalIndicator = ({
 
       <div
         style={{
-          fontSize: "0.85rem",
+          fontSize: '0.85rem',
           color: theme.textWhite,
         }}
       >
@@ -84,10 +84,10 @@ const ModalIndicator = ({
           <img
             alt="check metamask plugin icon"
             style={{
-              userSelect: "none",
-              height: "80px",
-              marginTop: "16px",
-              filter: "drop-shadow(0 10px 10px rgba(0, 0, 0, 0.2)",
+              userSelect: 'none',
+              height: '80px',
+              marginTop: '16px',
+              filter: 'drop-shadow(0 10px 10px rgba(0, 0, 0, 0.2)',
             }}
             src={imageUrl}
           />

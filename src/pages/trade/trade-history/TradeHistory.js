@@ -1,43 +1,43 @@
-import * as R from "ramda";
-import { connect } from "react-redux";
-import I from "components/I";
-import PropTypes from "prop-types";
-import React from "react";
+import * as R from 'ramda';
+import { connect } from 'react-redux';
+import I from 'components/I';
+import PropTypes from 'prop-types';
+import React from 'react';
 
-import * as getters from "../components/defaults/getters";
-import { withTheme } from "styled-components";
+import * as getters from '../components/defaults/getters';
+import { withTheme } from 'styled-components';
 
-import { TableColHead, TableColHeadPrice } from "./styles/Styles";
-import AbsoluteContainer from "../components/AbsoluteContainer";
-import CompactOrderTable from "../components/CompactOrderTable";
-import CompactTableHead from "../components/CompactTableHead";
-import Panel from "../components/Panel";
-import PanelHeader from "../components/PanelHeader";
-import ScrollContainer from "../components/ScrollContainer";
-import StickyContainer from "../components/StickyContainer";
+import { TableColHead, TableColHeadPrice } from './styles/Styles';
+import AbsoluteContainer from '../components/AbsoluteContainer';
+import CompactOrderTable from '../components/CompactOrderTable';
+import CompactTableHead from '../components/CompactTableHead';
+import Panel from '../components/Panel';
+import PanelHeader from '../components/PanelHeader';
+import ScrollContainer from '../components/ScrollContainer';
+import StickyContainer from '../components/StickyContainer';
 
-import OrderRow from "./components/OrderRow";
-import PrettyPrice from "../components/PrettyPrice";
-import PrettySize from "../components/PrettySize";
-import PrettyTimeStamp from "../components/PrettyTimeStamp";
-import config from "lightcone/config";
+import OrderRow from './components/OrderRow';
+import PrettyPrice from '../components/PrettyPrice';
+import PrettySize from '../components/PrettySize';
+import PrettyTimeStamp from '../components/PrettyTimeStamp';
+import config from 'lightcone/config';
 
 const unsafePropNames = [
-  "trades",
-  "length",
-  "headerText",
-  "sizeLabel",
-  "priceLabel",
-  "timeStampLabel",
-  "onClickTrade",
-  "getSideFromLightconeData",
-  "getTimeStampFromLightconeData",
-  "sizeFormat",
-  "priceFormat",
-  "timeStampFormat",
-  "renderSize",
-  "renderPrice",
-  "renderTimeStamp",
+  'trades',
+  'length',
+  'headerText',
+  'sizeLabel',
+  'priceLabel',
+  'timeStampLabel',
+  'onClickTrade',
+  'getSideFromLightconeData',
+  'getTimeStampFromLightconeData',
+  'sizeFormat',
+  'priceFormat',
+  'timeStampFormat',
+  'renderSize',
+  'renderPrice',
+  'renderTimeStamp',
 ];
 
 class TradeHistory extends React.Component {
@@ -91,19 +91,19 @@ class TradeHistory extends React.Component {
     const visibleTrades = trades.slice(0, length);
     const dataConfigs = [
       {
-        propName: "price",
+        propName: 'price',
         format: priceFormat,
         getter: this.getPrice,
         renderer: renderPrice,
       },
       {
-        propName: "size",
+        propName: 'size',
         format: sizeFormat,
         getter: this.getSize,
         renderer: renderSize,
       },
       {
-        propName: "timestamp",
+        propName: 'timestamp',
         format: timeStampFormat,
         getter: getTimeStampFromLightconeData,
         renderer: renderTimeStamp,
@@ -118,8 +118,8 @@ class TradeHistory extends React.Component {
       headerContent = (
         <div
           style={{
-            paddingTop: "0px",
-            paddingLeft: "0px",
+            paddingTop: '0px',
+            paddingLeft: '0px',
             backgroundColor: theme.background,
           }}
         >
@@ -138,24 +138,24 @@ class TradeHistory extends React.Component {
             <CompactTableHead>
               <TableColHeadPrice
                 style={{
-                  paddingLeft: "0px",
-                  textAlign: "center",
+                  paddingLeft: '0px',
+                  textAlign: 'center',
                 }}
               >
                 {priceLabel}
               </TableColHeadPrice>
               <TableColHead
                 style={{
-                  paddingRight: "13px",
-                  textAlign: "center",
+                  paddingRight: '13px',
+                  textAlign: 'center',
                 }}
               >
                 {sizeLabel}
               </TableColHead>
               <TableColHead
                 style={{
-                  paddingRight: "13px",
-                  textAlign: "right",
+                  paddingRight: '13px',
+                  textAlign: 'right',
                 }}
               >
                 {timeStampLabel}
@@ -212,18 +212,17 @@ TradeHistory.defaultProps = {
   length: Infinity,
   getSideFromLightconeData: getters.getSideFromLightconeData,
   getTimeStampFromLightconeData: getters.getTimeStampFromLightconeData,
-  sizeFormat: "0.0000",
-  priceFormat: "0.000000",
-  timeStampFormat: "HH:mm:ss",
+  sizeFormat: '0.0000',
+  priceFormat: '0.000000',
+  timeStampFormat: 'HH:mm:ss',
   renderSize: PrettySize,
   renderPrice: PrettyPrice,
   renderTimeStamp: PrettyTimeStamp,
 };
 
 const mapStateToProps = (state) => {
-  const { market, currentMarket, tradeHistory, exchange } = state;
+  const { currentMarket, tradeHistory, exchange } = state;
   return {
-    market,
     trades: tradeHistory.trades,
     baseTokenSymbol: currentMarket.baseTokenSymbol,
     quoteTokenSymbol: currentMarket.quoteTokenSymbol,
@@ -231,10 +230,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {};
-};
-
-export default withTheme(
-  connect(mapStateToProps, mapDispatchToProps)(TradeHistory)
-);
+export default withTheme(connect(mapStateToProps, null)(TradeHistory));

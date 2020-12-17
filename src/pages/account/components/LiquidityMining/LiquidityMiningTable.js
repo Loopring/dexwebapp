@@ -1,31 +1,28 @@
-import { connect } from "react-redux";
-import { withTheme } from "styled-components";
-import I from "components/I";
-import React from "react";
+import { connect } from 'react-redux';
+import { withTheme } from 'styled-components';
+import I from 'components/I';
+import React from 'react';
 
-import { ConfigProvider, Pagination, Table } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCrown } from "@fortawesome/free-solid-svg-icons/faCrown";
-import TableLoadingSpin from "components/TableLoadingSpin";
+import { ConfigProvider, Pagination, Table } from 'antd';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCrown } from '@fortawesome/free-solid-svg-icons/faCrown';
+import TableLoadingSpin from 'components/TableLoadingSpin';
 
 import {
   LargeTableRow,
   SimpleTableContainer,
   TextCompactTableHeader,
-} from "styles/Styles";
-import EmptyTableIndicator from "components/EmptyTableIndicator";
+} from 'styles/Styles';
+import EmptyTableIndicator from 'components/EmptyTableIndicator';
 
 class LiquidityMiningTable extends React.Component {
   render() {
-    const tokens = this.props.market.split("-");
-    const quoteToken = tokens[1];
-
     const theme = this.props.theme;
     const customizeRenderEmpty = () => (
       <EmptyTableIndicator
         text={this.props.placeHolder}
         loading={this.props.loading}
-        marginTop={"100px"}
+        marginTop={'100px'}
       />
     );
 
@@ -34,13 +31,13 @@ class LiquidityMiningTable extends React.Component {
         title: (
           <TextCompactTableHeader
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
             }}
           >
             <I s="Ranking" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "rank",
+        dataIndex: 'rank',
       },
       {
         title: (
@@ -48,36 +45,37 @@ class LiquidityMiningTable extends React.Component {
             <I s="Account ID" />
           </TextCompactTableHeader>
         ),
-        dataIndex: "accountId",
+        dataIndex: 'accountId',
       },
       {
         title: (
           <TextCompactTableHeader>
             <div
               style={{
-                textAlign: "right",
-                paddingRight: "14px",
-                width: "100%",
+                textAlign: 'right',
+                paddingRight: '14px',
+                width: '100%',
               }}
             >
-              <I s="Rewards" /> ({quoteToken})
+              <I s="Rewards" /> ({this.props.quoteToken})
             </div>
           </TextCompactTableHeader>
         ),
-        dataIndex: "reward",
+        dataIndex: 'reward',
+        width: '40%',
       },
     ];
 
     const data = [];
     for (let i = 0; i < this.props.data.length; i++) {
       const reward = this.props.data[i];
-      const rewardNum = Number(reward["rank"]);
+      const rewardNum = Number(reward['rank']);
       const icon =
         rewardNum <= 3 ? (
           <FontAwesomeIcon
             icon={faCrown}
             style={{
-              margin: "auto auto auto 4px",
+              margin: 'auto auto auto 4px',
               color: this.props.theme.orange,
             }}
           />
@@ -89,7 +87,7 @@ class LiquidityMiningTable extends React.Component {
         rank: (
           <LargeTableRow
             style={{
-              paddingLeft: "14px",
+              paddingLeft: '14px',
             }}
           >
             {rewardNum}
@@ -97,17 +95,17 @@ class LiquidityMiningTable extends React.Component {
         ),
         accountId: (
           <LargeTableRow>
-            {reward["accountId"]} {icon}
+            {reward['accountId']} {icon}
           </LargeTableRow>
         ),
         reward: (
           <LargeTableRow
             style={{
-              textAlign: "right",
-              paddingRight: "14px",
+              textAlign: 'right',
+              paddingRight: '14px',
             }}
           >
-            {reward["reward"]}
+            {reward['reward']}
           </LargeTableRow>
         ),
       });
@@ -119,7 +117,8 @@ class LiquidityMiningTable extends React.Component {
       <div>
         <SimpleTableContainer
           style={{
-            minHeight: "300px",
+            minHeight: '715px',
+            background: theme.popupHeaderBackground,
           }}
         >
           <ConfigProvider
@@ -141,9 +140,9 @@ class LiquidityMiningTable extends React.Component {
             {hasPagination ? (
               <Pagination
                 style={{
-                  padding: "30px 0px 30px 0px",
+                  padding: '30px 0px 30px 0px',
                   background: theme.background,
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
                 size=""
                 total={this.props.total}

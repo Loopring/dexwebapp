@@ -1,19 +1,19 @@
-import { connect } from "react-redux";
-import I from "components/I";
-import React from "react";
+import { connect } from 'react-redux';
+import I from 'components/I';
+import React from 'react';
 
-import { LOGGED_IN } from "redux/actions/DexAccount";
-import styled, { withTheme } from "styled-components";
+import { LOGGED_IN } from 'redux/actions/DexAccount';
+import styled, { withTheme } from 'styled-components';
 
-import { Button, Col, Row } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Button, Col, Row } from 'antd';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { faArrowAltCircleDown } from "@fortawesome/free-solid-svg-icons/faArrowAltCircleDown";
-import { faArrowAltCircleUp } from "@fortawesome/free-solid-svg-icons/faArrowAltCircleUp";
+import { faArrowAltCircleDown } from '@fortawesome/free-solid-svg-icons/faArrowAltCircleDown';
+import { faArrowAltCircleUp } from '@fortawesome/free-solid-svg-icons/faArrowAltCircleUp';
 import {
   showDepositModal,
   showWithdrawModal,
-} from "redux/actions/ModalManager";
+} from 'redux/actions/ModalManager';
 
 const MyButton = styled(Button)`
   color: ${(props) => props.theme.textWhite}!important;
@@ -34,12 +34,12 @@ const MyButton = styled(Button)`
 class AssetPanelButtons extends React.Component {
   render() {
     const theme = this.props.theme;
-    const { dexAccount, market } = this.props;
+    const { dexAccount, currentMarket } = this.props;
 
     // If account doesn't login, disable buttons
     let isButtonsDisable = true;
     if (
-      typeof window.wallet !== "undefined" &&
+      typeof window.wallet !== 'undefined' &&
       !!dexAccount &&
       !!dexAccount.account
     ) {
@@ -59,7 +59,7 @@ class AssetPanelButtons extends React.Component {
           gutter={4}
           style={{
             color: theme.textWhite,
-            paddingTop: "0px", // Overwrite the value in row1
+            paddingTop: '0px', // Overwrite the value in row1
           }}
         >
           <Col className="columnLeft" span={12} style={{}}>
@@ -68,7 +68,7 @@ class AssetPanelButtons extends React.Component {
               onClick={() => {
                 this.props.showDepositModal(
                   true,
-                  market.currentMarket.baseTokenSymbol
+                  currentMarket.baseTokenSymbol
                 );
               }}
               disabled={
@@ -76,7 +76,7 @@ class AssetPanelButtons extends React.Component {
               }
             >
               <FontAwesomeIcon
-                style={{ marginRight: "4px" }}
+                style={{ marginRight: '4px' }}
                 color={theme.green}
                 icon={faArrowAltCircleDown}
               />
@@ -90,7 +90,7 @@ class AssetPanelButtons extends React.Component {
               onClick={() => {
                 this.props.showWithdrawModal(
                   true,
-                  market.currentMarket.baseTokenSymbol
+                  currentMarket.baseTokenSymbol
                 );
               }}
               disabled={
@@ -100,7 +100,7 @@ class AssetPanelButtons extends React.Component {
               }
             >
               <FontAwesomeIcon
-                style={{ marginRight: "4px" }}
+                style={{ marginRight: '4px' }}
                 color={theme.red}
                 icon={faArrowAltCircleUp}
               />
@@ -117,8 +117,8 @@ class AssetPanelButtons extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  const { balances, dexAccount, metaMask, market } = state;
-  return { balances, dexAccount, metaMask, market };
+  const { balances, dexAccount, metaMask, currentMarket } = state;
+  return { balances, dexAccount, metaMask, currentMarket };
 };
 
 const mapDispatchToProps = (dispatch) => {

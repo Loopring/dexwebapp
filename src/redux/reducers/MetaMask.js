@@ -2,7 +2,7 @@ import {
   CONNECT_TO_METAMASK_COMPLETE,
   CONNECT_TO_META_MASK,
   DETECT_IF_META_MASK_INSTALLED,
-} from "redux/actions/MetaMask";
+} from 'redux/actions/MetaMask';
 
 const initialState = {
   startConnecting: false,
@@ -19,7 +19,6 @@ export const MetaMaskReducer = (state = initialState, action) => {
       if (startConnecting === true) {
         newReferenceCount = state.referenceCount + 1;
       }
-      console.log(newReferenceCount);
       return {
         ...state,
         startConnecting,

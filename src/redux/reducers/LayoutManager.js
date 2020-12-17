@@ -1,4 +1,4 @@
-import { UPDATE_COLUMNS } from "redux/actions/LayoutManager";
+import { UPDATE_COLUMNS } from 'redux/actions/LayoutManager';
 
 const initialState = {
   numColumns: 4,

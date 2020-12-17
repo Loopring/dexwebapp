@@ -1,12 +1,12 @@
-import { arrToTrade, getTrade } from "lightcone/api/LightconeAPI";
+import { arrToTrade, getTrade } from 'lightcone/api/LightconeAPI';
 
-export const UPDATE_TRADES = "UPDATE_TRADES";
-export const EXTEND_TRADES = "EXTEND_TRADES";
-export const EMPTY_TRADES = "EMPTY_TRADES";
+export const UPDATE_TRADES = 'UPDATE_TRADES';
+export const EXTEND_TRADES = 'EXTEND_TRADES';
+export const EMPTY_TRADES = 'EMPTY_TRADES';
 
 export function emptyTrades() {
   return {
-    type: "EMPTY_TRADES",
+    type: 'EMPTY_TRADES',
     payload: {},
   };
 }
@@ -57,7 +57,7 @@ async function getTradeFromRelay(market, limit) {
     return await getTrade(market, limit);
   } catch (e) {
     console.log(e);
-    if (e.message.indexOf("timeout") !== -1) {
+    if (e.message.indexOf('timeout') !== -1) {
       return await getTradeFromRelay(market, limit);
     }
   }

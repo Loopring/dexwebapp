@@ -1,20 +1,16 @@
+import * as fm from 'lightcone/common/formatter';
 import { dropTrailingZeroes } from 'pages/trade/components/defaults/util';
 import { signSetReferrer } from '../sign/exchange';
 import config from '../config';
 import request from '../common/request';
-
-export function getRefreshDurationInMillionSeconds() {
-  return 30 * 1000;
-}
 
 export function getApiDocsURL() {
   return `${config.getServer()}/docs/`;
 }
 
 export async function getApiKey(data, signed) {
-  const signature = signed.Rx + ',' + signed.Ry + ',' + signed.s;
   const headers = {
-    'X-API-SIG': signature,
+    'X-API-SIG': signed,
   };
 
   const response = await request({
@@ -26,14 +22,30 @@ export async function getApiKey(data, signed) {
   return response['data'];
 }
 
-export async function applyApiKey(data, signed) {
-  const signature = signed.Rx + ',' + signed.Ry + ',' + signed.s;
+export async function getWsApiKey() {
+  const headers = {};
+
+  const response = await request({
+    method: 'GET',
+    url: '/v2/ws/key',
+    headers: headers,
+  });
+  return response['data'];
+}
+
+export async function accountUpdate(data, ecdsaSig) {
+  console.log('accountUpdate(data, signed)', ecdsaSig);
+
   const headers = {
-    'X-API-SIG': signature,
+    'X-API-SIG': ecdsaSig,
   };
+  data['ecdsaSig'] = ecdsaSig;
+
+  console.log('accountUpdate data', data);
+
   const response = await request({
     method: 'POST',
-    url: '/api/v2/apiKey',
+    url: '/api/v2/account',
     headers: headers,
     data,
   });
@@ -49,10 +61,13 @@ export async function getDexNonce(data) {
   });
 }
 
+// 3.6 has different API
+// https://docs.loopring.io/zh-hans/dex_apis/submitOrderV3.html
 export async function submitOrderToLightcone(data, apiKey) {
   const headers = {
     'X-API-KEY': apiKey,
   };
+
   return await request({
     method: 'POST',
     url: '/api/v2/order',
@@ -61,7 +76,9 @@ export async function submitOrderToLightcone(data, apiKey) {
   });
 }
 
+// TODO: do we have /api/v2/orderId in 3.6?
 // Return order id
+/*
 export async function getOrderId(accountId, tokenSId, apiKey) {
   const params = {
     accountId: accountId,
@@ -79,12 +96,14 @@ export async function getOrderId(accountId, tokenSId, apiKey) {
 
   return response['data'];
 }
+*/
 
 export async function lightconeGetAccount(owner) {
   const params = {
     owner,
   };
 
+  // /api/v2/account doesn't return publicKeyX and publicKeyY
   const response = await request({
     method: 'GET',
     url: '/api/v2/account',
@@ -181,9 +200,10 @@ export function mapAmountInUI(baseToken, amount, tokens) {
     if (parseFloat(amountInDecimals) !== 0) {
       return amountInDecimals;
     }
+    return amountInUI;
   }
 
-  return amountInUI;
+  return fm.numberWithCommas(amountInUI);
 }
 
 function mapTransactions(transactions, tokens) {
@@ -197,7 +217,8 @@ function mapTransactions(transactions, tokens) {
       ? mapAmountInUI(baseToken, transaction.realAmount, tokens)
       : '';
     // Why this is feeAmount?
-    const feeInUI = config.fromWEI('ETH', transaction.feeAmount, tokens);
+    // No feeAmount in 3.6
+    const feeInUI = '-'; // config.fromWEI('ETH', transaction.feeAmount, tokens);
 
     const txHashInUI =
       transaction.txHash.substring(0, 7) + '...' + transaction.txHash.slice(-7);
@@ -263,6 +284,22 @@ export async function getWithdrawalHistory(
     limit,
     offset,
   };
+}
+
+export async function submitWithdraw(data, ecdsaSig, apiKey) {
+  const headers = {
+    'X-API-KEY': apiKey,
+    'X-API-SIG': ecdsaSig,
+  };
+
+  const response = await request({
+    method: 'POST',
+    url: '/api/v2/user/withdrawals',
+    headers: headers,
+    data: data,
+  });
+
+  return response['data'];
 }
 
 export async function getTicker(markets, tokens) {
@@ -367,6 +404,42 @@ export async function setRefer(info, keyPair) {
     url: '/api/v2/refer',
     headers: headers,
     data,
+  });
+
+  return response['data'];
+}
+
+// amm
+export async function getUserUpdateInfo(accountId, apiKey) {
+  const params = {
+    accountId,
+  };
+  const headers = {
+    'X-API-KEY': apiKey,
+  };
+  const response = await request({
+    method: 'GET',
+    url: '/api/v2/user/updateInfo',
+    headers: headers,
+    params,
+  });
+
+  return response['data'];
+}
+
+export async function getStorageId(accountId, tokenSId, apiKey) {
+  const params = {
+    accountId,
+    tokenSId,
+  };
+  const headers = {
+    'X-API-KEY': apiKey,
+  };
+  const response = await request({
+    method: 'GET',
+    url: '/api/v2/storageId',
+    headers: headers,
+    params,
   });
 
   return response['data'];

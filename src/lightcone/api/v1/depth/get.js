@@ -14,6 +14,11 @@ export async function getDepth(market, level, limit, configTokens) {
     params,
   });
 
+  // TODO: replace LP-
+  if (market.startsWith('LP-')) {
+    market = market.replace('LP-', '');
+  }
+
   const tokens = market.split('-');
   const baseToken = tokens[0];
 

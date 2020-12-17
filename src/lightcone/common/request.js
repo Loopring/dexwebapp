@@ -3,6 +3,8 @@ import config from '../config';
 
 export const SERVER_URL = config.getServer();
 
+console.log('SERVER_URL', SERVER_URL);
+
 /**
  * @description Supports single request and batch request;
  * @param options

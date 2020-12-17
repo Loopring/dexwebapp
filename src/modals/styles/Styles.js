@@ -1,6 +1,6 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
-import { Modal } from "antd";
+import { Modal } from 'antd';
 
 const TextFormError = styled.span`
   color: ${(props) => props.theme.red};

@@ -5,7 +5,7 @@ const {
   fixBabelImports,
   addLessLoader,
   setWebpackOptimizationSplitChunks,
-  addWebpackAlias
+  addWebpackAlias,
 } = require('customize-cra');
 const AntdDayjsWebpackPlugin = require('antd-dayjs-webpack-plugin');
 const path = require('path');
@@ -22,9 +22,11 @@ var onHeroku = process.env.SOURCE_VERSION && process.env.STACK;
 // so we can use that instead to generate the version file.
 function getCommitHash() {
   try {
-    return onHeroku ? process.env.SOURCE_VERSION : gitRevisionPlugin.commithash();
+    return onHeroku
+      ? process.env.SOURCE_VERSION
+      : gitRevisionPlugin.commithash();
   } catch (error) {
-    return ""
+    return '';
   }
 }
 
@@ -33,13 +35,14 @@ const DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack
 module.exports = override(
   addWebpackAlias({
     // lodash: path.resolve(__dirname, 'node_modules/lodash'),
-    'bn.js': path.resolve(__dirname, 'node_modules/bn.js/lib/bn.js')
+    'bn.js': path.resolve(__dirname, 'node_modules/bn.js/lib/bn.js'),
   }),
+
   addWebpackPlugin(new AntdDayjsWebpackPlugin()),
   addWebpackPlugin(
     new DuplicatePackageCheckerPlugin({
       verbose: true,
-      strict: true
+      strict: true,
     })
   ),
   // addWebpackPlugin(gitRevisionPlugin),
@@ -49,20 +52,20 @@ module.exports = override(
       'process.env.TIME':
         '"' +
         new Date().toLocaleString('en-US', { timeZone: 'Asia/Hong_Kong' }) +
-        '/SH"'
+        '/SH"',
     })
   ),
   fixBabelImports('import', {
     libraryName: 'antd',
     libraryDirectory: 'es',
-    style: true
+    style: true,
   }),
   setWebpackOptimizationSplitChunks({
     // https://webpack.js.org/plugins/split-chunks-plugin/
     chunks: 'async',
     maxSize: 4000000,
     maxAsyncRequests: 8,
-    maxInitialRequests: 6
+    maxInitialRequests: 6,
   }),
   addLessLoader({
     javascriptEnabled: true,
@@ -73,7 +76,7 @@ module.exports = override(
       '@btn-shadow': '0px',
       '@animation-duration-slow': '0s !important',
       '@wave-animation-width': '0px',
-      '@modal-body-padding': '16px 60px 32px 60px'
-    }
+      '@modal-body-padding': '16px 60px 32px 60px',
+    },
   })
 );

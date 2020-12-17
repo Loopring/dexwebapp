@@ -1,13 +1,16 @@
-import { history } from "redux/configureStore";
-import I from "components/I";
-import React, { useContext } from "react";
+import { connect } from 'react-redux';
+import { history } from 'redux/configureStore';
+import { tracker } from 'components/DefaultTracker';
+import { withUserPreferences } from 'components/UserPreferenceContext';
+import I from 'components/I';
+import React from 'react';
+import styled, { withTheme } from 'styled-components';
 
-import { Button } from "antd";
+import { Button } from 'antd';
 import {
   saveLastAccountPage,
   saveLastOrderPage,
-} from "lightcone/api/localStorgeAPI";
-import styled, { ThemeContext } from "styled-components";
+} from 'lightcone/api/localStorgeAPI';
 
 const NavButtonWrapper = styled(Button)`
   background-color: transparent !important;
@@ -36,11 +39,18 @@ const NavButton = ({ selected, id, label, href }) => {
       onClick={() => {
         history.push(href);
 
-        if (href.includes("orders")) {
+        if (href.includes('orders')) {
           saveLastOrderPage(id);
-        } else if (href.includes("account")) {
+        } else if (href.includes('account')) {
           saveLastAccountPage(id);
         }
+
+        tracker.trackEvent({
+          type: 'LOCATION_CHANGE',
+          data: {
+            location: href,
+          },
+        });
       }}
     >
       {label}
@@ -48,37 +58,59 @@ const NavButton = ({ selected, id, label, href }) => {
   );
 };
 
-const SecondaryNavBar = ({ selected, subPages }) => {
-  const theme = useContext(ThemeContext);
-  return (
-    <div
-      style={{
-        paddingLeft: "260px",
-        paddingRight: "60px",
-        paddingBottom: "0px",
-        borderWidth: "0px",
-        backgroundColor: theme.secondaryNavbarBackground,
-      }}
-    >
-      <Button.Group
+class SecondaryNavBar extends React.Component {
+  render() {
+    // Hide some pages if the account is not logged in.
+    let subPages = [];
+    if (this.props.subPages && this.props.exchange.isInitialized) {
+      for (let i = 0; i < this.props.subPages.length; i++) {
+        if (this.props.dexAccount.account.state !== 'LOGGED_IN') {
+          if (this.props.subPages[i].url === '/liquidity-mining/rewards') {
+            continue;
+          }
+        }
+        subPages.push(this.props.subPages[i]);
+      }
+    }
+
+    return (
+      <div
         style={{
-          borderRadius: "0px",
-          borderWidth: "0px",
-          paddingBottom: "0px",
+          paddingLeft: '260px',
+          paddingRight: '60px',
+          paddingBottom: '0px',
+          borderWidth: '0px',
+          height: '46px',
+          backgroundColor: this.props.theme.secondaryNavbarBackground,
         }}
       >
-        {subPages.map((config, i) => (
-          <NavButton
-            key={i}
-            selected={selected}
-            id={config.id}
-            href={config.url}
-            label={<I s={config.label} />}
-          />
-        ))}
-      </Button.Group>
-    </div>
-  );
+        <Button.Group
+          style={{
+            borderRadius: '0px',
+            borderWidth: '0px',
+            paddingBottom: '0px',
+          }}
+        >
+          {subPages.map((config, i) => (
+            <NavButton
+              key={i}
+              selected={this.props.selected}
+              id={config.id}
+              href={config.url}
+              label={<I s={config.label} />}
+            />
+          ))}
+        </Button.Group>
+      </div>
+    );
+  }
+}
+
+const mapStateToProps = (state) => {
+  const { dexAccount, exchange } = state;
+  return { dexAccount, exchange };
 };
 
-export default SecondaryNavBar;
+export default withUserPreferences(
+  withTheme(connect(mapStateToProps, null)(SecondaryNavBar))
+);

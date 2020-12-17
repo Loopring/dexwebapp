@@ -1,7 +1,7 @@
 import {
   CONNECT_TO_MEW_CONNECT,
   CONNECT_TO_MEW_CONNECT_COMPLETE,
-} from "redux/actions/MewConnect";
+} from 'redux/actions/MewConnect';
 
 const initialState = {
   startConnecting: false,

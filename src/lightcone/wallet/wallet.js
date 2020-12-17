@@ -1,12 +1,19 @@
 import * as exchange from '../sign/exchange';
 import * as fm from '../common/formatter';
+
 import {
   personalSign,
   sendTransaction,
+  signEip712,
   signEthereumTx,
 } from '../ethereum/metaMask';
 import { sha256 } from 'ethereumjs-util';
+import BigNumber from 'bignumber.js';
+
+import { isHardwareAddress, saveHardwareAddress } from '../api/localStorgeAPI';
+import { sleep } from 'modals/components/utils';
 import Contracts from '../ethereum/contracts/Contracts';
+import EdDSA from '../sign/eddsa';
 import config from '../config';
 
 const assert = require('assert');
@@ -23,6 +30,7 @@ export default class Wallet {
     this.keyPair = keyPair;
   }
 
+  // 3.6
   /**
    * Approve Zero
    * @param tokenAddress: approve token symbol to zero
@@ -32,7 +40,7 @@ export default class Wallet {
    */
   async approveZero(
     tokenAddress,
-    exchangeAddress,
+    depositAddress,
     chainId,
     nonce,
     gasPrice,
@@ -43,7 +51,7 @@ export default class Wallet {
       to: tokenAddress,
       value: '0',
       data: Contracts.ERC20Token.encodeInputs('approve', {
-        _spender: exchangeAddress,
+        _spender: depositAddress,
         _value: '0x0',
       }),
       chainId: chainId,
@@ -58,6 +66,7 @@ export default class Wallet {
     return response['result'];
   }
 
+  // 3.6
   /**
    * Approve Max
    * @param tokenAddress: approve token symbol to max
@@ -67,18 +76,19 @@ export default class Wallet {
    */
   async approveMax(
     tokenAddress,
-    exchangeAddress,
+    depositAddress,
     chainId,
     nonce,
     gasPrice,
     sendByMetaMask = false
   ) {
+    // TODO: What is _spender?
     const rawTx = {
       from: this.address,
       to: tokenAddress,
       value: '0',
       data: Contracts.ERC20Token.encodeInputs('approve', {
-        _spender: exchangeAddress,
+        _spender: depositAddress,
         _value: config.getMaxAmountInWEI(),
       }),
       chainId: chainId,
@@ -175,6 +185,16 @@ export default class Wallet {
     return response['result'];
   }
 
+  // 3.6
+  async depositTo_3_6(payload, sendByMetaMask = false) {
+    payload['from'] = this.address;
+    const tx = exchange.deposit(payload);
+    const response = sendByMetaMask
+      ? await sendTransaction(this.web3, tx)
+      : await signEthereumTx(this.web3, this.address, tx);
+    return response['result'];
+  }
+
   /**
    * Deposit to Dex
    * @param payload
@@ -241,7 +261,7 @@ export default class Wallet {
    */
   submitOrder(
     tokens,
-    exchangeId,
+    exchangeAddress,
     tokenS,
     tokenB,
     amountS,
@@ -251,10 +271,12 @@ export default class Wallet {
     validUntil,
     label,
     buy,
-    channelId
+    channelId,
+    orderType,
+    poolAddress
   ) {
     const order = {
-      exchangeId,
+      exchange: exchangeAddress,
       owner: this.address,
       accountId: this.accountId,
       tokenS: tokenS,
@@ -262,14 +284,18 @@ export default class Wallet {
       amountS: amountS,
       amountB: amountB,
       orderId: orderId,
-      validSince: Math.floor(validSince),
+      // validSince: Math.floor(validSince),
       validUntil: Math.floor(validUntil),
       label: label,
       buy: buy,
       channelId,
+      orderType: orderType,
+      poolAddress: poolAddress,
     };
 
-    return exchange.signOrder(order, this.keyPair, tokens);
+    let data = exchange.signOrder(order, this.keyPair, tokens);
+    // data['eddsaSig'] = data.signature;
+    return data;
   }
 
   /**
@@ -321,11 +347,70 @@ export default class Wallet {
     return exchange.signGetApiKey(request, this.keyPair);
   }
 
-  applyApiKey() {
-    const request = {
-      accountId: this.accountId,
+  // 3.6
+  // 02 is for SignatureType.EIP_712 ， 03 for hash eth_sign
+  async accountUpdate(data) {
+    data['chainId'] = await this.web3.eth.net.getId();
+
+    if (
+      this.walletType === 'MetaMask' &&
+      isHardwareAddress(this.address) === false
+    ) {
+      try {
+        return {
+          ecdsaSig:
+            (await this.accountUpdateWithDataStructure(data)).ecdsaSig + '02',
+        };
+      } catch (err) {
+        if (err.message.indexOf('Not supported on this device') !== -1) {
+          console.log('catch err', err);
+          saveHardwareAddress(this.address);
+
+          // Sleep is to avoid MetaMask popup too fast.
+          await sleep(1500);
+
+          // Try not to use EIP 712
+          // If it fails, throw errors
+          return {
+            ecdsaSig:
+              (await this.accountUpdateWithoutDataStructure(data)).ecdsaSig +
+              '03',
+          };
+        }
+        throw err;
+      }
+    } else {
+      const result = await this.accountUpdateWithoutDataStructure(data);
+      return {
+        ecdsaSig: result.ecdsaSig + '03',
+      };
+    }
+  }
+
+  async accountUpdateWithDataStructure(data) {
+    const typedData = exchange.getAccountUpdateEcdsaSigTypedData(data);
+    const msgParams = JSON.stringify(typedData);
+    const params = [this.address, msgParams];
+    const method = 'eth_signTypedData_v4';
+    const signEip712Result = await signEip712(
+      this.web3,
+      this.address,
+      method,
+      params
+    );
+
+    return {
+      ecdsaSig: signEip712Result.result,
     };
-    return exchange.signApplyApiKey(request, this.keyPair);
+  }
+
+  async accountUpdateWithoutDataStructure(data) {
+    const hash = exchange.getAccountUpdateEcdsaSig(data);
+    const signature = await personalSign(this.web3, this.address, hash);
+
+    return {
+      ecdsaSig: signature.sig,
+    };
   }
 
   /**
@@ -366,28 +451,156 @@ export default class Wallet {
     };
   }
 
-  async signTransfer(transfer, tokens) {
-    transfer.sender = this.accountId;
-    const signedTransfer = exchange.signTransfer(
-      transfer,
-      this.keyPair,
-      tokens
-    );
+  // 3.6
+  async signOffchainWithdraw(data) {
+    data['chainId'] = await this.web3.eth.net.getId();
+    if (
+      this.walletType === 'MetaMask' &&
+      isHardwareAddress(this.address) === false
+    ) {
+      try {
+        const result = await this.signOffchainWithdrawWithDataStructure(data);
+        return {
+          ...result,
+          ecdsaSig: result.ecdsaSig + '02',
+        };
+      } catch (err) {
+        if (err.message.indexOf('Not supported on this device') !== -1) {
+          console.log('catch err', err);
+          saveHardwareAddress(this.address);
 
-    const encodeTransfer = exchange.encodeTransfer(signedTransfer);
-    const result = await personalSign(
+          // Sleep is to avoid MetaMask popup too fast.
+          await sleep(1500);
+
+          // Try not to use EIP 712
+          // If it fails, throw errors
+          const result = await this.signOffchainWithdrawWithoutDataStructure(
+            data
+          );
+          return {
+            ...result,
+            ecdsaSig: result.ecdsaSig + '03',
+          };
+        }
+        throw err;
+      }
+    } else {
+      const result = await this.signOffchainWithdrawWithoutDataStructure(data);
+      return {
+        ...result,
+        ecdsaSig: result.ecdsaSig + '03',
+      };
+    }
+  }
+
+  async signOffchainWithdrawWithDataStructure(data) {
+    const typedData = exchange.getWithdrawTypedData(data);
+    const msgParams = JSON.stringify(typedData);
+    const params = [this.address, msgParams];
+    const method = 'eth_signTypedData_v4';
+    const signEip712Result = await signEip712(
       this.web3,
       this.address,
-      `${this.transferMessage}${encodeTransfer}`,
-      this.walletType
+      method,
+      params
     );
 
-    if (!result.error) {
+    const eddsaSig = exchange.signOffChainWithdraw(
+      data,
+      this.keyPair,
+      this.keyPair
+    );
+
+    return {
+      ecdsaSig: signEip712Result.result,
+      eddsaSig: eddsaSig,
+    };
+  }
+
+  async signOffchainWithdrawWithoutDataStructure(data) {
+    const hash = exchange.getWithdrawEcdsaSig(data);
+
+    const signature = await personalSign(this.web3, this.address, hash);
+    const eddsaSig = exchange.signOffChainWithdraw(
+      data,
+      this.keyPair,
+      this.keyPair
+    );
+
+    return {
+      ecdsaSig: signature.sig,
+      eddsaSig: eddsaSig,
+    };
+  }
+
+  // 3.6
+  async signTransfer(data) {
+    data['chainId'] = await this.web3.eth.net.getId();
+    if (
+      this.walletType === 'MetaMask' &&
+      isHardwareAddress(this.address) === false
+    ) {
+      try {
+        const result = await this.signTransferWithDataStructure(data);
+        return {
+          ...result,
+          ecdsaSig: result.ecdsaSig + '02',
+        };
+      } catch (err) {
+        if (err.message.indexOf('Not supported on this device') !== -1) {
+          console.log('catch err', err);
+          saveHardwareAddress(this.address);
+
+          // Sleep is to avoid MetaMask popup too fast.
+          await sleep(1500);
+
+          // Try not to use EIP 712
+          // If it fails, throw errors
+          const result = await this.signTransferWithoutDataStructure(data);
+          return {
+            ...result,
+            ecdsaSig: result.ecdsaSig + '03',
+          };
+        }
+        throw err;
+      }
+    } else {
+      const result = await this.signTransferWithoutDataStructure(data);
       return {
-        ecdsaSig: result.sig,
-        transfer: signedTransfer,
+        ...result,
+        ecdsaSig: result.ecdsaSig + '03',
       };
-    } else return result;
+    }
+  }
+
+  async signTransferWithDataStructure(data) {
+    const typedData = exchange.getTransferTypedData(data);
+    const msgParams = JSON.stringify(typedData);
+    const params = [this.address, msgParams];
+    const method = 'eth_signTypedData_v4';
+    const signEip712Result = await signEip712(
+      this.web3,
+      this.address,
+      method,
+      params
+    );
+
+    const eddsaSig = exchange.signTransfer(data, this.keyPair);
+    return {
+      ecdsaSig: signEip712Result.result,
+      eddsaSig: eddsaSig,
+    };
+  }
+
+  async signTransferWithoutDataStructure(data) {
+    const hash = exchange.getTransferEcdsaSig(data);
+    const signature = await personalSign(this.web3, this.address, hash);
+
+    const eddsaSig = exchange.signTransfer(data, this.keyPair);
+    return {
+      ecdsaSig: signature.sig,
+      eddsaSig: eddsaSig,
+    };
   }
 
   signUpdateDistributeHash(request) {
@@ -424,5 +637,162 @@ export default class Wallet {
       : await signEthereumTx(this.web3, this.address, rawTx);
 
     return response['result'];
+  }
+
+  // 3.6
+
+  async ammJoin(data) {
+    data['chainId'] = await this.web3.eth.net.getId();
+    const hash = exchange.getAmmJoinEcdsaSig(data);
+    const sigHash = fm.toHex(new BigNumber(hash, 16).idiv(8));
+    const signature = EdDSA.sign(this.keyPair.secretKey, sigHash);
+
+    return {
+      eddsaSig:
+        fm.formatEddsaKey(fm.toHex(fm.toBig(signature.Rx))) +
+        fm.clearHexPrefix(fm.formatEddsaKey(fm.toHex(fm.toBig(signature.Ry)))) +
+        fm.clearHexPrefix(fm.formatEddsaKey(fm.toHex(fm.toBig(signature.s)))),
+    };
+  }
+
+  // async ammJoin(data) {
+  //   data['chainId'] = await this.web3.eth.net.getId();
+  //
+  //   if (
+  //     this.walletType === 'MetaMask' &&
+  //     isHardwareAddress(this.address) === false
+  //   ) {
+  //     try {
+  //       return {
+  //         ecdsaSig: (await this.ammJoinWithDataStructure(data)).ecdsaSig + '02',
+  //       };
+  //     } catch (err) {
+  //       // Try not to use EIP 712
+  //       // If it fails, throw errors
+  //       if (err.message.indexOf('Not supported on this device') !== -1) {
+  //         console.log('catch err', err);
+  //         saveHardwareAddress(this.address);
+  //
+  //         // Sleep is to avoid MetaMask popup too fast.
+  //         await sleep(1500);
+  //
+  //         // Try not to use EIP 712
+  //         // If it fails, throw errors
+  //         return {
+  //           ecdsaSig:
+  //             (await this.ammJoinWithoutDataStructure(data)).ecdsaSig + '03',
+  //         };
+  //       }
+  //       throw err;
+  //     }
+  //   } else {
+  //     const result = await this.ammJoinWithoutDataStructure(data);
+  //     return {
+  //       ecdsaSig: result.ecdsaSig + '03',
+  //     };
+  //   }
+  // }
+
+  async ammJoinWithDataStructure(data) {
+    const typedData = exchange.getAmmJoinEcdsaTypedData(data);
+    const msgParams = JSON.stringify(typedData);
+    const params = [this.address, msgParams];
+    const method = 'eth_signTypedData_v4';
+    const signEip712Result = await signEip712(
+      this.web3,
+      this.address,
+      method,
+      params
+    );
+
+    return {
+      ecdsaSig: signEip712Result.result,
+    };
+  }
+
+  async ammJoinWithoutDataStructure(data) {
+    const hash = exchange.getAmmJoinEcdsaSig(data);
+    const signature = await personalSign(this.web3, this.address, hash);
+
+    return {
+      ecdsaSig: signature.sig,
+    };
+  }
+
+  async ammExit(data) {
+    data['chainId'] = await this.web3.eth.net.getId();
+    const hash = exchange.getAmmExitEcdsaSig(data);
+    const sigHash = fm.toHex(new BigNumber(hash, 16).idiv(8));
+    const signature = EdDSA.sign(this.keyPair.secretKey, sigHash);
+
+    return {
+      eddsaSig:
+        fm.formatEddsaKey(fm.toHex(fm.toBig(signature.Rx))) +
+        fm.clearHexPrefix(fm.formatEddsaKey(fm.toHex(fm.toBig(signature.Ry)))) +
+        fm.clearHexPrefix(fm.formatEddsaKey(fm.toHex(fm.toBig(signature.s)))),
+    };
+  }
+
+  // async ammExit(data) {
+  //   data['chainId'] = await this.web3.eth.net.getId();
+  //
+  //   if (
+  //     this.walletType === 'MetaMask' &&
+  //     isHardwareAddress(this.address) === false
+  //   ) {
+  //     try {
+  //       return {
+  //         ecdsaSig: (await this.ammExitWithDataStructure(data)).ecdsaSig + '02',
+  //       };
+  //     } catch (err) {
+  //       // Try not to use EIP 712
+  //       // If it fails, throw errors
+  //       if (err.message.indexOf('Not supported on this device') !== -1) {
+  //         console.log('catch err', err);
+  //         saveHardwareAddress(this.address);
+  //
+  //         // Sleep is to avoid MetaMask popup too fast.
+  //         await sleep(1500);
+  //
+  //         // Try not to use EIP 712
+  //         // If it fails, throw errors
+  //         return {
+  //           ecdsaSig:
+  //             (await this.ammExitWithoutDataStructure(data)).ecdsaSig + '03',
+  //         };
+  //       }
+  //       throw err;
+  //     }
+  //   } else {
+  //     const result = await this.ammExitWithoutDataStructure(data);
+  //     return {
+  //       ecdsaSig: result.ecdsaSig + '03',
+  //     };
+  //   }
+  // }
+
+  async ammExitWithDataStructure(data) {
+    const typedData = exchange.getAmmExitEcdsaTypedData(data);
+    const msgParams = JSON.stringify(typedData);
+    var params = [this.address, msgParams];
+    var method = 'eth_signTypedData_v4';
+    const signEip712Result = await signEip712(
+      this.web3,
+      this.address,
+      method,
+      params
+    );
+    return {
+      ecdsaSig: signEip712Result.result,
+    };
+  }
+
+  async ammExitWithoutDataStructure(data) {
+    const hash = exchange.getAmmExitEcdsaSig(data);
+    const signature = await personalSign(this.web3, this.address, hash);
+
+    return {
+      ecdsaSig: signature.sig,
+    };
   }
 }

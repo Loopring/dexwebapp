@@ -1,7 +1,7 @@
 import {
   CONNECT_TO_WALLET_CONNECT,
   CONNECT_TO_WALLET_CONNECT_COMPLETE,
-} from "redux/actions/WalletConnect";
+} from 'redux/actions/WalletConnect';
 
 const initialState = {
   startConnecting: false,

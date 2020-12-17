@@ -1,12 +1,12 @@
-import { Button } from "antd";
-import { connect } from "react-redux";
-import { showReferralModal } from "redux/actions/ModalManager";
-import AppLayout from "AppLayout";
-import Group from "modals/components/Group";
-import I from "components/I";
-import React from "react";
+import { Button } from 'antd';
+import { connect } from 'react-redux';
+import { showReferralModal } from 'redux/actions/ModalManager';
+import AppLayout from 'AppLayout';
+import Group from 'modals/components/Group';
+import I from 'components/I';
+import React from 'react';
 
-import styled, { withTheme } from "styled-components";
+import styled, { withTheme } from 'styled-components';
 
 import {
   AddressDiv,
@@ -14,10 +14,10 @@ import {
   MyModal,
   Section,
   TextPopupTitle,
-} from "modals/styles/Styles";
+} from 'modals/styles/Styles';
 
-import { CopyToClipboard } from "react-copy-to-clipboard";
-import { notifySuccess } from "redux/actions/Notification";
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { notifySuccess } from 'redux/actions/Notification';
 
 const MyButton = styled(Button)`
   font-size: 1rem !important;
@@ -70,7 +70,7 @@ class ReferralModal extends React.Component {
         </Section>
         <Section
           style={{
-            textAlign: "center",
+            textAlign: 'center',
           }}
         >
           <CopyToClipboard text={referralLink}>
