@@ -22,11 +22,28 @@ const AssetMenu = styled(Menu)`
 `;
 
 const AssetDropdownButton = styled(Button)`
-  height: ${(props) => (props.small ? '32px' : '40px')};
-  border-radius: 4px;
+  height: ${(props) => {
+    if (props.size) {
+      if (props.size === 'small') {
+        return '32px';
+      } else if (props.size === 'large') {
+        return '48px';
+      }
+    }
+    return '40px';
+  }};
   width: 100%;
   background: ${(props) => props.theme.foreground};
-  font-size: ${(props) => (props.small ? '0.85rem' : '0.9rem')};
+  font-size: ${(props) => {
+    if (props.size) {
+      if (props.size === 'small') {
+        return '0.85rem';
+      } else if (props.size === 'large') {
+        return '1.2rem';
+      }
+    }
+    return '0.9rem';
+  }};
   border: 1px solid ${(props) => props.theme.inputBorderColor}!important;
 
   &:hover, &:focus  {
@@ -35,23 +52,61 @@ const AssetDropdownButton = styled(Button)`
       props.theme.inputBorderActiveColor}!important;
     color: ${(props) => props.theme.textBright};
   }
+
+  .ant-btn-icon-only {
+    height: 60%!important;;
+    margin-top: ${(props) => {
+      if (props.size) {
+        if (props.size === 'small') {
+          return '1px!important;';
+        } else if (props.size === 'large') {
+          return '2px!important;';
+        }
+      }
+      return '1px!important;';
+    }};
+  }
 `;
 
-const AssetDropdown = ({ options, selected, small }) => {
+export const ArrowDownButton = styled(Button)`
+  text-align: right;
+  background-color: ${(props) => props.theme.foreground} !important;
+  border: none !important;
+  &[disabled],
+  &:hover {
+    border: none;
+    background-color: ${(props) => props.theme.foreground} !important;
+    color: ${(props) => props.theme.primary} !important;
+  }
+  &[disabled] {
+    color: ${(props) => props.theme.foreground} s !important;
+  }
+`;
+
+const AssetDropdown = ({
+  options,
+  selected,
+  size,
+  paddingLeft,
+  paddingRight,
+  borderRadius,
+}) => {
   const theme = useContext(ThemeContext);
   return (
     <Dropdown trigger={['click']} overlay={<AssetMenu>{options}</AssetMenu>}>
       <AssetDropdownButton
         style={{
-          paddingLeft: '8px',
-          paddingRight: '8px',
+          paddingLeft: paddingLeft ? paddingLeft : '8px',
+          paddingRight: paddingRight ? paddingRight : '8px',
+          borderRadius: borderRadius ? borderRadius : '4px',
         }}
-        small={small}
+        size={size}
       >
         <Row
           gutter={16}
           style={{
             paddingBottom: '1px',
+            height: '100%',
           }}
         >
           <Col
@@ -59,6 +114,8 @@ const AssetDropdown = ({ options, selected, small }) => {
             style={{
               textAlign: 'left',
               color: theme.textWhite,
+              marginTop: 'auto',
+              marginBottom: 'auto',
             }}
           >
             {selected}
@@ -68,9 +125,17 @@ const AssetDropdown = ({ options, selected, small }) => {
             style={{
               textAlign: 'right',
               color: theme.primary,
+              marginTop: 'auto',
+              marginBottom: 'auto',
             }}
           >
-            <FontAwesomeIcon icon={faCaretDown} />
+            <FontAwesomeIcon
+              style={{
+                color: theme.primary,
+                fontSize: '18px',
+              }}
+              icon={faCaretDown}
+            />
           </Col>
         </Row>
       </AssetDropdownButton>

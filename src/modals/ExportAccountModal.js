@@ -2,6 +2,7 @@ import { Modal, Spin } from 'antd';
 
 import { connect } from 'react-redux';
 
+import * as fm from 'lightcone/common/formatter';
 import { showExportAccountModal } from 'redux/actions/ModalManager';
 import AppLayout from 'AppLayout';
 import I from 'components/I';
@@ -48,7 +49,7 @@ class ExportAccountModal extends React.Component {
         try {
           const valid = await window.wallet.verify(
             this.props.exchangeAddress,
-            this.props.dexAccount.account.keyNonce
+            Math.max(this.props.dexAccount.account.accountNonce - 1)
           );
           if (valid) {
             this.setState({
@@ -80,7 +81,7 @@ class ExportAccountModal extends React.Component {
     const { dexAccount } = this.props;
     if (dexAccount.account && dexAccount.account.accountId) {
       var json = {};
-      json['exchangeName'] = 'LoopringDEX: Beta 1';
+      json['exchangeName'] = 'Loopring Exchange v2';
       json['exchangeAddress'] = this.props.exchangeAddress;
       json['exchangeId'] = this.props.exchangeId;
       json['accountAddress'] = window.wallet ? window.wallet.address : '';
@@ -88,7 +89,9 @@ class ExportAccountModal extends React.Component {
       json['apiKey'] = this.props.dexAccount.account.apiKey;
       json['publicKeyX'] = this.props.dexAccount.account.publicKeyX;
       json['publicKeyY'] = this.props.dexAccount.account.publicKeyY;
-      json['privateKey'] = dexAccount.account.accountKey;
+      json['privateKey'] = dexAccount.account.accountKey
+        ? fm.toHex(fm.toBig(dexAccount.account.accountKey))
+        : '';
 
       container = (
         <div

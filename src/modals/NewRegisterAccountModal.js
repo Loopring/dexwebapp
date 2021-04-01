@@ -1,4 +1,5 @@
 import { ActionButton, AssetDropdownMenuItem } from 'styles/Styles';
+import { history } from 'redux/configureStore';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -7,8 +8,9 @@ import {
   Section,
   TextPopupTitle,
 } from 'modals/styles/Styles';
+import { REGISTERING, updateAccount } from 'redux/actions/DexAccount';
 
-import { Spin } from 'antd';
+import { Input, Spin } from 'antd';
 import { connect } from 'react-redux';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons/faArrowRight';
 import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
@@ -17,12 +19,17 @@ import { faHandPointRight } from '@fortawesome/free-solid-svg-icons/faHandPointR
 import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
 import { fetchAllowance, fetchWalletBalance } from 'modals/components/utils';
 import { fetchGasPrice } from 'redux/actions/GasPrice';
-import { fetchInfo } from 'redux/actions/ExchangeInfo';
 import { fetchNonce } from 'redux/actions/Nonce';
 import { formatter } from 'lightcone/common';
-import { getWalletType } from 'lightcone/api/localStorgeAPI';
+import {
+  getReferralId,
+  getWalletType,
+  setReferralId,
+} from 'lightcone/api/localStorgeAPI';
 import { notifyError, notifySuccess } from 'redux/actions/Notification';
-import { showDepositModal } from 'redux/actions/ModalManager';
+import { registerAccountModal } from 'redux/actions/ModalManager';
+
+import { fetchInfo } from 'redux/actions/ExchangeInfo';
 import { sleep } from './components/utils';
 import { withTheme } from 'styled-components';
 import AppLayout from 'AppLayout';
@@ -39,8 +46,13 @@ import WalletConnectIndicatorPlaceholder from 'modals/components/WalletConnectIn
 import WhyIcon from 'components/WhyIcon';
 import config from 'lightcone/config';
 
-class DepositModal extends React.Component {
+class NewRegisterAccountModal extends React.Component {
   state = {
+    isRegister: false,
+    referrer: '',
+    isInvited: false,
+
+    selectedTokenSymbol: 'ETH',
     errorMessage1: '',
     errorToken: '',
     errorMessage2: '',
@@ -54,7 +66,11 @@ class DepositModal extends React.Component {
     ethEnough: true,
     processingNum: 1,
     balanceOnEthereumDict: {},
+    isContractWallet: false,
   };
+
+  title = (<I s="Activate Layer-2" />);
+  buttonLabel = (<I s="Activate Layer-2" />);
 
   componentDidUpdate(prevProps, prevState) {
     // When the modal becomes visible
@@ -65,7 +81,7 @@ class DepositModal extends React.Component {
       this.props.isVisible &&
       window.wallet
     ) {
-      const selectedTokenSymbol = this.props.modalManager.depositToken;
+      const selectedTokenSymbol = this.state.selectedTokenSymbol;
       this.loadData(selectedTokenSymbol, true);
       (async () => {
         this.props.fetchInfo();
@@ -91,6 +107,40 @@ class DepositModal extends React.Component {
         balanceOnEthereumDict: {},
       });
     }
+
+    if (
+      this.props.isVisible === true &&
+      this.props.isVisible !== prevProps.isVisible
+    ) {
+      // set referer
+      this.setState({
+        isRegister: true,
+      });
+
+      let refer_id = '';
+      if (this.props.pathname) {
+        if (this.props.pathname.startsWith('/invite/')) {
+          refer_id = this.props.pathname.replace('/invite/', '');
+        }
+      } else if (this.props.pathname === '/invite') {
+        refer_id = '';
+      }
+
+      const localReferralId = getReferralId();
+
+      let referrer = refer_id;
+      if (refer_id == '') {
+        referrer = localReferralId ? localReferralId : '';
+      }
+      if (!Number.isNaN(refer_id)) {
+        setReferralId(refer_id);
+      }
+
+      this.setState({
+        referrer: referrer,
+        isInvited: !!referrer,
+      });
+    }
   }
 
   depositTo_3_6() {
@@ -101,16 +151,12 @@ class DepositModal extends React.Component {
     (async () => {
       try {
         const { approveTxCount, amount } = this.state;
-
-        console.log('approveTxCount', approveTxCount);
+        const symbol = this.state.selectedTokenSymbol;
+        console.log('approveTxCount', approveTxCount, symbol);
 
         const { gasPrice, exchange } = this.props;
-        // Deposit
-        let symbol = this.props.modalManager.depositToken;
         let nonce = this.props.nonce.nonce;
-
         const { chainId, tokens, exchangeAddress, depositAddress } = exchange;
-        console.log('depositAddress', depositAddress);
 
         if (approveTxCount === 2) {
           await window.wallet.approveZero(
@@ -153,7 +199,6 @@ class DepositModal extends React.Component {
           }
         }
 
-        console.log(window.wallet);
         await window.wallet.depositTo_3_6(
           {
             exchangeAddress,
@@ -166,10 +211,18 @@ class DepositModal extends React.Component {
           },
           true
         );
+
+        const account = {
+          address: window.wallet.address,
+          state: REGISTERING,
+        };
+
+        this.props.updateAccount(account);
+
         notifySuccess(
           <I s="DepositInstructionNotification" />,
           this.props.theme,
-          15
+          3600
         );
       } catch (err) {
         console.log('depositTo_3_6', err);
@@ -184,16 +237,33 @@ class DepositModal extends React.Component {
           amount: null,
           processingNum: 1,
         });
+
+        // If it's from invite, navigate to swap page
+        if (this.props.pathname.startsWith('/invite')) {
+          history.push('/swap');
+        }
       }
     })();
   }
 
+  onReferrerValueChange = (e) => {
+    this.setState({
+      referrer: e.target.value,
+    });
+    // Always set referral onChange for later usage.
+    // Always uppercase
+    setReferralId(e.target.value.toUpperCase());
+  };
+
   handleCurrencyTypeSelect = (tokenSymbol) => {
-    this.props.showDepositModal(tokenSymbol);
+    this.props.registerAccountModal(tokenSymbol);
     this.loadData(tokenSymbol);
+
+    console.log('tokenSymbol', tokenSymbol);
 
     // Reset amount and error message
     this.setState({
+      selectedTokenSymbol: tokenSymbol,
       amount: null,
       ethEnough: true,
       validateAmount: true,
@@ -212,7 +282,7 @@ class DepositModal extends React.Component {
         )[0].balance;
         tokenBalance = tokenBalance.toString().replace(/,/g, '');
 
-        let ethBalance =
+        const ethBalance =
           tokenSymbol.toUpperCase() === 'ETH'
             ? tokenBalance
             : loadETH
@@ -224,7 +294,6 @@ class DepositModal extends React.Component {
                 )
               )[0].balance
             : this.state.ethBalance;
-        ethBalance = ethBalance.toString().replace(/,/g, '');
 
         const allowance = await fetchAllowance(
           this.props.dexAccount.account.address,
@@ -272,7 +341,8 @@ class DepositModal extends React.Component {
           balanceOnEthereumDict[ba.symbol] = ba.balance;
         });
 
-        console.log('tokenBalance', tokenBalance);
+        const isContractWallet = await window.wallet.isContractWallet();
+
         this.setState({
           availableAmount: tokenBalance,
           ethBalance,
@@ -281,10 +351,9 @@ class DepositModal extends React.Component {
           approveTxCount: txCount,
           validateAmount,
           balanceOnEthereumDict,
+          isContractWallet,
         });
-      } catch (error) {
-        console.log('error', error);
-      }
+      } catch (error) {}
     })();
   }
 
@@ -301,8 +370,7 @@ class DepositModal extends React.Component {
   };
 
   onAmountValueChange = (value) => {
-    const { allowance } = this.state;
-    const selectedTokenSymbol = this.props.modalManager.depositToken;
+    const { allowance, selectedTokenSymbol } = this.state;
     let txCount = 0;
     if (
       selectedTokenSymbol.toUpperCase() !== 'ETH' &&
@@ -319,7 +387,7 @@ class DepositModal extends React.Component {
     } else {
       ethEnough =
         cost + (value && Number(value) >= 0 ? Number(value) : 0) <=
-        Number(this.state.ethBalance);
+        this.state.ethBalance;
     }
 
     // Check validateAmount
@@ -408,7 +476,7 @@ class DepositModal extends React.Component {
   };
 
   depositAll = () => {
-    const selectedTokenSymbol = this.props.modalManager.depositToken;
+    const { selectedTokenSymbol } = this.state;
     let amount;
     let txCount = 0;
     // availableAmount may has commas.
@@ -439,10 +507,14 @@ class DepositModal extends React.Component {
   render() {
     const theme = this.props.theme;
 
-    const { availableAmount, approveTxCount, processingNum } = this.state;
+    const {
+      availableAmount,
+      approveTxCount,
+      processingNum,
+      selectedTokenSymbol,
+    } = this.state;
     const { tokens } = this.props.exchange;
 
-    const selectedTokenSymbol = this.props.modalManager.depositToken;
     const { balances } = this.props.balances;
     const selectedToken = config.getTokenBySymbol(selectedTokenSymbol, tokens);
     const holdBalance = balances.find(
@@ -653,24 +725,12 @@ class DepositModal extends React.Component {
 
     let isWalletConnectLoading =
       this.state.loading && tips.length === 1 && getWalletType() !== 'MetaMask';
-    let indicatorMarginBottom = '18px';
-    if (isWalletConnectLoading === false && this.state.loading) {
-      if (approveTxCount === 0) {
-        indicatorMarginBottom = '26px';
-      } else {
-        indicatorMarginBottom = '72px';
-      }
-    }
 
     return (
       <MyModal
         centered
         width={AppLayout.modalWidth}
-        title={
-          <TextPopupTitle>
-            <I s="Make a Deposit" />
-          </TextPopupTitle>
-        }
+        title={<TextPopupTitle>{this.title}</TextPopupTitle>}
         footer={null}
         maskClosable={false}
         closeIcon={<FontAwesomeIcon icon={faTimes} />}
@@ -684,9 +744,16 @@ class DepositModal extends React.Component {
           <Section
             style={{
               display: isWalletConnectLoading ? 'none' : 'block',
-              marginBottom: indicatorMarginBottom,
             }}
           >
+            <Instruction
+              style={{
+                color: theme.primary,
+                fontWeight: '600',
+              }}
+            >
+              <I s="NewActiveLayerInstruction_1" />
+            </Instruction>
             <Instruction>
               <I s="DepositInstruction_1" />
             </Instruction>
@@ -712,13 +779,7 @@ class DepositModal extends React.Component {
                 options={options}
                 selected={
                   <span>
-                    {selectedToken.name.split('-').length - 1 >= 2 ? (
-                      <div>{selectedToken.symbol}</div>
-                    ) : (
-                      <div>
-                        {selectedToken.symbol} - <I s={selectedToken.name} />{' '}
-                      </div>
-                    )}
+                    {selectedToken.symbol} - <I s={selectedToken.name} />
                   </span>
                 }
               />
@@ -749,15 +810,37 @@ class DepositModal extends React.Component {
                 errorMessage2={this.state.errorMessage2}
               />
             </Group>
-            {selectedTokenSymbol.toUpperCase() === 'RENBTC' && (
-              <a
-                href="https://bridge.renproject.io/"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                <I s="Mint renBTC with BTC" />
-              </a>
-            )}
+          </Section>
+
+          <Section
+            style={{
+              display: isWalletConnectLoading ? 'none' : 'block',
+            }}
+          >
+            <div
+              style={
+                {
+                  // paddingTop: '12px',
+                  // marginTop: '18px',
+                }
+              }
+            >
+              <Group label={<I s="Referral ID / Promotion Code" />}>
+                <Input
+                  suffix={<span />}
+                  style={{
+                    color: theme.textWhite,
+                  }}
+                  value={
+                    this.state.referrer
+                      ? this.state.referrer.toUpperCase()
+                      : this.state.referrer
+                  }
+                  onChange={this.onReferrerValueChange}
+                  disabled={this.state.isInvited}
+                />
+              </Group>
+            </div>
           </Section>
 
           <Section
@@ -788,12 +871,26 @@ class DepositModal extends React.Component {
                 this.state.amount <= 0 ||
                 !this.state.validateAmount ||
                 this.state.loading ||
-                !this.state.ethEnough
+                !this.state.ethEnough ||
+                this.state.isContractWallet
               }
               onClick={() => this.onClick()}
             >
-              <I s="Deposit" />
+              <I s="Deposit to Activate Layer-2" />
             </ActionButton>
+          </Section>
+          <Section
+            style={{
+              display: isWalletConnectLoading ? 'none' : 'block',
+              marginTop: '-12px',
+              marginBottom: '30px',
+            }}
+          >
+            <ErrorMessage
+              style={{}}
+              validateAddress={!this.state.isContractWallet}
+              errorAddressMessage={'ContactWalletErrorMessage'}
+            />
           </Section>
         </Spin>
       </MyModal>
@@ -802,6 +899,8 @@ class DepositModal extends React.Component {
 }
 
 const mapStateToProps = (state) => {
+  const { pathname } = state.router.location;
+
   const {
     modalManager,
     dexAccount,
@@ -810,10 +909,12 @@ const mapStateToProps = (state) => {
     gasPrice,
     exchange,
   } = state;
-  const isVisible = modalManager.isDepositModalVisible;
+
+  const isVisible = modalManager.isRegisterAccountModalVisible;
+
   return {
+    pathname,
     isVisible,
-    modalManager,
     dexAccount,
     balances,
     nonce,
@@ -824,8 +925,10 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    closeModal: () => dispatch(showDepositModal(false, '')),
-    showDepositModal: (token) => dispatch(showDepositModal(true, token)),
+    closeModal: () => dispatch(registerAccountModal(false, '')),
+    updateAccount: (account) => dispatch(updateAccount(account)),
+    registerAccountModal: (token) =>
+      dispatch(registerAccountModal(true, token)),
     fetchNonce: (address) => dispatch(fetchNonce(address)),
     fetchGasPrice: () => dispatch(fetchGasPrice()),
     fetchInfo: () => dispatch(fetchInfo()),
@@ -833,5 +936,5 @@ const mapDispatchToProps = (dispatch) => {
 };
 
 export default withTheme(
-  connect(mapStateToProps, mapDispatchToProps)(DepositModal)
+  connect(mapStateToProps, mapDispatchToProps)(NewRegisterAccountModal)
 );

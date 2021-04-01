@@ -27,7 +27,7 @@ const EthEnoughDepositErrorMessage = ({ selectedToken }) => (
     {selectedToken.symbol === 'ETH' ? (
       <I s="Insufficient balance" />
     ) : (
-      <I s="Not enough Ether to pay deposit fee and transaction gas." />
+      <I s="Not enough Ether to pay transaction gas." />
     )}
   </ErrorLabel>
 );

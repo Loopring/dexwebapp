@@ -120,8 +120,6 @@ class MarketSelector extends React.Component {
       return 'url(/assets/images/DeFi+L.png)';
     } else if (token.symbol.toUpperCase() === 'DEFIS') {
       return 'url(/assets/images/DeFi++S.png)';
-    } else if (token.symbol.toUpperCase() === 'DOUGH') {
-      return 'url(/assets/images/DOUGH2v.png)';
     } else {
       path = 'assets/' + token.address;
     }
@@ -158,7 +156,7 @@ class MarketSelector extends React.Component {
     let placeholder = language === 'en' ? 'Search market' : '搜索市场对';
 
     const { filter, groupSelect } = this.state;
-    const { theme } = this.props;
+    const { theme, exchange } = this.props;
     let markets =
       filter !== ''
         ? this.props.exchange.markets.filter(
@@ -170,6 +168,13 @@ class MarketSelector extends React.Component {
 
     if (groupSelect === 'new') {
       markets = markets.filter((x) => x.isNew);
+    } else if (groupSelect === 'usdt') {
+      markets = markets.filter(
+        (x) =>
+          x.market.includes('USDT') ||
+          x.market.includes('USDC') ||
+          x.market.includes('DAI')
+      );
     } else if (groupSelect !== 'all') {
       markets = markets.filter((x) =>
         x.market.includes(groupSelect.toUpperCase())
@@ -207,7 +212,11 @@ class MarketSelector extends React.Component {
     }
 
     // Sort by volume. No need to sort alphabetically.
-    updatedMarkets = sortByVolume(updatedMarkets, this.props.legalPrice.prices);
+    updatedMarkets = sortByVolume(
+      updatedMarkets,
+      this.props.legalPrice.prices,
+      exchange.tokens
+    );
 
     const customizeRenderEmpty = () => (
       <EmptyTableIndicator text={'NoMarketSelects'} loading={false} />
@@ -231,7 +240,7 @@ class MarketSelector extends React.Component {
           <RadioButton value="all">ALL</RadioButton>
           <RadioButton value="lrc">LRC</RadioButton>
           <RadioButton value="eth">ETH</RadioButton>
-          <RadioButton value="usdt">USDT</RadioButton>
+          <RadioButton value="usdt">USD*</RadioButton>
           <RadioButton value="btc">BTC</RadioButton>
           <RadioButton value="new">New</RadioButton>
         </Radio.Group>

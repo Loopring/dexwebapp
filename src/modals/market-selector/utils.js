@@ -1,3 +1,5 @@
+import config from 'lightcone/config';
+
 export function checkMarketIsNew(markets) {
   let updatedMarkets = [];
   for (let i = 0; i < markets.length; i = i + 1) {
@@ -43,6 +45,14 @@ export function checkMarketIsNew(markets) {
       'KAI-USDT',
       'PLTC-USDT',
       'QCAD-USDT',
+      'ADX-USDT',
+      'DEFIL-ETH',
+      'DEFIS-ETH',
+      'DOUGH-ETH',
+      'FIN-USDT',
+      'NIOX-ETH',
+      'OGN-USDT',
+      'DAI-USDT',
     ];
     if (existingMarkets.includes(market.market) === false) {
       market.isNew = true;
@@ -54,12 +64,25 @@ export function checkMarketIsNew(markets) {
   return updatedMarkets;
 }
 
-export function sortByVolume(markets, prices) {
-  let ethFilteredPrice = prices.filter((price) => price.symbol === 'ETH');
-  let usdtFilteredPrice = prices.filter((price) => price.symbol === 'USDT');
+export function sortByVolume(markets, prices, tokens) {
+  const ethToken = config.getTokenBySymbol('ETH', tokens);
+  const usdtToken = config.getTokenBySymbol('USDT', tokens);
+
+  let ethFilteredPrice = prices.filter(
+    (price) =>
+      ethToken &&
+      ethToken.address &&
+      price.token.toLowerCase() === ethToken.address.toLowerCase()
+  );
+  let usdtFilteredPrice = prices.filter(
+    (price) =>
+      usdtToken &&
+      usdtToken.address &&
+      price.token.toLowerCase() === usdtToken.address.toLowerCase()
+  );
 
   // If no prices from APIs, use default values.
-  let ethPrice = 240;
+  let ethPrice = 600;
   let usdtPrice = 1;
   if (ethFilteredPrice.length === 1 && usdtFilteredPrice.length === 1) {
     ethPrice = parseFloat(ethFilteredPrice[0].price);

@@ -10,7 +10,6 @@ import styled, { withTheme } from 'styled-components';
 
 import {
   AddressDiv,
-  Instruction,
   MyModal,
   Section,
   TextPopupTitle,
@@ -61,9 +60,9 @@ class ReferralModal extends React.Component {
         onCancel={() => this.onClose()}
       >
         <Section>
-          <Instruction>
+          {/* <Instruction>
             <I s="Referral_Instruct_1" />
-          </Instruction>
+          </Instruction> */}
           <Group label={<I s="Referral Link" />}>
             <AddressDiv>{referralLink}</AddressDiv>
           </Group>

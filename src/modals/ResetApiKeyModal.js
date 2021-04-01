@@ -1,5 +1,5 @@
 import { Section, TextPopupTitle } from 'modals/styles/Styles';
-import { applyApiKey } from 'lightcone/api/LightconeAPI';
+import { accountUpdate } from 'lightcone/api/LightconeAPI';
 import { connect } from 'react-redux';
 import { loginModal, showResetApiKeyModal } from 'redux/actions/ModalManager';
 import { notifyError, notifySuccess } from 'redux/actions/Notification';
@@ -17,23 +17,25 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
 
 import AppLayout from 'AppLayout';
 
+import * as fm from 'lightcone/common/formatter';
+
 class ResetApiKeyModal extends React.Component {
   state = {
     loading: false,
   };
 
-  title = (<I s="Reset API Key" />);
-  buttonLabel = (<I s="Reset API Key" />);
+  title = (<I s="Active API Key" />);
+  buttonLabel = (<I s="Active API Key" />);
   getInstructions = () => {
     return (
       <Section>
         <ul>
-          <li>
+          {/* <li>
             <I s="ResetApiKeyInstruction_1" />
           </li>
           <li>
             <I s="ResetApiKeyInstruction_2" />
-          </li>
+          </li> */}
         </ul>
       </Section>
     );
@@ -66,14 +68,50 @@ class ResetApiKeyModal extends React.Component {
 
     (async () => {
       try {
-        const signed = await window.wallet.applyApiKey();
+        console.log('dexAccount', dexAccount);
+
+        const validUntil = new Date().getTime() / 1000 + 3600 * 24 * 60;
+
+        let publicKeyX = fm.clearHexPrefix(
+          fm.toHex(fm.toBN(dexAccount.account.publicKeyX.toString('hex')))
+        );
+        console.log('publicKeyX', publicKeyX, publicKeyX.length);
+        // TODO: How to set to 64 in a nice way.
+        if (publicKeyX.length < 64) {
+          const padding = new Array(64 - publicKeyX.length).fill(0);
+          publicKeyX = padding.join('').toString() + publicKeyX;
+        }
+        console.log('publicKeyX', publicKeyX, publicKeyX.length);
+
+        let publicKeyY = fm.clearHexPrefix(
+          fm.toHex(fm.toBN(dexAccount.account.publicKeyY.toString('hex')))
+        );
+        console.log('publicKeyY', publicKeyY, publicKeyY.length);
+        if (publicKeyY.length < 64) {
+          const padding = new Array(64 - publicKeyY.length).fill(0);
+          publicKeyY = padding.join('').toString() + publicKeyY;
+        }
+        console.log('publicKeyY', publicKeyY, publicKeyY.length);
+
+        // offchainRequest是奇数， order是偶数
         const data = {
+          owner: dexAccount.account.owner,
+          exchange: this.props.exchange.exchangeAddress,
+          feeToken: 0,
+          maxFeeAmount: 4000000000000000,
           accountId: dexAccount.account.accountId,
-          publicKeyX: dexAccount.account.publicKeyX,
-          publicKeyY: dexAccount.account.publicKeyY,
+          publicKeyX: '0x' + publicKeyX,
+          publicKeyY: '0x' + publicKeyY,
+          nonce: dexAccount.account.accountNonce,
+          validUntil: Math.floor(validUntil),
         };
 
-        const apiKey = await applyApiKey(data, signed.signature);
+        console.log('data', data);
+
+        const result = await window.wallet.accountUpdate(data);
+
+        const apiKey = await accountUpdate(data, result.ecdsaSig);
+
         const account = {
           ...dexAccount.account,
           apiKey: apiKey,
@@ -117,9 +155,9 @@ class ResetApiKeyModal extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  const { modalManager, dexAccount } = state;
+  const { modalManager, dexAccount, exchange } = state;
   const isVisible = modalManager.isResetApiKeyModalVisible;
-  return { isVisible, modalManager, dexAccount };
+  return { isVisible, modalManager, dexAccount, exchange };
 };
 
 const mapDispatchToProps = (dispatch) => {

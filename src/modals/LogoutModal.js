@@ -46,7 +46,9 @@ class LogoutModal extends React.Component {
     if (window.wallet && window.wallet.walletType === 'WalletConnect') {
       (async () => {
         try {
-          await window.ethereum.close();
+          if (window.ethereum.close) {
+            await window.ethereum.close();
+          }
           this.props.logoutAll();
         } catch (error) {
           console.log(error);
@@ -59,7 +61,7 @@ class LogoutModal extends React.Component {
     setTimeout(() => {
       this.onClose();
       this.setState({ loading: false });
-    }, 100);
+    }, 2000);
   };
 
   onClose = () => {
@@ -79,12 +81,12 @@ class LogoutModal extends React.Component {
         footer={null}
         closable={false}
         maskClosable={false}
-        visible={this.props.isVislble}
+        visible={this.props.isVisible}
         onCancel={() => this.onClose()}
       >
         <Spin
           spinning={this.state.loading}
-          indicator={<ModalIndicator title="Locking..." marginTop="60px" />}
+          indicator={<ModalIndicator title="Locking..." marginTop="30px" />}
         >
           <Section>
             <Instruction>
@@ -114,9 +116,9 @@ class LogoutModal extends React.Component {
 
 const mapStateToProps = (state) => {
   const { modalManager, dexAccount } = state;
-  const isVislble = modalManager.isLogoutModalVisible;
+  const isVisible = modalManager.isLogoutModalVisible;
   const address = dexAccount.account.address;
-  return { isVislble, address };
+  return { isVisible, address };
 };
 
 const mapDispatchToProps = (dispatch) => {
