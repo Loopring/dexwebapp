@@ -9,28 +9,104 @@ import { connect } from 'react-redux';
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons/faExclamationTriangle';
 import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
 
-import { lightconeGetAccount } from 'lightcone/api/LightconeAPI';
+import {
+  accountUpdate,
+  getExchangeInfo,
+  lightconeGetAccount,
+  setRefer,
+} from 'lightcone/api/LightconeAPI';
+import { getReferralId, removeReferralId } from 'lightcone/api/localStorgeAPI';
 import { loginModal, resetPasswordModal } from 'redux/actions/ModalManager';
-import { notifyError } from 'redux/actions/Notification';
+import { notifyError, notifySuccess } from 'redux/actions/Notification';
 import { withTheme } from 'styled-components';
 import AppLayout from 'AppLayout';
+import BigNumber from 'bignumber.js';
 import GenerateKeyPairIndicator from 'modals/components/GenerateKeyPairIndicator';
 import GenerateKeyPairIndicatorPlaceholder from 'modals/components/GenerateKeyPairIndicatorPalceholder';
 import Group from 'modals/components/Group';
 import I from 'components/I';
 import React from 'react';
 
+import * as fm from 'lightcone/common/formatter';
+
 class LoginModal extends React.Component {
   state = {
     loading: false,
+    approveTxCount: 1,
+    processingNum: 1,
   };
+
+  componentDidUpdate(prevProps, prevState) {
+    // When the modal becomes visible
+    if (
+      (this.props.isVisible !== prevProps.isVisible ||
+        this.props.dexAccount.account.address !==
+          prevProps.dexAccount.account.address) &&
+      this.props.isVisible &&
+      window.wallet
+    ) {
+      (async () => {
+        try {
+          const relayAccount = await lightconeGetAccount(window.wallet.address);
+          if (!!relayAccount.publicKeyX && !!relayAccount.publicKeyY) {
+          } else {
+            // Two signs
+            console.log('two txCount');
+            this.setState({
+              approveTxCount: 2,
+            });
+          }
+        } catch (err) {
+          console.log('login failed', err);
+        }
+      })();
+    }
+  }
 
   onClose = () => {
     this.props.closeModal();
     this.setState({
       showError: false,
       loading: false,
+      approveTxCount: 1,
+      processingNum: 1,
     });
+  };
+
+  // Sign second times
+  newUpdateAccount = async (keyPair) => {
+    try {
+      const { dexAccount } = this.props;
+      const validUntil = new Date().getTime() / 1000 + 3600 * 24 * 60;
+
+      const info = await getExchangeInfo();
+
+      // offchainRequest是奇数， order是偶数
+      const data = {
+        owner: dexAccount.account.owner,
+        exchange: info['exchangeAddress'],
+        feeToken: 0,
+        // maxFeeAmount: 4000000000000000,
+        maxFeeAmount: 0,
+        accountId: dexAccount.account.accountId,
+        publicKeyX: keyPair.publicKeyX,
+        publicKeyY: keyPair.publicKeyY,
+        nonce: dexAccount.account.accountNonce,
+        validUntil: Math.floor(validUntil),
+      };
+
+      const result = await window.wallet.accountUpdate(data);
+      const apiKey = await accountUpdate(data, result.ecdsaSig);
+
+      // notifySuccess(<I s="LoginApiKeyNotification" />, this.props.theme);
+    } catch (err) {
+      console.log('accountUpdate failed', err);
+      // notifyError(<I s="LoginApiKeySetFailedNotification" />, this.props.theme);
+      // Throw error so that users can retry
+      throw err;
+    } finally {
+      this.onClose();
+    }
   };
 
   onClick = () => {
@@ -46,47 +122,133 @@ class LoginModal extends React.Component {
     (async () => {
       try {
         const relayAccount = await lightconeGetAccount(window.wallet.address);
-
+        // console.log('relayAccount', relayAccount);
+        console.log('exchangeAddress', exchangeAddress, relayAccount);
+        if (exchangeAddress === '') {
+          throw new Error('exchange.exchangeAddress is empty');
+        }
         const result = await window.wallet.generateKeyPair(
           exchangeAddress,
-          relayAccount.keyNonce
+          !!relayAccount.publicKeyX && !!relayAccount.publicKeyY
+            ? relayAccount.accountNonce - 1
+            : 0
         );
+        let { keyPair, error } = result;
 
-        const { keyPair, error } = result;
+        keyPair = {
+          ...keyPair,
+          publicKeyX: fm.formatEddsaKey(
+            new BigNumber(keyPair.publicKeyX).toString(16)
+          ),
+          publicKeyY: fm.formatEddsaKey(
+            new BigNumber(keyPair.publicKeyY).toString(16)
+          ),
+        };
 
         if (error) {
           throw new Error(error.message);
         }
 
-        if (
-          !!keyPair &&
-          !!keyPair.secretKey &&
-          keyPair.publicKeyX === relayAccount.publicKeyX &&
-          keyPair.publicKeyY === relayAccount.publicKeyY
-        ) {
-          const state = relayAccount.frozen ? RESETTING : LOGGED_IN;
-          updateAccount({
-            ...account,
-            accountKey: keyPair.secretKey,
-            state,
-          });
+        this.setState({
+          processingNum: this.state.processingNum + 1,
+        });
 
-          _this.onClose();
+        if (!!relayAccount.publicKeyX && !!relayAccount.publicKeyY) {
+          console.log('keyPair', keyPair.publicKeyX, keyPair.publicKeyY);
+          // Changed in 3.6
+          if (
+            !!keyPair &&
+            !!keyPair.secretKey &&
+            keyPair.publicKeyX === relayAccount.publicKeyX &&
+            keyPair.publicKeyY === relayAccount.publicKeyY
+          ) {
+            const state = relayAccount.frozen ? RESETTING : LOGGED_IN;
+            updateAccount({
+              ...account,
+              accountKey: keyPair.secretKey,
+              publicKeyX: keyPair.publicKeyX,
+              publicKeyY: keyPair.publicKeyY,
+              state,
+            });
+
+            _this.onClose();
+            notifySuccess(<I s="Login Successfully" />, this.props.theme);
+          } else {
+            console.log("keyPair and account don't match");
+            _this.setState({
+              loading: false,
+            });
+            updateAccount({
+              ...account,
+              publicKeyX: relayAccount.publicKeyX,
+              publicKeyY: relayAccount.publicKeyY,
+            });
+
+            notifyError(
+              <I s="LoginFailedNotificationKeypairAndAccountDontMatch" />,
+              this.props.theme,
+              3600
+            );
+          }
         } else {
-          _this.setState({
-            loading: false,
-            showError: relayAccount.keyNonce === account.keyNonce,
-          });
+          // setReferrer or  promotion code
+          const localReferralId = getReferralId();
+          try {
+            if (localReferralId) {
+              const reg = new RegExp('^([1-9][0-9]{0,6})$');
+              if (!Number.isNaN(localReferralId) && reg.test(localReferralId)) {
+                await setRefer(
+                  {
+                    address: window.wallet.address,
+                    referrer: localReferralId,
+                  },
+                  keyPair
+                );
+                removeReferralId();
+              } else {
+                await setRefer(
+                  {
+                    address: window.wallet.address,
+                    promotionCode: localReferralId,
+                  },
+                  keyPair
+                );
+              }
+            }
+          } catch (e) {
+            console.log(e);
+            console.log('failed to set referrer or promotion code');
+          }
 
+          await this.newUpdateAccount(keyPair);
+
+          // Set to LOGGED_IN directly.
           updateAccount({
             ...account,
-            publicKeyX: relayAccount.publicKeyX,
-            publicKeyY: relayAccount.publicKeyY,
-            keyNonce: relayAccount.keyNonce,
+            accountNonce: account.accountNonce + 1, // 在update account之后，account nonce 在relay会 +1
+            accountKey: keyPair.secretKey,
+            publicKeyX: keyPair.publicKeyX,
+            publicKeyY: keyPair.publicKeyY,
+            state: LOGGED_IN,
           });
+
+          // 1 hour duration
+          notifySuccess(
+            <I s="LoginSuccessfullyFirstDeposit" />,
+            this.props.theme,
+            3600
+          );
         }
       } catch (err) {
-        notifyError(<I s="LoginFailedNotification" />, this.props.theme);
+        console.log('login failed', err);
+        if (err.message === 'exchange.exchangeAddress is empty') {
+          notifyError(
+            <I s="LoginFailedNotificationExchangeAddressEmpty" />,
+            this.props.theme
+          );
+        } else {
+          notifyError(<I s="LoginFailedNotification" />, this.props.theme);
+        }
         _this.setState({
           loading: false,
           showError: false,
@@ -101,7 +263,13 @@ class LoginModal extends React.Component {
     // indicatorPlaceholder is used to set the height of a modal dynamically.
     let indicatorPlaceholder = <div />;
     if (this.state.loading) {
-      indicator = <GenerateKeyPairIndicator title={'Logging in...'} />;
+      indicator = (
+        <GenerateKeyPairIndicator
+          title={'Logging in...'}
+          approveTxCount={this.state.approveTxCount}
+          processingNum={this.state.processingNum}
+        />
+      );
       indicatorPlaceholder = <GenerateKeyPairIndicatorPlaceholder />;
     }
 
