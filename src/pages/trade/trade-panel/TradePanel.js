@@ -5,7 +5,6 @@ import styled, { withTheme } from 'styled-components';
 
 import AppLayout from 'AppLayout';
 
-import '@ant-design/compatible/assets/index.css';
 import { ActionButton } from 'styles/Styles';
 import { Button, Spin } from 'antd';
 
@@ -15,7 +14,10 @@ import {
 } from 'redux/actions/MyOrders';
 
 import { fetchMyAccountPage } from 'redux/actions/MyAccountPage';
-import { getOrderId, submitOrderToLightcone } from 'lightcone/api/LightconeAPI';
+import {
+  getStorageId,
+  submitOrderToLightcone,
+} from 'lightcone/api/LightconeAPI';
 import { updateAmount, updatePrice } from 'redux/actions/TradePanel';
 import AssetPanel from 'pages/trade/asset-panel/AssetPanel';
 import NumericInput from 'components/NumericInput';
@@ -378,11 +380,10 @@ class TradePanel extends React.Component {
     const holdBalance = balances.find(
       (ba) => ba.tokenId === selectedToken.tokenId
     );
-    try {
-      return holdBalance ? Number(holdBalance.available) : 0;
-    } catch {
-      return 0;
+    if (holdBalance) {
+      return Number(holdBalance.available.replace(/,/g, ''));
     }
+    return 0;
   };
 
   onPriceValueChange = (value) => {
@@ -557,24 +558,54 @@ class TradePanel extends React.Component {
         var tokenB;
 
         var amountS = 0;
+        var amountSInBigNumber;
         var amountB = 0;
+        var amountBInBigNumber;
 
         if (isBuy) {
           // Buying means selling ETH to get LRC. User enter LRC amount
           tokenS = quoteTokenSymbol;
           tokenSId = quoteToken.tokenId;
-          amountS = amountInBigNumber.times(price).toFixed();
+          amountS = amountInBigNumber.times(price);
+          const amountSInWei = config.toWEI(
+            quoteTokenSymbol,
+            amountS,
+            exchange.tokens,
+            3
+          );
+          amountSInBigNumber = new BigNumber(amountSInWei);
 
           tokenB = baseTokenSymbol;
-          amountB = amountInBigNumber.toFixed();
+          amountB = amountInBigNumber;
+          const amountBInWei = config.toWEI(
+            baseTokenSymbol,
+            amountB,
+            exchange.tokens,
+            3
+          );
+          amountBInBigNumber = new BigNumber(amountBInWei);
         } else {
           // Selling means selling LRC to get ETH. User enter LRC amount
           tokenS = baseTokenSymbol;
           tokenSId = baseToken.tokenId;
-          amountS = amountInBigNumber.toFixed();
+          amountS = amountInBigNumber;
+          const amountSInWei = config.toWEI(
+            baseTokenSymbol,
+            amountS,
+            exchange.tokens,
+            3
+          );
+          amountSInBigNumber = new BigNumber(amountSInWei);
 
           tokenB = quoteTokenSymbol;
-          amountB = amountInBigNumber.times(price).toFixed();
+          amountB = amountInBigNumber.times(price);
+          const amountBInWei = config.toWEI(
+            quoteTokenSymbol,
+            amountB,
+            exchange.tokens,
+            3
+          );
+          amountBInBigNumber = new BigNumber(amountBInWei);
         }
 
         const tradingPrivKey = this.props.dexAccount.account.accountKey;
@@ -582,36 +613,41 @@ class TradePanel extends React.Component {
           throw new Error('please login first');
         }
 
+        // TODO: 3.6 /api/v2/orderId is not found
         // Get order id
         const accountId = this.props.dexAccount.account.accountId;
         const apiKey = this.props.dexAccount.account.apiKey;
         // Use token sell id
-        const orderId = await getOrderId(accountId, tokenSId, apiKey);
+        const storageId = await getStorageId(accountId, tokenSId, apiKey);
+        const orderId = storageId.orderId;
 
         // Timestamp in second
         const validSince = new Date().getTime() / 1000 - 3600;
-        const validUntil = new Date().getTime() / 1000 + 3600 * 24 * 10000;
 
-        const signedOrder = window.wallet.submitOrder(
+        const validUntil = new Date().getTime() / 1000 + 3600 * 1 * 10000;
+
+        const signedOrderData = window.wallet.submitOrder(
           exchange.tokens,
-          exchange.exchangeId,
+          exchange.exchangeAddress,
           tokenS,
           tokenB,
-          amountS,
-          amountB,
+          amountSInBigNumber.toFixed(0),
+          amountBInBigNumber.toFixed(0),
           orderId,
           validSince,
           validUntil,
           config.getLabel(),
           isBuy,
-          config.getChannelId()
+          config.getChannelId(),
+          'LIMIT_ORDER'
         );
 
-        await submitOrderToLightcone(signedOrder, apiKey);
+        signedOrderData['storageId'] = orderId;
+
+        await submitOrderToLightcone(signedOrderData, accountId, apiKey);
 
         saveAccountToLocal(this.props.dexAccount.account);
 
-        console.log('TradePanel fetchMyAccountPage');
         // Get the balance from API immediately
         this.props.fetchMyAccountPage(
           this.props.dexAccount.account.accountId,
@@ -650,7 +686,7 @@ class TradePanel extends React.Component {
         );
       } catch (err) {
         console.log(err);
-        notifyError(<I s="Failed to submit your order." />, this.props.theme);
+        notifyError(<I s="Failed to swap." />, this.props.theme);
       } finally {
         this.setState({
           loading: false,
@@ -763,6 +799,7 @@ class TradePanel extends React.Component {
         disabled={disabled}
         onClick={() => this.pressedButton()}
       >
+        {' '}
         <I s="Buy" />
         &nbsp; {baseTokenSymbol}
       </ActionButton>
@@ -773,6 +810,7 @@ class TradePanel extends React.Component {
         disabled={disabled}
         onClick={() => this.pressedButton()}
       >
+        {' '}
         <I s="Sell" />
         &nbsp; {baseTokenSymbol}
       </ActionButton>
