@@ -3,9 +3,9 @@ import { request } from '../../../common';
 export async function getPrice(legal) {
   const response = await request({
     method: 'GET',
-    url: '/api/v2/price',
+    url: '/api/wallet/v3/latestTokenPrices',
     params: {
-      legal,
+      currency: legal,
     },
   });
   return response['data'];

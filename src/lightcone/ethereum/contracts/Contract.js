@@ -25,6 +25,7 @@ export default class Contract {
    * @returns {*|string}
    */
   encodeInputs(method, inputs) {
+    console.log('encodeInputs', method, inputs);
     const abiFunction = this.abiFunctions[method];
     if (abiFunction) {
       return abiFunction.encodeInputs(inputs);

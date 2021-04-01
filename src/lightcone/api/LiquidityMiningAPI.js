@@ -136,7 +136,7 @@ export async function getLiquidityMiningConf() {
 
   const response = await request({
     method: 'GET',
-    url: '/api/v2/sidecar/liquidityMiningConf',
+    url: '/api/v2/sidecar/liquidityMiningConf?running=true',
     headers: headers,
   });
 

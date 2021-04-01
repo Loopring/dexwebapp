@@ -1,20 +1,16 @@
+import * as fm from 'lightcone/common/formatter';
 import { dropTrailingZeroes } from 'pages/trade/components/defaults/util';
 import { signSetReferrer } from '../sign/exchange';
 import config from '../config';
 import request from '../common/request';
-
-export function getRefreshDurationInMillionSeconds() {
-  return 30 * 1000;
-}
 
 export function getApiDocsURL() {
   return `${config.getServer()}/docs/`;
 }
 
 export async function getApiKey(data, signed) {
-  const signature = signed.Rx + ',' + signed.Ry + ',' + signed.s;
   const headers = {
-    'X-API-SIG': signature,
+    'X-API-SIG': signed,
   };
 
   const response = await request({
@@ -26,29 +22,30 @@ export async function getApiKey(data, signed) {
   return response['data'];
 }
 
-export async function getWsApiKey(data, signed) {
-  const signature = signed.Rx + ',' + signed.Ry + ',' + signed.s;
-  const headers = {
-    'X-API-SIG': signature,
-  };
+export async function getWsApiKey() {
+  const headers = {};
 
   const response = await request({
     method: 'GET',
     url: '/v2/ws/key',
     headers: headers,
-    params: data,
   });
   return response['data'];
 }
 
-export async function applyApiKey(data, signed) {
-  const signature = signed.Rx + ',' + signed.Ry + ',' + signed.s;
+export async function accountUpdate(data, ecdsaSig) {
+  console.log('accountUpdate(data, signed)', ecdsaSig);
+
   const headers = {
-    'X-API-SIG': signature,
+    'X-API-SIG': ecdsaSig,
   };
+  data['ecdsaSig'] = ecdsaSig;
+
+  console.log('accountUpdate data', data);
+
   const response = await request({
     method: 'POST',
-    url: '/api/v2/apiKey',
+    url: '/api/v2/account',
     headers: headers,
     data,
   });
@@ -64,20 +61,47 @@ export async function getDexNonce(data) {
   });
 }
 
-export async function submitOrderToLightcone(data, apiKey) {
+// 3.6 has different API
+// https://docs3.loopring.io/zh-hans/dex_apis/submitOrderV3.html
+export async function submitOrderToLightcone(data, accountId, apiKey) {
   const headers = {
     'X-API-KEY': apiKey,
   };
-  // https://docs.loopring.io/zh-hans/dex_apis/submitOrderV3.html
-  return await request({
+
+  let response0 = await request({
     method: 'POST',
-    url: '/api/v3/order',
+    url: '/api/v2/order',
     headers: headers,
     data,
   });
+
+  let orderHash = response0['data']['orderHash'];
+  let params = {
+    accountId,
+    orderHash,
+  };
+
+  let response1 = null;
+  let i = 0;
+  while (i < 3) {
+    response1 = await request({
+      method: 'GET',
+      url: '/api/v2/order',
+      headers: headers,
+      params,
+    });
+    if (response1['data']['status'] !== 'processing') {
+      break;
+    }
+    i = i + 1;
+  }
+
+  return response1;
 }
 
+// TODO: do we have /api/v2/orderId in 3.6?
 // Return order id
+/*
 export async function getOrderId(accountId, tokenSId, apiKey) {
   const params = {
     accountId: accountId,
@@ -95,19 +119,32 @@ export async function getOrderId(accountId, tokenSId, apiKey) {
 
   return response['data'];
 }
+*/
 
 export async function lightconeGetAccount(owner) {
   const params = {
     owner,
   };
 
+  // /api/v2/account doesn't return publicKeyX and publicKeyY
   const response = await request({
     method: 'GET',
     url: '/api/v2/account',
     params,
   });
 
-  return response['data'];
+  let data = response['data'];
+  let publicKeyX = data['publicKeyX'];
+  if (publicKeyX !== '') {
+    data['publicKeyX'] = fm.formatEddsaKey(publicKeyX);
+  }
+
+  let publicKeyY = data['publicKeyY'];
+  if (publicKeyY !== '') {
+    data['publicKeyY'] = fm.formatEddsaKey(publicKeyY);
+  }
+
+  return data;
 }
 
 export async function getTimestamp() {
@@ -197,9 +234,10 @@ export function mapAmountInUI(baseToken, amount, tokens) {
     if (parseFloat(amountInDecimals) !== 0) {
       return amountInDecimals;
     }
+    return amountInUI;
   }
 
-  return amountInUI;
+  return fm.numberWithCommas(amountInUI);
 }
 
 function mapTransactions(transactions, tokens) {
@@ -213,7 +251,11 @@ function mapTransactions(transactions, tokens) {
       ? mapAmountInUI(baseToken, transaction.realAmount, tokens)
       : '';
     // Why this is feeAmount?
-    const feeInUI = config.fromWEI('ETH', transaction.feeAmount, tokens);
+    // No feeAmount in 3.6
+    const feeInUI =
+      transaction.feeAmount === ''
+        ? '--'
+        : config.fromWEI(transaction.symbol, transaction.feeAmount, tokens);
 
     const txHashInUI =
       transaction.txHash.substring(0, 7) + '...' + transaction.txHash.slice(-7);
@@ -279,6 +321,22 @@ export async function getWithdrawalHistory(
     limit,
     offset,
   };
+}
+
+export async function submitWithdraw(data, ecdsaSig, apiKey) {
+  const headers = {
+    'X-API-KEY': apiKey,
+    'X-API-SIG': ecdsaSig,
+  };
+
+  const response = await request({
+    method: 'POST',
+    url: '/api/v2/user/withdrawals',
+    headers: headers,
+    data: data,
+  });
+
+  return response['data'];
 }
 
 export async function getTicker(markets, tokens) {
@@ -356,7 +414,10 @@ export async function getExchangeInfo() {
 
 export async function setRefer(info, keyPair) {
   const signed = signSetReferrer(info, keyPair);
-  const signature = signed.Rx + ',' + signed.Ry + ',' + signed.s;
+  const signature =
+    fm.formatEddsaKey(fm.toHex(fm.toBig(signed.Rx))) +
+    fm.clearHexPrefix(fm.formatEddsaKey(fm.toHex(fm.toBig(signed.Ry)))) +
+    fm.clearHexPrefix(fm.formatEddsaKey(fm.toHex(fm.toBig(signed.s))));
   let data;
   if (info.referrer) {
     data = {
@@ -386,4 +447,79 @@ export async function setRefer(info, keyPair) {
   });
 
   return response['data'];
+}
+
+// amm
+export async function getUserUpdateInfo(accountId, apiKey) {
+  const params = {
+    accountId,
+  };
+  const headers = {
+    'X-API-KEY': apiKey,
+  };
+  const response = await request({
+    method: 'GET',
+    url: '/api/v2/user/updateInfo',
+    headers: headers,
+    params,
+  });
+
+  return response['data'];
+}
+
+export async function getStorageId(accountId, tokenSId, apiKey) {
+  const params = {
+    accountId,
+    tokenSId,
+  };
+  const headers = {
+    'X-API-KEY': apiKey,
+  };
+  const response = await request({
+    method: 'GET',
+    url: '/api/v2/storageId',
+    headers: headers,
+    params,
+  });
+
+  return response['data'];
+}
+
+export async function checkWithdrawAgent(tokenId, amount) {
+  const params = {
+    tokenId,
+    amount,
+  };
+  const headers = {};
+  const response = await request({
+    method: 'GET',
+    url: '/api/v2/exchange/withdrawalAgents',
+    headers: headers,
+    params,
+  });
+
+  return response['data'];
+}
+
+export async function getEstimatedBlockTime() {
+  const params = {};
+  const headers = {};
+  const response = await request({
+    method: 'GET',
+    url: '/api/v3/estimatedBlockTime',
+    headers: headers,
+    params,
+  });
+
+  let estimatedNextBlockTime = response['estimatedNextBlockTime'];
+  if (estimatedNextBlockTime < 60) {
+    return 1;
+  } else {
+    console.log('estimatedNextBlockTime', estimatedNextBlockTime);
+    console.log(
+      'parseInt(Number(estimatedNextBlockTime)/3600.0)',
+      parseInt(Number(estimatedNextBlockTime) / 3600.0)
+    );
+    return parseInt(Number(estimatedNextBlockTime) / 60.0);
+  }
 }

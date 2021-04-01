@@ -7,16 +7,20 @@ function getMaintenanceMode() {
 
 function getRelayerHost(restUrl = true) {
   if (
-    window.location.hostname === 'beta-loopring-io.herokuapp.com' ||
-    window.location.hostname === 'beta.loopring.io' ||
     window.location.hostname === 'loopring.io' ||
     window.location.hostname === 'www.loopring.io' ||
     window.location.hostname === 'v1.loopring.io' ||
     window.location.hostname === 'www.v1.loopring.io'
   ) {
     return restUrl ? config.prodServerUrl : config.prodWsUrl;
+  } else if (
+    window.location.hostname === 'exchange.loopring.io' ||
+    window.location.hostname === 'www.exchange.loopring.io'
+  ) {
+    return restUrl ? config.prod36ServerUrl : config.prod36WsUrl;
   } else {
-    return restUrl ? config.uatServerUrl : config.uatWsUrl;
+    // No uat
+    return restUrl ? config.uat2ServerUrl : config.uat2WsUrl;
   }
 }
 
@@ -51,6 +55,16 @@ function getTokenBySymbol(symbol, tokens) {
   );
 }
 
+function getTokenByName(name, tokens) {
+  if (typeof name === 'undefined') {
+    return {};
+  }
+  return (
+    tokens.find((token) => token.name.toLowerCase() === name.toLowerCase()) ||
+    {}
+  );
+}
+
 function getTokenByAddress(address, tokens) {
   if (typeof address === 'undefined') {
     return {};
@@ -68,10 +82,26 @@ function getTokenByTokenId(tokenId, tokens) {
 }
 
 function fromWEI(symbol, valueInWEI, tokens, { precision, ceil } = {}) {
-  const token = getTokenBySymbol(symbol, tokens);
-  const precisionToFixed = precision ? precision : token.precision;
-  const value = toBig(valueInWEI).div('1e' + token.decimals);
-  return toFixed(value, precisionToFixed, ceil);
+  try {
+    const token = getTokenBySymbol(symbol, tokens);
+    const precisionToFixed = precision ? precision : token.precision;
+    const value = toBig(valueInWEI).div('1e' + token.decimals);
+    return toFixed(value, precisionToFixed, ceil);
+  } catch (error) {
+    return undefined;
+  }
+}
+
+function feeFromWei(symbol, valueInWEI, tokens) {
+  try {
+    const token = getTokenBySymbol(symbol, tokens);
+    return toBig(valueInWEI)
+      .div('1e' + token.decimals)
+      .toNumber()
+      .toString();
+  } catch (error) {
+    return undefined;
+  }
 }
 
 function toWEI(symbol, value, tokens, rm = 3) {
@@ -140,12 +170,17 @@ function getLocalTokens() {
   return config.localTokens;
 }
 
+function getFeeByToken(token, fees) {
+  return fees.find((fee) => fee.token.toLowerCase() === token.toLowerCase());
+}
+
 export default {
   getMaintenanceMode,
   getRelayerHost,
   getServer,
   getWsServer,
   getTokenBySymbol,
+  getTokenByName,
   getTokenByAddress,
   getTokenByTokenId,
   getMarketByPair,
@@ -162,4 +197,6 @@ export default {
   toWEI,
   getDepositGas,
   getLocalTokens,
+  getFeeByToken,
+  feeFromWei,
 };

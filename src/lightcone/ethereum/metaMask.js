@@ -6,7 +6,6 @@ import {
   keccak256,
   pubToAddress,
 } from 'ethereumjs-util';
-import { validate } from '../common';
 import ABI from '../ethereum/contracts';
 import Transaction from 'ethereumjs-tx';
 
@@ -18,14 +17,14 @@ import Transaction from 'ethereumjs-tx';
  * @returns {Promise.<*>}
  */
 export async function sign(web3, account, hash) {
-  await validate({ value: account, type: 'ETH_ADDRESS' });
-
   return new Promise((resolve) => {
     web3.eth.sign(hash, account, function (err, result) {
       if (!err) {
+        console.log('sig result', result);
         const r = result.slice(0, 66);
         const s = addHexPrefix(result.slice(66, 130));
-        const v = toNumber(addHexPrefix(result.slice(130, 132)));
+        let v = toNumber(addHexPrefix(result.slice(130, 132)));
+        if (v === 0 || v === 1) v = v + 27; // 修复ledger的签名
         resolve({ result: { r, s, v } });
       } else {
         const errorMsg = err.message.substring(0, err.message.indexOf(' at '));
@@ -33,6 +32,45 @@ export async function sign(web3, account, hash) {
       }
     });
   });
+}
+
+/**
+ * @description sign EIP217
+ * @param web3
+ * @param account
+ * @param method
+ * @param params
+ * @returns {Promise.<*>}
+ */
+export async function signEip712(web3, account, method, params) {
+  const response = await new Promise((resolve) => {
+    web3.currentProvider.sendAsync(
+      {
+        method,
+        params,
+        account,
+      },
+      function (err, result) {
+        if (err) {
+          resolve({ error: { message: err.message } });
+          return;
+        }
+
+        if (result.error) {
+          resolve({ error: { message: result.error.message } });
+          return;
+        }
+
+        resolve({ result: result.result });
+      }
+    );
+  });
+
+  if (response['result']) {
+    return response;
+  } else {
+    throw new Error(response['error']['message']);
+  }
 }
 
 /**
@@ -49,8 +87,16 @@ export async function signMessage(web3, account, message) {
 
 export async function personalSign(web3, account, msg, walletType) {
   return new Promise((resolve) => {
+
     web3.eth.personal.sign(msg, account, '', async function (err, result) {
       if (!err) {
+
+        // no sign/ecRecover for imtoken
+        if (!!window.imToken || (window.ethereum && window.ethereum.isImToken)) {
+          resolve({ sig: result });
+          return;
+        }
+
         // ecRecover not implemented in WalletLink
         if (walletType === 'WalletLink') {
           const valid = await walletLinkValid(web3, account, msg, result);
@@ -82,7 +128,7 @@ export async function personalSign(web3, account, msg, walletType) {
             msg,
             result
           );
-          console.log(JSON.stringify(walletValid));
+
           if (walletValid.result) {
             resolve({ sig: result });
           } else {
@@ -92,7 +138,7 @@ export async function personalSign(web3, account, msg, walletType) {
               msg,
               result
             );
-            console.log(JSON.stringify(walletValid2));
+
             if (walletValid2.result) {
               resolve({ sig: result });
             } else {
@@ -124,7 +170,10 @@ export async function ecRecover(web3, account, msg, sig) {
         resolve({
           result: address.toLowerCase() === account.toLowerCase(),
         });
-      else resolve({ error: err });
+      else {
+        console.log('in web3.eth.personal.ecRecover', err, address);
+        resolve({ error: err });
+      }
     });
   });
 }
@@ -278,7 +327,6 @@ export async function walletLinkValid(web3, account, msg, sig) {
  * @returns {Promise.<*>}
  */
 export async function signEthereumTx(web3, account, rawTx) {
-  await validate({ value: rawTx, type: 'TX' });
   const ethTx = new Transaction(rawTx);
   const hash = toHex(ethTx.hash(false));
   const response = await sign(web3, account, hash);
@@ -299,7 +347,6 @@ export async function signEthereumTx(web3, account, rawTx) {
  * @returns {*}
  */
 export async function sendTransaction(web3, tx) {
-  await validate({ type: 'TX', value: tx });
   delete tx.gasPrice;
   // delete tx.gas;
   const response = await new Promise((resolve) => {
@@ -317,4 +364,9 @@ export async function sendTransaction(web3, tx) {
   } else {
     throw new Error(response['error']['message']);
   }
+}
+
+export async function isContract(web3, address) {
+  const code = await web3.eth.getCode(address);
+  return code && code.length > 2;
 }

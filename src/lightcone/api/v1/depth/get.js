@@ -14,6 +14,11 @@ export async function getDepth(market, level, limit, configTokens) {
     params,
   });
 
+  // TODO: replace LP-
+  if (market.startsWith('LP-')) {
+    market = market.replace('LP-', '');
+  }
+
   const tokens = market.split('-');
   const baseToken = tokens[0];
 
@@ -23,6 +28,9 @@ export async function getDepth(market, level, limit, configTokens) {
   let aggregatedBidSize = BigNumber(0);
   for (let i = 0; i < bids.length; i = i + 1) {
     const bid = bids[i];
+    if (bid.count < 0) {
+      continue;
+    }
     aggregatedBidSize = aggregatedBidSize.plus(bid.size);
     let updatedBid = {
       price: bid.price,
@@ -44,6 +52,9 @@ export async function getDepth(market, level, limit, configTokens) {
   let aggregateAskSize = BigNumber(0);
   for (let i = 0; i < asks.length; i = i + 1) {
     const ask = asks[i];
+    if (ask.count < 0) {
+      continue;
+    }
     aggregateAskSize = aggregateAskSize.plus(ask.size);
     let updatedAsk = {
       price: ask.price,
